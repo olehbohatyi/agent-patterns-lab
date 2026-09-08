@@ -25,3 +25,17 @@ stop conditions with more complex tasks and attempt history).
 | sum of digits (negative nums)   |      PASSED               |       PASSED                   |
 | second largest (duplicates)     |      PASSED               |       PASSED                   |
 | count vowels (case-insensitive) |      PASSED               |       PASSED                  |
+
+## Conclusion
+Linear agent: 4/5 (80%) tasks passed on the first attempt.
+Loop agent: 5/5 (100%) tasks passed.
+
+The difference showed up on the "palindrome check" task — the linear 
+agent didn't account for ignoring spaces/case on the first attempt 
+and had no mechanism to fix it. The loop agent received the actual 
+pytest error output, understood the issue, and rewrote the code 
+on the second attempt.
+
+This confirms the core hypothesis: an agent loop with evidence-based 
+verification (real test output, not the model's self-assessment) 
+delivers a measurable reliability improvement even on simple tasks.
