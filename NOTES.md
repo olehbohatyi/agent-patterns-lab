@@ -40,6 +40,29 @@ This confirms the core hypothesis: an agent loop with evidence-based
 verification (real test output, not the model's self-assessment) 
 delivers a measurable reliability improvement even on simple tasks.
 
+## Phase 2: Context-selection bug misdiagnosed as a model limitation
+
+The diamond agent failed the palindrome task with an identical `NameError`
+on all 3 retries — a tell that the bug was in `test_solution.py` (never
+rewritten by the loop), not `solution.py` (rewritten each attempt). Cause:
+`test_solution.py` had no `from solution import is_palindrome` line.
+
+First instinct was to patch the prompt with "include the import line" —
+treating it as a model capability gap. Actual cause: the test-generation
+prompt only said the function "is already implemented in solution.py" but
+never showed its content, so the model was guessing the function name from
+a text description. Each `claude -p` call is a blank slate with no
+filesystem access.
+
+Fix: pass `solution.py`'s content directly into the test-generation prompt.
+Applied to `agent_diamond.py`, then backported to `agent_loop.py`/
+`agent_linear.py` (same latent bug — it's what caused Phase 1's linear
+"palindrome check" failure above).
+
+Takeaway: a "Select" failure in context engineering, not a model
+limitation — worth checking what the prompt actually handed the model
+before concluding it "can't do" something.
+
 ## Phase 2: Diamond pattern — PASS/FAIL calibration check
 
 ### Setup
