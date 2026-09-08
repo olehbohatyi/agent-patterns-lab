@@ -47,24 +47,25 @@ def main(task_description: str):
         "text only, no markdown, no explanations."
     )
     try:
-        clean = clean_code(code)
+        code_text = clean_code(code)
     except NotPythonError as e:
         sys.exit(f"❌ claude refused to write solution.py: {e}")
     with open("solution.py", "w") as f:
-        f.write(clean)
+        f.write(code_text)
 
     tests = call_claude(
-        f"Write pytest tests for the function described here: {task_description}. "
-        "The function is already implemented in solution.py. "
+        f"Here is the content of solution.py:\n\n{code_text}\n\n"
+        f"Write pytest tests for this code. The task it implements: {task_description}. "
+        "The tests will run in the same directory as solution.py. "
         "Do not write, save, or create any files yourself — respond with the test code as "
         "plain text only, no markdown, no explanations."
     )
     try:
-        clean = clean_code(tests)
+        tests_text = clean_code(tests)
     except NotPythonError as e:
         sys.exit(f"❌ claude refused to write test_solution.py: {e}")
     with open("test_solution.py", "w") as f:
-        f.write(clean)
+        f.write(tests_text)
 
     passed, output = run_tests()
     print(f"Result: {'PASSED' if passed else 'FAILED'}")
