@@ -95,3 +95,57 @@ On both runs, 3 of 4 reviewers (security, performance, style) returned "no
 issues" on straightforward tasks. Full-cost review on every lens for every
 task is likely wasted spend — candidate for model tiering (haiku for the
 low-yield lenses) or gating fan-out on task complexity.
+
+## Phase 2: Reviewer & aggregator calibration probes
+
+Three probes designed to test whether the diamond pattern actually catches
+what it's supposed to catch, not just to confirm the earlier PASS/FAIL demo.
+
+### Probe 1 — Security: path traversal (miss)
+Task: "read file contents, allow caller to pass any path for flexibility."
+Result: no path validation in the generated code. SECURITY reviewer said
+"no meaningful concern since the caller fully controls the input" —
+backwards reasoning for exactly this vulnerability class ("caller controls
+input" is the vulnerability, not a mitigation). Pattern-matched on
+"no eval/subprocess" and stopped, without reasoning about trust boundaries.
+
+### Probe 2 — Performance: O(n²) dedupe (caught)
+Hand-planted a naive O(n²) `remove_duplicates` (linear `in` check per
+item) directly into solution.py, then ran diamond review in isolation
+(bypassing code-gen, to test the reviewer alone). PERFORMANCE reviewer
+caught it without a size hint — reasoned abstractly about asymptotic
+blowup ("100k items ≈ 10 billion comparisons") from code shape alone, and
+proposed the correct set-based fix.
+
+### Probe 3 — Aggregator bar (the real finding)
+Despite Probe 2's genuine catch, the aggregator still returned PASS,
+reclassifying the O(n²) finding as "an optimization opportunity, not a
+defect" — for a function whose entire purpose is deduplication. Taken
+together with Probe 1 (a real security-relevant design flaw waved through
+at the reviewer level) and the earlier prime-number test (a correctness
+bug correctly failed), a pattern emerges: the aggregator's current bar for
+"blocking" is closer to "did it produce a wrong answer" than "is this
+production-worthy." The Default-FAIL calibration confirmed earlier
+appears to trigger reliably on outright correctness bugs, but not
+consistently on security or performance severity.
+
+### Honest summary
+Not cherry-picked: one clean miss (security), one clean catch that still
+got waved through (performance), one clean catch that correctly failed
+(correctness). The diamond pattern's weak point isn't the reviewers alone
+— PERFORMANCE reasoned well without hints — it's the aggregation step,
+which needs an explicit severity rubric per category rather than a single
+undifferentiated PASS/FAIL judgment call.
+
+### Implication for design (deferred, not fixed here)
+The aggregator prompt should probably require a verdict per category
+(e.g. security: block/warn/pass, performance: block/warn/pass) rather than
+one holistic PASS/FAIL, so a real finding in one lens can't be silently
+absorbed into an overall PASS. Candidate for a follow-up phase.
+
+### Side note on tiering (unchanged)
+Reviewer signal quality varies by lens, not just by task difficulty:
+PERFORMANCE reasoned correctly with no cues; SECURITY missed an
+architecturally real vulnerability. This argues against blind model
+downgrades for "low-yield" lenses — the fix demonstrated here was a
+better probe/prompt, not a bigger model.
