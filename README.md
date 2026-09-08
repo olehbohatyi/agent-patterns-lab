@@ -1,4 +1,4 @@
-# agent-phase0
+# agent-loop-demo
 
 A minimal demonstration of an "agent loop": a script that calls the `claude` CLI to generate a
 solution and its tests, then repeatedly runs pytest and feeds failures back to Claude as a new
