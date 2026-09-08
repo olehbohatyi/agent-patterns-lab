@@ -75,21 +75,51 @@ def run_diamond_review(code: str, tests: str) -> dict:
             results[name] = verdict
     return results
 
-def aggregate_verdict(results: dict) -> tuple[bool, str]:
-    """The diamond's join: a verifier with no context on how the code was written
-    or fixed, deciding PASS/FAIL from the 4 independent reviews alone. Asymmetric
-    from the agent that wrote the code, so it can't just agree with itself."""
-    combined = "\n\n".join(f"[{name.upper()}]\n{verdict}" for name, verdict in results.items())
+def judge_review(name: str, review: str) -> tuple[str, str, str]:
+    """Judges one review in isolation — this call never sees the other three, so a
+    real finding can't be softened by sitting next to clean reports."""
     prompt = (
-        "You are a final verifier with no prior context about how this code was written. "
-        "Here are 4 independent code reviews:\n\n"
-        f"{combined}\n\n"
-        "Based ONLY on these reviews, answer with exactly one word first: PASS or FAIL. "
+        "You are a strict, isolated verifier. You have no context on how this code "
+        "was written or fixed — you are judging only the review text below.\n\n"
+        f"Review ({name}):\n{review}\n\n"
+        "Does this review describe a real defect that should block shipping (a security "
+        "flaw, a correctness bug, a genuine performance problem), as opposed to a minor "
+        "style nitpick or a scope suggestion?\n\n"
+        "Answer with exactly one word first: BLOCK or OK. "
         "Then on a new line, explain briefly why."
     )
-    verdict_text = call_claude(prompt)
-    passed = verdict_text.strip().upper().startswith("PASS")
-    return passed, verdict_text
+    response = call_claude(prompt)
+    words = response.strip().upper().split()
+    # Fail safe: an empty or unparseable response counts as BLOCK — an ambiguous
+    # verdict shouldn't silently pass.
+    verdict = "OK" if words and words[0].startswith("OK") else "BLOCK"
+    return name, verdict, response
+
+def aggregate_verdict(results: dict) -> tuple[bool, str]:
+    """The diamond's join: each review gets its own isolated BLOCK/OK judgment, then
+    Python (not the model) decides the final PASS/FAIL — FAIL if ANY category blocks.
+    A single holistic PASS/FAIL question let one real finding get smoothed over by
+    three clean ones (see NOTES.md)."""
+    verdicts = {}
+    reasoning = {}
+    with ThreadPoolExecutor(max_workers=len(results)) as executor:
+        futures = [
+            executor.submit(judge_review, name, review)
+            for name, review in results.items()
+        ]
+        for future in futures:
+            name, verdict, response = future.result()
+            verdicts[name] = verdict
+            reasoning[name] = response
+
+    passed = all(verdict == "OK" for verdict in verdicts.values())
+
+    summary = "\n".join(f"{name}: {verdict}" for name, verdict in verdicts.items())
+    details = "\n\n".join(
+        f"[{name.upper()} — {verdicts[name]}]\n{response}"
+        for name, response in reasoning.items()
+    )
+    return passed, f"{summary}\n\n{details}"
 
 def main(task_description: str):
     # Step A: agent writes the first version of the solution
