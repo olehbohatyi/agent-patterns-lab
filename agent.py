@@ -33,20 +33,19 @@ def run_tests() -> tuple[bool, str]:
     passed = result.returncode == 0
     return passed, result.stdout + result.stderr
 
-def main():
+def main(task_description: str):
     # Step A: agent writes the first version of the solution
     print("=== Attempt 1: writing the first version ===")
     code = call_claude(
-        "Write a function is_prime(n) in Python in a single file. "
-        "IMPORTANT: number 1 must be considered prime (return True for n=1). "
-        "Output ONLY the code, no markdown, no explanations."
+        f"Write a Python function for this task: {task_description}. "
+        "Save it in a single file. Output ONLY the code, no markdown, no explanations."
     )
     with open("solution.py", "w") as f:
         f.write(clean_code(code))
 
     tests = call_claude(
-        "Write pytest tests for the is_prime(n) function from the file solution.py. "
-        "The file solution.py already exists and contains this function. "
+        f"Write pytest tests for the function described here: {task_description}. "
+        "The function is already implemented in solution.py. "
         "Output ONLY the test code, no markdown, no explanations."
     )
     with open("test_solution.py", "w") as f:
@@ -69,7 +68,7 @@ def main():
         # The agent forms a new prompt on its own based on the actual error
         fix_prompt = (
             f"Here is the pytest output for the file solution.py:\n\n{output}\n\n"
-            "Fix the is_prime(n) function in the file solution.py so that the tests pass. "
+            f"Fix the function for this task: {task_description}, in the file solution.py, so that the tests pass. "
             "Output ONLY the fixed code of the whole function, no markdown, no explanations."
         )
         fixed_code = call_claude(fix_prompt)
@@ -77,4 +76,5 @@ def main():
             f.write(clean_code(fixed_code))
 
 if __name__ == "__main__":
-    main()
+    task = sys.argv[1]
+    main(task)
