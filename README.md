@@ -16,10 +16,18 @@ whether the self-correction loop actually improves reliability (see [NOTES.md](N
   pass, or exits with an error if the attempt budget runs out.
 - [agent_linear.py](agent_linear.py) — the same generate-solution / generate-tests / run-tests flow,
   but with no fix loop: it runs the tests exactly once and reports the result, whatever it is.
+- [agent_diamond.py](agent_diamond.py) — builds on the loop agent, but once tests pass it fans out to
+  4 independent reviewers (security, performance, style, test coverage) run in parallel, then an
+  asymmetric aggregator with no prior context on the code decides a final PASS/FAIL from their
+  verdicts alone. Calibration probes in [NOTES.md](NOTES.md) found the pattern isn't uniformly
+  reliable: the security reviewer missed a real path-traversal-shaped design flaw, the performance
+  reviewer correctly caught a hand-planted O(n²) regression with no size hint, and the aggregator
+  still passed that same O(n²) finding by calling it "an optimization opportunity" rather than a
+  defect — the aggregation step, not the reviewers, is the weak point.
 
-Both scripts take the task description as a command-line argument, and both overwrite `solution.py`
-and `test_solution.py` on each run — those two files are generated output, not hand-authored source,
-and are gitignored.
+All three scripts take the task description as a command-line argument, and all overwrite
+`solution.py` and `test_solution.py` on each run — those two files are generated output, not
+hand-authored source, and are gitignored.
 
 ## Requirements
 
@@ -46,4 +54,10 @@ Run the single-attempt linear agent on the same task:
 
 ```bash
 python agent_linear.py "reverse a string"
+```
+
+Run the loop agent plus diamond review (4 parallel reviewers + aggregator) on a task:
+
+```bash
+python agent_diamond.py "reverse a string"
 ```
