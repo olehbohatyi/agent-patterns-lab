@@ -39,3 +39,36 @@ on the second attempt.
 This confirms the core hypothesis: an agent loop with evidence-based 
 verification (real test output, not the model's self-assessment) 
 delivers a measurable reliability improvement even on simple tasks.
+
+## Phase 2: Diamond pattern — PASS/FAIL calibration check
+
+### Setup
+Same diamond agent (4 parallel reviewers + asymmetric aggregator), run on
+two contrasting tasks to check whether the verifier can actually say both
+PASS and FAIL, not just rubber-stamp everything.
+
+### Run 1 — palindrome check (PASS)
+3 of 4 reviewers (security, performance, style) found no issues.
+TEST_COVERAGE flagged a real gap: punctuation isn't stripped, so
+"A man, a plan, a canal: Panama" returns False. The aggregator classified
+this as a scope limitation, not a defect, and returned PASS.
+
+### Run 2 — prime check with an injected defect (FAIL)
+Task deliberately asked for `is_prime(1) == True` (mathematically wrong).
+The agent implemented it faithfully and wrote tests that lock in the same
+bug as expected behavior. TEST_COVERAGE flagged that the test suite
+codifies a known defect as a guarantee — a correctness issue, not a
+nitpick. The aggregator returned FAIL.
+
+### Takeaway
+The verifier calibrates by severity rather than defaulting to PASS: a
+scope gap passed, a defect baked into the test contract failed. This is
+the asymmetric verification + Default-FAIL pattern from the research
+corpus, confirmed empirically on two contrasting runs rather than just
+described.
+
+### Side observation
+On both runs, 3 of 4 reviewers (security, performance, style) returned "no
+issues" on straightforward tasks. Full-cost review on every lens for every
+task is likely wasted spend — candidate for model tiering (haiku for the
+low-yield lenses) or gating fan-out on task complexity.
