@@ -15,3 +15,13 @@ Attempt 2: 31 passed. The agent stopped on its own.
 The "run → check → fix based on the real error" loop works without human
 involvement. Baseline for comparison with Phase 5 (evidence-based
 stop conditions with more complex tasks and attempt history).
+
+# Phase 1: Linear vs Loop agent comparison
+
+| Task                          | Linear (1 attempt) | Loop (up to 3 attempts) |
+|--------------------------------|---------------------|--------------------------|
+| reverse a string               |     PASSED                |        PASSED                  |
+| palindrome check                |      FAILED               |       PASSED                   |
+| sum of digits (negative nums)   |      PASSED               |       PASSED                   |
+| second largest (duplicates)     |      PASSED               |       PASSED                   |
+| count vowels (case-insensitive) |      PASSED               |       PASSED                  |
