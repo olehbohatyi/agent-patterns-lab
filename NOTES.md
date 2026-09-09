@@ -205,3 +205,46 @@ Both judges cited the anti-hedge clause by name in their reasoning.
   run overwrote `solution.py`/`test_solution.py` mid-review. Probes now
   assert on the expected function name first, but the single-working-file
   design makes concurrent runs unsafe.
+## Phase 2: Closing finding — the architectural ceiling of asymmetric verification
+
+### Question
+Does the aggregator's per-category rubric fix also protect against a
+reviewer that simply misses a defect and reports "no issues found"?
+
+### Test
+Deterministic, not dependent on reviewer nondeterminism: hand-wrote a fake
+"No issues found" review for each category and paired it with the known-
+vulnerable `read_file_contents` (no path validation). Ran `aggregate_verdict`
+directly against this fabricated review set.
+
+### Result
+PASS. Every category returned OK. The security judge's own reasoning:
+"The review states no vulnerability exists and gives a specific, verifiable
+rationale... it's a clean bill of health, not a disguised finding." The
+judge called the rationale "verifiable" while holding neither the code nor
+the tests — it can only assess whether a review sounds well-reasoned, not
+whether it's true. A confident lie and a correct all-clear are
+indistinguishable from where the judge sits.
+
+### Why this is different from the earlier rubric fix
+The rubric fix (Probes 1–2) addressed a calibration bug: real findings were
+being reported but waved through as non-blocking. This is an architectural
+limit: a finding that is never reported cannot be recovered downstream by
+any prompt change to the judge, because the judge has no independent
+access to the artifact being judged — only to what the reviewer chose to
+say about it.
+
+### The tradeoff, now demonstrated rather than argued
+Giving the judge the code would close this hole, but at a cost: the judge
+would stop being an independent check on the *reviews* and become a fifth
+*reviewer*, looking at the code directly. That's a different system —
+one more opinion in the fan-out — not a better-tuned version of the
+current asymmetric-verification design, which depends on the judge staying
+blind to everything except what it's asked to verify.
+
+### Standing limitation
+The diamond pattern as built is only as reliable as the honesty and
+completeness of its 4 reviewers. The aggregator can raise the bar for
+findings that surface, but has no mechanism to catch a finding that never
+surfaces. This is recorded as a known, unresolved architectural boundary,
+not a bug to fix in this phase.
