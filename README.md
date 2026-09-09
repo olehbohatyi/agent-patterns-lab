@@ -17,13 +17,20 @@ whether the self-correction loop actually improves reliability (see [NOTES.md](N
 - [agent_linear.py](agent_linear.py) — the same generate-solution / generate-tests / run-tests flow,
   but with no fix loop: it runs the tests exactly once and reports the result, whatever it is.
 - [agent_diamond.py](agent_diamond.py) — builds on the loop agent, but once tests pass it fans out to
-  4 independent reviewers (security, performance, style, test coverage) run in parallel, then an
-  asymmetric aggregator with no prior context on the code decides a final PASS/FAIL from their
-  verdicts alone. Calibration probes in [NOTES.md](NOTES.md) found the pattern isn't uniformly
-  reliable: the security reviewer missed a real path-traversal-shaped design flaw, the performance
-  reviewer correctly caught a hand-planted O(n²) regression with no size hint, and the aggregator
-  still passed that same O(n²) finding by calling it "an optimization opportunity" rather than a
-  defect — the aggregation step, not the reviewers, is the weak point.
+  4 independent reviewers (security, performance, style, test coverage) run in parallel. Each review
+  is then judged in isolation by a separate verifier that sees only that one review and answers
+  BLOCK/OK against an explicit severity rubric; Python — not the model — computes the final verdict,
+  failing if any category blocks.
+
+  Calibration probes in [NOTES.md](NOTES.md) drove that design. The first version asked one verifier
+  for a single holistic PASS/FAIL, and it waved through both a real path-traversal flaw and a
+  hand-planted O(n²) regression, on the grounds that neither was a *demonstrated* failure in current
+  usage — it was effectively punishing reviewers for honest hedging ("if untrusted input...", "at
+  scale..."). Per-category isolation alone didn't fix that; an explicit rubric forbidding hedges as
+  grounds for dismissal did, and both probes now correctly fail.
+
+  A known limit remains: the verifier reads only review text, never the code. A fabricated "no issues
+  found" review passes cleanly, so the pattern is only as reliable as the honesty of its reviewers.
 
 All three scripts take the task description as a command-line argument, and all overwrite
 `solution.py` and `test_solution.py` on each run — those two files are generated output, not
