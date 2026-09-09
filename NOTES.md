@@ -149,3 +149,59 @@ PERFORMANCE reasoned correctly with no cues; SECURITY missed an
 architecturally real vulnerability. This argues against blind model
 downgrades for "low-yield" lenses — the fix demonstrated here was a
 better probe/prompt, not a bigger model.
+
+## Phase 2: Fixing the aggregator — one wrong diagnosis, one right one
+
+### Attempt 1 — per-category isolation (didn't work)
+Hypothesis: the aggregator "smoothed over" a single real finding because
+one call saw all 4 reviews at once. Fix: give each review its own isolated
+BLOCK/OK call (seeing only that review), and compute the final PASS/FAIL in
+Python — FAIL if any category blocks — so the model can't blend.
+
+Re-ran the O(n²) dedupe probe: still PASS. The isolated performance judge
+saw the finding alone, with no clean reports beside it, and still said OK:
+"O(n²) behavior only matters at scale... not a demonstrated regression
+against current usage." Hypothesis falsified — blending was never the
+mechanism.
+
+### The actual mechanism
+The judge had no severity bar, so it invented one: "is there a demonstrated
+failure in current usage?" Neither a conditional vulnerability nor an
+asymptotic complexity defect can ever satisfy that, isolated or not.
+
+The security probe made it sharper. This time the SECURITY reviewer *did*
+catch the path traversal (CWE-22, described accurately) — and the judge
+overrode it anyway, because the reviewer had honestly hedged "if `filename`
+ever originates from an untrusted source." The judge read that "if" as
+"unproven." **The system was punishing epistemic honesty**: a more
+overconfident, less accurate review would have scored higher. That's a
+Goodhart-shaped incentive baked into the verification step itself.
+
+### Attempt 2 — explicit severity rubric (worked)
+Added a rubric to the judge prompt naming what must block even when hedged
+(security flaw with no trust boundary; complexity defect in a function whose
+purpose is that operation; correctness bug, including tests encoding wrong
+behavior), plus an explicit clause: do not treat "if..." / "at scale..." as
+evidence an issue is unproven.
+
+| Probe                      | Before rubric | After rubric          |
+|----------------------------|---------------|-----------------------|
+| Security (path traversal)  | PASS          | FAIL (security: BLOCK)|
+| Performance (O(n²) dedupe) | PASS          | FAIL (performance: BLOCK)|
+
+Both judges cited the anti-hedge clause by name in their reasoning.
+
+### Caveats (not resolved)
+- **Partly circular**: the rubric names these two defect classes by
+  description, so this shows it catches *known* cases, not that it
+  generalizes to unanticipated ones. Untested on a novel defect type.
+- **Findings now double-count across lenses**: on the dedupe probe, STYLE
+  also returned BLOCK because the style reviewer mentioned the O(n²) issue
+  in passing. Correct per the rubric, but category verdicts are no longer
+  cleanly scoped to their own concern.
+- **The judge still never sees the code** — only review text. If a reviewer
+  misses a defect entirely, no rubric can recover it downstream.
+- **Shared-file fragility**: one probe run was invalidated when a parallel
+  run overwrote `solution.py`/`test_solution.py` mid-review. Probes now
+  assert on the expected function name first, but the single-working-file
+  design makes concurrent runs unsafe.
