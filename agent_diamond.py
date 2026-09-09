@@ -6,10 +6,10 @@ from concurrent.futures import ThreadPoolExecutor
 
 MAX_ATTEMPTS = 3
 
-def call_claude(prompt: str) -> str:
+def call_claude(prompt: str, model: str = "sonnet") -> str:
     """Calls Claude Code in non-interactive mode and returns the response."""
     result = subprocess.run(
-        ["claude", "--model", "sonnet", "-p", prompt],
+        ["claude", "--model", model, "-p", prompt],
         capture_output=True,
         text=True,
         timeout=120
@@ -45,30 +45,45 @@ def run_tests() -> tuple[bool, str]:
     passed = result.returncode == 0
     return passed, result.stdout + result.stderr
 
+# Model is per-reviewer so tiering can be tested one role at a time. The judge in
+# judge_review() is deliberately left on the default (sonnet) — changing reviewers
+# and judge together would make a regression impossible to attribute.
 REVIEWERS = {
-    "security": "Review this code for security issues (e.g. injection, unsafe input handling). "
-                "List any problems found, or say 'No issues found' if none.",
-    "performance": "Review this code for performance issues (e.g. inefficient loops, unnecessary work). "
-                   "List any problems found, or say 'No issues found' if none.",
-    "style": "Review this code for style issues (e.g. naming, readability, PEP8). "
-             "List any problems found, or say 'No issues found' if none.",
-    "test_coverage": "Review the test file for coverage gaps (e.g. missing edge cases). "
-                      "List any gaps found, or say 'No issues found' if none.",
+    "security": {
+        "model": "sonnet",
+        "instruction": "Review this code for security issues (e.g. injection, unsafe input handling). "
+                       "List any problems found, or say 'No issues found' if none.",
+    },
+    "performance": {
+        "model": "sonnet",
+        "instruction": "Review this code for performance issues (e.g. inefficient loops, unnecessary work). "
+                       "List any problems found, or say 'No issues found' if none.",
+    },
+    "style": {
+        "model": "sonnet",
+        "instruction": "Review this code for style issues (e.g. naming, readability, PEP8). "
+                       "List any problems found, or say 'No issues found' if none.",
+    },
+    "test_coverage": {
+        "model": "sonnet",
+        "instruction": "Review the test file for coverage gaps (e.g. missing edge cases). "
+                       "List any gaps found, or say 'No issues found' if none.",
+    },
 }
 
-def run_reviewer(name: str, instruction: str, code: str, tests: str) -> tuple[str, str]:
-    prompt = f"{instruction}\n\nCode (solution.py):\n{code}\n\nTests (test_solution.py):\n{tests}"
-    result = call_claude(prompt)
+def run_reviewer(name: str, config: dict, code: str, tests: str) -> tuple[str, str]:
+    prompt = f"{config['instruction']}\n\nCode (solution.py):\n{code}\n\nTests (test_solution.py):\n{tests}"
+    result = call_claude(prompt, model=config["model"])
     return name, result
 
 def run_diamond_review(code: str, tests: str) -> dict:
     """Fans out to 4 independent reviewers in parallel (the diamond's split),
     each with a different lens on the same code and tests."""
     results = {}
-    with ThreadPoolExecutor(max_workers=4) as executor:
+    with ThreadPoolExecutor(max_workers=len(REVIEWERS)) as executor:
         futures = [
-            executor.submit(run_reviewer, name, instruction, code, tests)
-            for name, instruction in REVIEWERS.items()
+            executor.submit(run_reviewer, name, config, code, tests)
+            for name, config in REVIEWERS.items()
         ]
         for future in futures:
             name, verdict = future.result()
