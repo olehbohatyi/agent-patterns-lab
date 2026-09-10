@@ -331,3 +331,67 @@ outright.
 A rubric fix that separates "hedge excusing an in-scope finding" from
 "honest out-of-scope mention" — not attempted here, noted as a follow-up
 alongside the earlier "judge never sees the code" limitation from Phase 2.
+
+## Phase 3: Lane-aware rubric fix — regression more severe than the fix
+
+### Fix attempted
+Added a lane clause to the judge rubric: block only if the defect belongs
+to the reviewer's own assigned lens, not just if it's mentioned anywhere.
+Intended to stop out-of-lane honest mentions (e.g. security noting "this
+is a correctness bug, not a security issue") from triggering a block.
+
+### Result
+| Probe | Sonnet | Haiku |
+|---|---|---|
+| path_traversal | 1/1 correct | 1/1 correct |
+| on2_dedupe | 1/1 correct | 6/7 correct, 1 unreproduced miss (likely noise) |
+| prime_bug | **4/7 correct, 3/7 full miss (PASS)** | 3/3 correct |
+
+The fix worked exactly as designed where it was aimed — an out-of-lane
+mention correctly stopped blocking. But on `prime_bug`/sonnet it produced
+a 43% full-miss rate, worse than the pre-fix baseline (0% miss).
+
+### Root cause of the regression
+Captured a full silent-failure run. Every reviewer behaved reasonably by
+its own rules:
+- performance: mentioned the bug, correctly labeled it "not a performance
+  issue, a correctness bug" → judge correctly read this as out-of-lane, OK
+- style: mentioned the same defect but filed it as a cosmetic nitpick
+  ("awkward branch ordering") without flagging it as a correctness bug →
+  judge correctly read this as genuinely in-lane-and-minor, OK
+- test_coverage (the lens that actually owns this defect): didn't mention
+  it at all this run — generic coverage gaps only
+- security: no mention
+
+Result: zero blocks, defect ships clean, with every individual judgment
+locally defensible.
+
+### What actually broke
+The old (lane-blind) rubric had an accidental safety net: any reviewer
+mentioning the defect in any framing triggered a block somewhere, because
+the judge didn't check ownership. The lane fix closed that loophole by
+design — but with it went the redundancy that made the system tolerant of
+the "correct" owner staying silent in a given run. Precision and
+robustness traded against each other here; the fix increased one and
+silently cost the other.
+
+### The haiku/sonnet reversal
+Haiku's tendency to restate the same defect across all 4 reviews — the
+exact "lens discipline" problem flagged as a cost in the first tiering
+finding — turned out to be what shielded it from this regression: with 4
+independent restatements, at least one review reliably fails to disclaim
+cleanly and blocks. Sonnet's more disciplined, single-owner reviews have
+no redundancy to fall back on when the actual owner misses in a given
+run. Redundant/noisy reviewing was more robust here than precise/lane-
+disciplined reviewing — the opposite of the usual tiering assumption that
+the more careful model is the safer one to keep un-tiered.
+
+### Standing tension
+Two rubric goals are in direct conflict:
+1. Don't block on honest out-of-lane mentions (lane fix's goal)
+2. Don't silently pass when the actual owner lens misses in a given run
+Fixing (1) directly weakened (2). Not resolved here — options for a future
+pass: keep the lane fix but add a cross-lens fallback ("if no lens claims
+this in-lane, treat any accurate mention as sufficient to block"), or
+accept the trade and rely on tiering/redundancy (haiku's behavior) as the
+actual safety net instead of rubric precision.
