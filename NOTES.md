@@ -248,3 +248,86 @@ completeness of its 4 reviewers. The aggregator can raise the bar for
 findings that surface, but has no mechanism to catch a finding that never
 surfaces. This is recorded as a known, unresolved architectural boundary,
 not a bug to fix in this phase.
+
+## Phase 3: Model tiering — clean tiers vs. a rubric gap
+
+### Setup
+Made the model per-reviewer (`call_claude(prompt, model=...)`; `REVIEWERS`
+carries a model alongside each instruction) so tiering could be tested one
+role at a time. Judge stayed on sonnet throughout — changing reviewers and
+judge together would make a regression impossible to attribute. Re-ran the
+3 calibrated probes from Phase 2 on sonnet as a fresh baseline, then again
+with all 4 reviewers on haiku.
+
+### Bug found while establishing the sonnet baseline
+The first baseline run showed `security: BLOCK` on the dedupe probe even
+though the security review itself said "No issues found." Cause:
+`judge_review()` parsed the verdict by reading the response's first word.
+A judge that reasoned out loud before answering — "BLOCK... wait, no, let
+me reconsider... OK" — got scored on the word it started with, not the
+verdict it reached. This silently broke the fail-safe default in the
+dangerous direction: a judge talking itself *into* OK from BLOCK would have
+read as OK instead. Fixed by requiring an explicit `VERDICT: BLOCK` /
+`VERDICT: OK` marker on its own line, parsed with `re.findall` — zero or
+multiple markers both fail safe to BLOCK. Re-ran the baseline after the
+fix; the false positive was gone.
+
+### Result
+| Probe | Sonnet | Haiku |
+|---|---|---|
+| path_traversal | security: BLOCK only | security: BLOCK only — match |
+| on2_dedupe | performance: BLOCK only | performance: BLOCK only — match |
+| prime_bug | test_coverage: BLOCK only | all 4: BLOCK in 5 of 6 runs |
+
+Two of three probes tier cleanly — same detecting category, same final
+verdict. The third diverges, reproduced across 6 total runs (4 isolated
+re-runs plus 2 full `agent_diamond.py` pipeline runs): 5/6 had all 4
+categories block, 1/6 had 3/4 (style stayed scoped that time). Stable
+pattern, not one-off noise — final verdict was FAIL in all 6 either way.
+
+### What's actually happening on prime_bug
+Every haiku reviewer independently notices the `is_prime(1)` bug and
+mentions it, even when asked to look at an unrelated lens — and each one
+explicitly disclaims it: "Note: this is a correctness bug, not a security
+issue"; "however, there is a correctness issue (not strictly performance,
+but critical)"; "the only concern is correctness, not style." The judge
+blocks anyway, correctly applying the existing anti-hedge rubric from
+Phase 2 — but that rubric was written to stop a reviewer from using
+hedges to excuse a real defect *in its own lane* ("if untrusted input...",
+"at scale..."). It has no way to tell that pattern apart from a reviewer
+honestly flagging a defect that's genuinely outside its lane. Both read as
+"this isn't really my category, but—", so the same rule fires on both.
+
+### Reframing
+Not a haiku detection or articulation weakness — if anything haiku is
+more consistent here, catching the bug from every angle unprompted and
+disclaiming scope honestly each time; sonnet's reviewers mostly stayed
+scoped and only test_coverage caught it. The gap is in the rubric, not the
+model: it was never designed to distinguish "hedge masking an in-scope
+finding" from "accurate out-of-scope mention." Haiku's verbosity just
+surfaces this rubric gap more often than sonnet's terser reviews do.
+
+### Caveat on the probe itself
+`prime_bug`'s defect (`is_prime(1) == True`) is blatant enough that almost
+any reviewer trips over it by accident, regardless of assigned lens — this
+may be less about haiku specifically than about using an impossible-to-miss
+bug as the probe. It doesn't test whether haiku *misses* scoped, subtle
+defects the way sonnet's security reviewer did in Phase 2's original path
+traversal probe; it tests whether reviewers *stay scoped* when a defect is
+obvious enough to notice by accident. Both are real questions, but this run
+only answers the second one.
+
+### Practical implication for tiering
+If the only thing that matters is the final PASS/FAIL, haiku tiers fine on
+all 3 probes (3/3 correct across the board, 6/6 counting the repeats). If
+per-category attribution matters — e.g. triaging "which lens actually
+caught this" downstream — haiku's cross-contamination degrades that signal
+specifically on probes loud enough to leak across categories. This is a
+cost to attribution, not to correctness of the final verdict, and it's a
+rubric fix away from being closed rather than a reason to avoid haiku
+outright.
+
+### Deferred
+A rubric fix that separates "hedge excusing an in-scope finding" from
+"honest out-of-scope mention" — not attempted here, noted as a follow-up
+alongside the earlier "judge never sees the code" limitation from Phase 2.
