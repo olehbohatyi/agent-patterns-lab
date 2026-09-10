@@ -110,15 +110,27 @@ def judge_review(name: str, review: str) -> tuple[str, str, str]:
         "described conditionally is still a defect. OK only for genuine style nitpicks, "
         "missing docstrings, or coverage suggestions for behavior that already works "
         "correctly.\n\n"
-        "Answer with exactly one word first: BLOCK or OK. "
-        "Then on a new line, explain briefly why."
+        "Think through your reasoning first if you need to. Then output your final "
+        "verdict on its own last line, in exactly this format and nothing else:\n\n"
+        "VERDICT: BLOCK\n"
+        "or\n"
+        "VERDICT: OK"
     )
     response = call_claude(prompt)
-    words = response.strip().upper().split()
-    # Fail safe: an empty or unparseable response counts as BLOCK — an ambiguous
-    # verdict shouldn't silently pass.
-    verdict = "OK" if words and words[0].startswith("OK") else "BLOCK"
-    return name, verdict, response
+    return name, parse_verdict(response), response
+
+def parse_verdict(response: str) -> str:
+    """Extracts the verdict from an explicit VERDICT: marker. Anything ambiguous —
+    no marker, conflicting markers, empty response — fails safe to BLOCK.
+
+    Reading the first word instead was actively wrong: judges that reason aloud
+    ("BLOCK — wait, no, let me reconsider... OK") got scored on the word they
+    started with, not the verdict they reached, which breaks fail-safe in the
+    direction that matters (a judge talking itself into OK would have read as OK)."""
+    matches = re.findall(r"^VERDICT:\s*(BLOCK|OK)\s*$", response.upper(), re.MULTILINE)
+    if len(matches) != 1:
+        return "BLOCK"
+    return matches[0]
 
 def aggregate_verdict(results: dict) -> tuple[bool, str]:
     """The diamond's join: each review gets its own isolated BLOCK/OK judgment, then
