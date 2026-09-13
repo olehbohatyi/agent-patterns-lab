@@ -1,4 +1,5 @@
 import ast
+import builtins
 import re
 import subprocess
 import sys
@@ -15,20 +16,92 @@ def call_claude(prompt: str) -> str:
 class NotPythonError(RuntimeError):
     """Raised when claude's response isn't valid Python (e.g. a refusal or explanation)."""
 
+_ALWAYS_DEFINED = set(dir(builtins)) | {
+    "__name__", "__file__", "__doc__", "__package__", "__spec__",
+    "__loader__", "__builtins__",
+}
+
+def find_undefined_names(tree: ast.AST) -> set[str]:
+    """Static check for names referenced but never bound anywhere in the module —
+    catches the common case of a missing import (e.g. `os.path.X` used without
+    `import os`) that ast.parse()'s syntax-only check can't, without needing to
+    actually call the generated function (which ast.parse and a bare exec() of the
+    module both miss, since a name used only inside a function body isn't touched
+    until that function is called).
+
+    Deliberately not full scope resolution: any name bound ANYWHERE in the module,
+    at any nesting level, counts as defined everywhere. That's conservative in the
+    safe direction — it can miss a real scoping bug, but won't flag well-formed
+    code as broken."""
+    defined = set(_ALWAYS_DEFINED)
+    loaded = set()
+
+    class Visitor(ast.NodeVisitor):
+        def visit_Name(self, node):
+            (defined if isinstance(node.ctx, ast.Store) else loaded).add(node.id)
+            self.generic_visit(node)
+
+        def visit_Import(self, node):
+            for alias in node.names:
+                defined.add((alias.asname or alias.name).split(".")[0])
+
+        def visit_ImportFrom(self, node):
+            for alias in node.names:
+                defined.add(alias.asname or alias.name)
+
+        def _visit_function(self, node):
+            defined.add(node.name)
+            args = node.args
+            for arg in args.posonlyargs + args.args + args.kwonlyargs:
+                defined.add(arg.arg)
+            if args.vararg:
+                defined.add(args.vararg.arg)
+            if args.kwarg:
+                defined.add(args.kwarg.arg)
+            self.generic_visit(node)
+
+        visit_FunctionDef = _visit_function
+        visit_AsyncFunctionDef = _visit_function
+
+        def visit_Lambda(self, node):
+            for arg in node.args.posonlyargs + node.args.args + node.args.kwonlyargs:
+                defined.add(arg.arg)
+            self.generic_visit(node)
+
+        def visit_ClassDef(self, node):
+            defined.add(node.name)
+            self.generic_visit(node)
+
+        def visit_ExceptHandler(self, node):
+            if node.name:
+                defined.add(node.name)
+            self.generic_visit(node)
+
+    Visitor().visit(tree)
+    return loaded - defined
+
 def clean_code(text: str) -> str:
     """Extracts a fenced code block if present anywhere in the response, then
-    validates the result parses as Python. Raises NotPythonError instead of
-    returning prose/refusals that would silently corrupt solution.py or
-    test_solution.py."""
+    validates the result parses as Python and references no undefined names (e.g.
+    a missing import). Raises NotPythonError instead of returning prose/refusals,
+    or code that would fail at runtime with a NameError pytest would otherwise be
+    the first to catch — silently writing either to solution.py/test_solution.py."""
     match = re.search(r"```(?:python)?\n(.*?)\n```", text, re.DOTALL)
     code = match.group(1) if match else text.strip()
 
     try:
-        ast.parse(code)
+        tree = ast.parse(code)
     except SyntaxError as e:
         raise NotPythonError(
             f"claude did not return valid Python code:\n\n{text[:500]}"
         ) from e
+
+    undefined = find_undefined_names(tree)
+    if undefined:
+        raise NotPythonError(
+            f"code references undefined name(s) {sorted(undefined)} — likely a "
+            f"missing import:\n\n{text[:500]}"
+        )
     return code
 
 def run_tests() -> tuple[bool, str]:
