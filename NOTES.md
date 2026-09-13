@@ -395,3 +395,52 @@ pass: keep the lane fix but add a cross-lens fallback ("if no lens claims
 this in-lane, treat any accurate mention as sufficient to block"), or
 accept the trade and rely on tiering/redundancy (haiku's behavior) as the
 actual safety net instead of rubric precision.
+
+## Phase 4: Graph routing — first result, two distinct failure classes
+
+### Setup
+First graph run: solution + tests → diamond review → route by blocking
+category → security-specific fix prompt (adds trust boundary) → re-test.
+
+### Result
+Routing worked as designed — security blocked, graph took the
+security-specific path, not the generic fallback. The routed fix itself
+broke on two independent bugs.
+
+### Bug 1 — missing import (infrastructure gap, not graph-specific)
+The security fix used `os.path.realpath`, `os.path.join`, etc. without
+`import os`. `clean_code()`'s `ast.parse()` only validates syntax, not
+name resolution — a NameError at runtime passes the check silently. This
+gap predates Phase 4; specialized fix prompts just make it more likely to
+surface, since they tend to pull in code (path handling, hashing, etc.)
+that needs imports the simpler generic prompts rarely triggered.
+
+### Bug 2 — routed fix contradicts the task's own spec (graph-specific)
+After patching bug 1, 7/9 tests still failed: the fix hardcoded a
+containment boundary (`base_dir="."` resolved via `os.path.realpath`)
+that rejects any path outside the process's cwd — including pytest's
+`tmp_path` fixture, breaking every legitimate test. This directly
+contradicts the task's explicit requirement: "allow caller to pass any
+path they want for flexibility." The security route prompt gave the model
+the review finding and the task description, but the model had no way to
+reconcile "add a trust boundary" with "the whole point is flexible path
+access" — it picked a boundary that satisfies the reviewer while
+defeating the feature.
+
+### Takeaway
+Bug 1 is a validation gap in existing infra (ast.parse checks syntax, not
+runtime correctness) — fixable by actually running the fixed code, not
+just parsing it. Bug 2 is specific to routing: a specialized fix prompt
+built from the review text alone lacks the context to know when a
+security recommendation conflicts with the task's actual design intent.
+Generic fix prompts avoid this by being vague enough to not overcommit to
+a specific mechanism — specialization trades that safety for precision,
+and this run shows the cost side of that trade for the first time.
+
+### Deferred
+Hardening options not applied yet: an import/execution check after
+clean_code() (catches bug 1 generally), and passing the original task
+description more explicitly into the fix prompt with an instruction to
+preserve stated requirements (addresses bug 2, though may not fully
+resolve genuine security/functionality conflicts — some tasks may have
+requirements that are fundamentally in tension with being secure).
