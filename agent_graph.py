@@ -1,0 +1,315 @@
+import ast
+import re
+import subprocess
+import sys
+from concurrent.futures import ThreadPoolExecutor
+
+MAX_ATTEMPTS = 3
+
+def call_claude(prompt: str, model: str = "sonnet") -> str:
+    """Calls Claude Code in non-interactive mode and returns the response."""
+    result = subprocess.run(
+        ["claude", "--model", model, "-p", prompt],
+        capture_output=True,
+        text=True,
+        timeout=120
+    )
+    return result.stdout.strip()
+
+class NotPythonError(RuntimeError):
+    """Raised when claude's response isn't valid Python (e.g. a refusal or explanation)."""
+
+def clean_code(text: str) -> str:
+    """Extracts a fenced code block if present anywhere in the response, then
+    validates the result parses as Python. Raises NotPythonError instead of
+    returning prose/refusals that would silently corrupt solution.py or
+    test_solution.py."""
+    match = re.search(r"```(?:python)?\n(.*?)\n```", text, re.DOTALL)
+    code = match.group(1) if match else text.strip()
+
+    try:
+        ast.parse(code)
+    except SyntaxError as e:
+        raise NotPythonError(
+            f"claude did not return valid Python code:\n\n{text[:500]}"
+        ) from e
+    return code
+
+def run_tests() -> tuple[bool, str]:
+    """Runs pytest and returns (success, output)."""
+    result = subprocess.run(
+        ["pytest", "test_solution.py", "-v"],
+        capture_output=True,
+        text=True
+    )
+    passed = result.returncode == 0
+    return passed, result.stdout + result.stderr
+
+# Model is per-reviewer so tiering can be tested one role at a time. The judge in
+# judge_review() is deliberately left on the default (sonnet) — changing reviewers
+# and judge together would make a regression impossible to attribute.
+REVIEWERS = {
+    "security": {
+        "model": "sonnet",
+        "instruction": "Review this code for security issues (e.g. injection, unsafe input handling). "
+                       "List any problems found, or say 'No issues found' if none.",
+    },
+    "performance": {
+        "model": "sonnet",
+        "instruction": "Review this code for performance issues (e.g. inefficient loops, unnecessary work). "
+                       "List any problems found, or say 'No issues found' if none.",
+    },
+    "style": {
+        "model": "sonnet",
+        "instruction": "Review this code for style issues (e.g. naming, readability, PEP8). "
+                       "List any problems found, or say 'No issues found' if none.",
+    },
+    "test_coverage": {
+        "model": "sonnet",
+        "instruction": "Review the test file for coverage gaps (e.g. missing edge cases). "
+                       "List any gaps found, or say 'No issues found' if none.",
+    },
+}
+
+def run_reviewer(name: str, config: dict, code: str, tests: str) -> tuple[str, str]:
+    prompt = f"{config['instruction']}\n\nCode (solution.py):\n{code}\n\nTests (test_solution.py):\n{tests}"
+    result = call_claude(prompt, model=config["model"])
+    return name, result
+
+def run_diamond_review(code: str, tests: str) -> dict:
+    """Fans out to 4 independent reviewers in parallel (the diamond's split),
+    each with a different lens on the same code and tests."""
+    results = {}
+    with ThreadPoolExecutor(max_workers=len(REVIEWERS)) as executor:
+        futures = [
+            executor.submit(run_reviewer, name, config, code, tests)
+            for name, config in REVIEWERS.items()
+        ]
+        for future in futures:
+            name, verdict = future.result()
+            results[name] = verdict
+    return results
+
+def judge_review(name: str, review: str) -> tuple[str, str, str]:
+    """Judges one review in isolation — this call never sees the other three, so a
+    real finding can't be softened by sitting next to clean reports."""
+    prompt = (
+        "You are a strict, isolated verifier. You have no context on how this code "
+        "was written or fixed — you are judging only the review text below.\n\n"
+        f"This review's assigned lens is: {name}.\n\n"
+        f"Review ({name}):\n{review}\n\n"
+        "Severity rubric — BLOCK if the review describes ANY of the following AND "
+        f"the defect genuinely belongs to the {name} lens (not a defect the reviewer "
+        "is only mentioning about a different lens), even conditionally or hedged "
+        "with 'if untrusted input' / 'at scale' / 'in some cases':\n"
+        "- A security flaw that would trigger under any input the function's own "
+        "signature does not rule out (e.g. no explicit trust boundary, no validation)\n"
+        "- An algorithmic complexity defect (e.g. O(n²) or worse) in a function whose "
+        "stated purpose is that exact operation, regardless of current test input size\n"
+        "- A correctness bug, including tests that encode incorrect behavior as expected\n\n"
+        "Do NOT treat a hedge or conditional phrasing ('if...', 'at scale...', "
+        "'could be...') as evidence an in-lane issue is unproven or minor — a real "
+        "defect described conditionally is still a defect.\n\n"
+        "Do NOT block on a defect the review explicitly identifies as belonging to a "
+        "different lens (e.g. a security review noting 'this is a correctness bug, "
+        f"not a security issue' — if the lens is '{name}', that is an out-of-lane "
+        "mention, not a finding in this lens, so it does not block this category; it "
+        "will be judged by the lens it actually belongs to).\n\n"
+        "OK for genuine style nitpicks, missing docstrings, coverage suggestions for "
+        "behavior that already works correctly, or an accurate out-of-lane mention "
+        "with no in-lane defect of its own.\n\n"
+        "Think through your reasoning first if you need to. Then output your final "
+        "verdict on its own last line, in exactly this format and nothing else:\n\n"
+        "VERDICT: BLOCK\n"
+        "or\n"
+        "VERDICT: OK"
+    )
+    response = call_claude(prompt)
+    return name, parse_verdict(response), response
+
+def parse_verdict(response: str) -> str:
+    """Extracts the verdict from an explicit VERDICT: marker. Anything ambiguous —
+    no marker, conflicting markers, empty response — fails safe to BLOCK.
+
+    Reading the first word instead was actively wrong: judges that reason aloud
+    ("BLOCK — wait, no, let me reconsider... OK") got scored on the word they
+    started with, not the verdict they reached, which breaks fail-safe in the
+    direction that matters (a judge talking itself into OK would have read as OK)."""
+    matches = re.findall(r"^VERDICT:\s*(BLOCK|OK)\s*$", response.upper(), re.MULTILINE)
+    if len(matches) != 1:
+        return "BLOCK"
+    return matches[0]
+
+def aggregate_verdict(results: dict) -> tuple[bool, str, dict]:
+    """The diamond's join: each review gets its own isolated BLOCK/OK judgment, then
+    Python (not the model) decides the final PASS/FAIL — FAIL if ANY category blocks.
+    A single holistic PASS/FAIL question let one real finding get smoothed over by
+    three clean ones (see NOTES.md). Also returns the per-category verdicts dict —
+    the graph's routing node reads this directly instead of re-parsing the report
+    text to figure out which category blocked."""
+    verdicts = {}
+    reasoning = {}
+    with ThreadPoolExecutor(max_workers=len(results)) as executor:
+        futures = [
+            executor.submit(judge_review, name, review)
+            for name, review in results.items()
+        ]
+        for future in futures:
+            name, verdict, response = future.result()
+            verdicts[name] = verdict
+            reasoning[name] = response
+
+    passed = all(verdict == "OK" for verdict in verdicts.values())
+
+    summary = "\n".join(f"{name}: {verdict}" for name, verdict in verdicts.items())
+    details = "\n\n".join(
+        f"[{name.upper()} — {verdicts[name]}]\n{response}"
+        for name, response in reasoning.items()
+    )
+    return passed, f"{summary}\n\n{details}", verdicts
+
+def route_fix(category_verdicts: dict, review_results: dict, task_description: str) -> str:
+    """The graph's routing node: decides which fix path to take based on which
+    category blocked, instead of one generic 'here's the error, fix it' prompt for
+    every failure type. Security and performance get defect-specific guidance;
+    everything else (style, test_coverage, correctness) falls back to a generic
+    fix path that just forwards the blocked reviews."""
+
+    if category_verdicts.get("security") == "BLOCK":
+        return (
+            f"This code was flagged for a security issue:\n\n{review_results['security']}\n\n"
+            f"Fix the function for this task: {task_description}, in the file solution.py. "
+            "Specifically: add explicit input validation and enforce a trust boundary — "
+            "do not assume the caller provides safe input. Do not write, save, or create "
+            "any files yourself — respond with the fixed code of the whole function as "
+            "plain text only, no markdown, no explanations."
+        )
+
+    if category_verdicts.get("performance") == "BLOCK":
+        return (
+            f"This code was flagged for a performance issue:\n\n{review_results['performance']}\n\n"
+            f"Fix the function for this task: {task_description}, in the file solution.py. "
+            "Specifically: address the algorithmic complexity problem described above — "
+            "use an appropriate data structure to avoid the inefficiency. Do not write, "
+            "save, or create any files yourself — respond with the fixed code of the "
+            "whole function as plain text only, no markdown, no explanations."
+        )
+
+    # Fallback: style / test_coverage / correctness — generic fix path
+    blocked = [name for name, v in category_verdicts.items() if v == "BLOCK"]
+    blocked_reviews = "\n\n".join(f"[{name}]\n{review_results[name]}" for name in blocked)
+    return (
+        f"This code was flagged by review:\n\n{blocked_reviews}\n\n"
+        f"Fix the function for this task: {task_description}, in the file solution.py, "
+        "to address the issues above. Do not write, save, or create any files yourself — "
+        "respond with the fixed code of the whole function as plain text only, no "
+        "markdown, no explanations."
+    )
+
+def main(task_description: str):
+    # Step A: agent writes the first version of the solution
+    print("=== Attempt 1: writing the first version ===")
+    code = call_claude(
+        f"Write a Python function for this task: {task_description}. "
+        "Do not write, save, or create any files yourself — respond with the code as plain "
+        "text only, no markdown, no explanations."
+    )
+    try:
+        code_text = clean_code(code)
+    except NotPythonError as e:
+        sys.exit(f"❌ claude refused to write solution.py: {e}")
+    with open("solution.py", "w") as f:
+        f.write(code_text)
+
+    tests = call_claude(
+        f"Here is the content of solution.py:\n\n{code_text}\n\n"
+        f"Write pytest tests for this code. The task it implements: {task_description}. "
+        "The tests will run in the same directory as solution.py. "
+        "Do not write, save, or create any files yourself — respond with the test code as "
+        "plain text only, no markdown, no explanations."
+    )
+    try:
+        tests_text = clean_code(tests)
+    except NotPythonError as e:
+        sys.exit(f"❌ claude refused to write test_solution.py: {e}")
+    with open("test_solution.py", "w") as f:
+        f.write(tests_text)
+
+    # Step B: check-and-fix loop — this is where the agent makes its own decisions
+    tests_passed = False
+    for attempt in range(1, MAX_ATTEMPTS + 1):
+        tests_passed, output = run_tests()
+        print(f"\n=== Attempt {attempt}: tests {'PASSED' if tests_passed else 'FAILED'} ===")
+        print(output[-500:])  # last 500 characters of output
+
+        if tests_passed:
+            print("\n✅ The agent decided to stop on its own — tests are green.")
+            break
+
+        if attempt == MAX_ATTEMPTS:
+            print("\n❌ Attempt limit exhausted, the agent gave up.")
+            sys.exit(1)
+
+        # The agent forms a new prompt on its own based on the actual error
+        fix_prompt = (
+            f"Here is the pytest output for the file solution.py:\n\n{output}\n\n"
+            f"Fix the function for this task: {task_description}, in the file solution.py, so that the tests pass. "
+            "Do not write, save, or create any files yourself — respond with the fixed code of "
+            "the whole function as plain text only, no markdown, no explanations."
+        )
+        fixed_code = call_claude(fix_prompt)
+        try:
+            code_text = clean_code(fixed_code)
+        except NotPythonError as e:
+            sys.exit(f"❌ claude refused to fix solution.py: {e}")
+        with open("solution.py", "w") as f:
+            f.write(code_text)
+
+    # Step C: diamond review, with a graph loop for routed fixes — the route isn't
+    # fixed in advance, it's built from what the previous node (the aggregator)
+    # returned, unlike the diamond's always-the-same fan-out/fan-in shape.
+    MAX_GRAPH_ATTEMPTS = 2
+    for graph_attempt in range(1, MAX_GRAPH_ATTEMPTS + 1):
+        print(f"\n=== Diamond review (graph attempt {graph_attempt}) ===")
+        review_results = run_diamond_review(code_text, tests_text)
+        for name, verdict in review_results.items():
+            print(f"\n--- {name.upper()} ---\n{verdict[:300]}")
+
+        final_pass, final_report, category_verdicts = aggregate_verdict(review_results)
+        print(f"\n=== Verdict: {'PASS' if final_pass else 'FAIL'} ===")
+        print(final_report)
+
+        if final_pass:
+            print("\n✅ Graph converged — all categories OK.")
+            sys.exit(0)
+
+        if graph_attempt == MAX_GRAPH_ATTEMPTS:
+            print("\n❌ Graph attempt limit exhausted.")
+            sys.exit(1)
+
+        # Route: pick the fix path based on which category blocked
+        route_taken = (
+            "security" if category_verdicts.get("security") == "BLOCK"
+            else "performance" if category_verdicts.get("performance") == "BLOCK"
+            else "generic"
+        )
+        print(f"\n=== Routing to: {route_taken} fix ===")
+
+        fix_prompt = route_fix(category_verdicts, review_results, task_description)
+        fixed_code = call_claude(fix_prompt)
+        try:
+            code_text = clean_code(fixed_code)
+        except NotPythonError as e:
+            sys.exit(f"❌ claude refused to fix solution.py: {e}")
+        with open("solution.py", "w") as f:
+            f.write(code_text)
+
+        # Re-verify tests still pass after the routed fix, before reviewing again
+        tests_passed, test_output = run_tests()
+        if not tests_passed:
+            print(f"\n⚠️ Fix broke tests:\n{test_output[-500:]}")
+            sys.exit(1)
+
+if __name__ == "__main__":
+    task = sys.argv[1]
+    main(task)
