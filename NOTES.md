@@ -444,3 +444,21 @@ description more explicitly into the fix prompt with an instruction to
 preserve stated requirements (addresses bug 2, though may not fully
 resolve genuine security/functionality conflicts — some tasks may have
 requirements that are fundamentally in tension with being secure).
+
+## Phase 4: Bug 2 reproduces — confirmed pattern, not a fluke
+
+### Second run
+Same security probe, independent run. Fix produced a different
+implementation (`Path.relative_to()` + `PermissionError`, vs. the first
+run's `os.path.commonpath()` + `ValueError`), but the identical underlying
+mechanism: containment scoped to the process's cwd via
+`os.environ.get(..., os.getcwd())` / `Path(...).resolve()`.
+
+### Takeaway
+Two independent runs, two different code shapes, same root cause. This is
+a reproducible pattern in how the security-specific fix prompt resolves
+"add a trust boundary" when the task's own requirement is "allow any
+path" — it reliably defaults to a cwd-scoped sandbox that satisfies the
+reviewer's finding while silently breaking the stated feature. Not
+prompt-writing noise; the fix prompt lacks any mechanism to detect that
+its recommended fix contradicts the task spec it was also given.
