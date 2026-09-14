@@ -462,3 +462,39 @@ path" — it reliably defaults to a cwd-scoped sandbox that satisfies the
 reviewer's finding while silently breaking the stated feature. Not
 prompt-writing noise; the fix prompt lacks any mechanism to detect that
 its recommended fix contradicts the task spec it was also given.
+
+## Phase 4: Isolation caveat — claude -p has implicit tool access
+
+### Finding
+`claude -p` calls in this repo are not sandboxed by default — the model
+can use tools (e.g. Read, git context) unless explicitly told not to.
+A security-fix response once quoted `NOTES.md`'s real Bug 2 section
+essentially verbatim, despite the fix prompt never mentioning it. Follow-up
+isolated it: a plain `-p` call correctly reported the latest git commit
+message via auto-injected git context (a standard Claude Code feature, not
+hidden file access), while an explicit "do not use tools or read files"
+call correctly said "I don't know" instead of guessing `NOTES.md`'s
+content. So every `call_claude()` in this repo has always had the
+*capability* to read cwd files unless the prompt discouraged it — a
+capability, not necessarily a behavior that occurred in any given run.
+
+### Implication for prior findings
+Phase 2's "judge never sees the code" finding was based on the judge's
+prompt not including the code — it hadn't verified the judge had no
+*means* to look. Re-verified directly against `judge_review()`: fed a
+fabricated "No issues found" security review while `solution.py` on disk
+held the genuinely vulnerable, unfixed `read_file_contents` (naive `open()`,
+no validation) — the same pattern this session's security reviewer catches
+reliably in essentially every other run. If the judge were checking the
+file, this is exactly the case where it would show. Across 3 runs: OK every
+time, no reasoning, no reference to the file's actual content. Phase 2's
+finding holds empirically at this call site — the judge trusts the review
+text as given, in practice, even though nothing architecturally prevents
+it from doing otherwise.
+
+### Design implication going forward
+Prompts intended to test or rely on isolation should explicitly state "do
+not use tools" / "do not read any files" to make the isolation an enforced
+constraint rather than an incidental one. Phase 2's original entry is left
+unedited as a historical snapshot — this note is the correction, not a
+rewrite.
