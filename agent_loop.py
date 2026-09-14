@@ -140,11 +140,11 @@ def main(task_description: str):
         "plain text only, no markdown, no explanations."
     )
     try:
-        tests_text = clean_code(tests)
+        test_text = clean_code(tests)
     except NotPythonError as e:
         sys.exit(f"❌ claude refused to write test_solution.py: {e}")
     with open("test_solution.py", "w") as f:
-        f.write(tests_text)
+        f.write(test_text)
 
     # Step B: check-and-fix loop — this is where the agent makes its own decisions
     for attempt in range(1, MAX_ATTEMPTS + 1):

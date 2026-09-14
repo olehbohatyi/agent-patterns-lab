@@ -306,11 +306,11 @@ def main(task_description: str):
         "plain text only, no markdown, no explanations."
     )
     try:
-        tests_text = clean_code(tests)
+        test_text = clean_code(tests)
     except NotPythonError as e:
         sys.exit(f"❌ claude refused to write test_solution.py: {e}")
     with open("test_solution.py", "w") as f:
-        f.write(tests_text)
+        f.write(test_text)
 
     # Step B: check-and-fix loop — this is where the agent makes its own decisions
     tests_passed = False
@@ -348,7 +348,7 @@ def main(task_description: str):
     MAX_GRAPH_ATTEMPTS = 2
     for graph_attempt in range(1, MAX_GRAPH_ATTEMPTS + 1):
         print(f"\n=== Diamond review (graph attempt {graph_attempt}) ===")
-        review_results = run_diamond_review(code_text, tests_text)
+        review_results = run_diamond_review(code_text, test_text)
         for name, verdict in review_results.items():
             print(f"\n--- {name.upper()} ---\n{verdict[:300]}")
 
