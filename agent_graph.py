@@ -253,9 +253,13 @@ def route_fix(category_verdicts: dict, review_results: dict, task_description: s
             f"This code was flagged for a security issue:\n\n{review_results['security']}\n\n"
             f"Fix the function for this task: {task_description}, in the file solution.py. "
             "Specifically: add explicit input validation and enforce a trust boundary — "
-            "do not assume the caller provides safe input. Do not write, save, or create "
-            "any files yourself — respond with the fixed code of the whole function as "
-            "plain text only, no markdown, no explanations."
+            "do not assume the caller provides safe input. "
+            f"IMPORTANT: the task description above is a requirement, not just context — "
+            "if your fix would reject or restrict input that the task explicitly asks the "
+            "function to accept, that is not an acceptable fix. Find a way to address the "
+            "security finding without narrowing the function's stated behavior. "
+            "Do not write, save, or create any files yourself — respond with the fixed "
+            "code of the whole function as plain text only, no markdown, no explanations."
         )
 
     if category_verdicts.get("performance") == "BLOCK":
