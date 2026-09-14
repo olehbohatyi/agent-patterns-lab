@@ -19,20 +19,37 @@ whether the self-correction loop actually improves reliability (see [NOTES.md](N
 - [agent_diamond.py](agent_diamond.py) — builds on the loop agent, but once tests pass it fans out to
   4 independent reviewers (security, performance, style, test coverage) run in parallel. Each review
   is then judged in isolation by a separate verifier that sees only that one review and answers
-  BLOCK/OK against an explicit severity rubric; Python — not the model — computes the final verdict,
-  failing if any category blocks.
+  BLOCK/OK against an explicit severity rubric — including a lane check, so an honest out-of-lane
+  mention ("this is a correctness bug, not a security issue") doesn't block the wrong category; Python
+  — not the model — computes the final verdict, failing if any category blocks.
 
   Calibration probes in [NOTES.md](NOTES.md) drove that design. The first version asked one verifier
   for a single holistic PASS/FAIL, and it waved through both a real path-traversal flaw and a
   hand-planted O(n²) regression, on the grounds that neither was a *demonstrated* failure in current
   usage — it was effectively punishing reviewers for honest hedging ("if untrusted input...", "at
-  scale..."). Per-category isolation alone didn't fix that; an explicit rubric forbidding hedges as
-  grounds for dismissal did, and both probes now correctly fail.
+  scale..."). An explicit rubric forbidding hedges as grounds for dismissal fixed that, but the lane
+  check that followed traded some of that robustness away: when the category that actually owns a
+  defect stays silent in a given run while everyone else correctly disclaims it as out-of-lane, nothing
+  blocks. A known limit remains regardless: the verifier reads only review text, never the code, so the
+  pattern is only as reliable as the honesty and completeness of its reviewers.
 
-  A known limit remains: the verifier reads only review text, never the code. A fabricated "no issues
-  found" review passes cleanly, so the pattern is only as reliable as the honesty of its reviewers.
+  Model tiering (sonnet vs. haiku reviewers) was also probed: routine findings tier down cleanly, but
+  haiku's habit of restating an obvious defect across every lens — while sonnet stays scoped — turned
+  out to make haiku *more* robust to the lane-check regression above, not less. See `NOTES.md` Phase 3.
 
-All three scripts take the task description as a command-line argument, and all overwrite
+- [agent_graph.py](agent_graph.py) — adds routing on top of the diamond pattern: which category
+  blocked decides which fix prompt runs next (a security-specific prompt, a performance-specific
+  prompt, or a generic fallback), and the loop re-reviews after each fix rather than reviewing once.
+  Routing itself is reliable — right category, right prompt, every time it's fired — but the two tested
+  routes fail in different places: the security route's fix quality is the weak point (across several
+  runs it either refused outright or "fixed" the flaw by adding a hardcoded directory sandbox that
+  silently breaks the task's own "accept any path" requirement), while the performance route's fixes
+  were clean every time they fired, but the *reviewer* itself missed the O(n²) defect entirely on 1 of
+  3 runs, so the route never got a chance to trigger. Also surfaced along the way: `claude -p` isn't a
+  sandboxed blank slate — it can read files in the working directory unless told not to (verified
+  directly), though the diamond judge doesn't do so in practice. See `NOTES.md` Phase 4.
+
+All four scripts take the task description as a command-line argument, and all overwrite
 `solution.py` and `test_solution.py` on each run — those two files are generated output, not
 hand-authored source, and are gitignored.
 
@@ -67,4 +84,10 @@ Run the loop agent plus diamond review (4 parallel reviewers + aggregator) on a 
 
 ```bash
 python agent_diamond.py "reverse a string"
+```
+
+Run the diamond agent plus category-routed fixes (re-reviews after each fix, up to 2 rounds):
+
+```bash
+python agent_graph.py "reverse a string"
 ```
