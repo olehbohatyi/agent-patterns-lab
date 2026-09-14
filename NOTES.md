@@ -498,3 +498,48 @@ not use tools" / "do not read any files" to make the isolation an enforced
 constraint rather than an incidental one. Phase 2's original entry is left
 unedited as a historical snapshot — this note is the correction, not a
 rewrite.
+
+## Phase 4: Performance route — comparison with security route
+
+### Method note
+Unlike the security probe, code-gen reliably writes the optimal O(n)
+set-based dedupe unprompted (matching Phase 2's original finding), so the
+performance route never fires through a natural `main()` run. Tested by
+seeding the naive O(n²) code directly and driving the graph loop's body
+(review → route → fix → re-test) from that entry point, rather than from
+`main()`'s Step A. This means performance's results aren't from an
+identical pipeline entry to security's — worth keeping in mind when
+comparing failure rates across the two routes.
+
+### Result (3 seeded runs)
+| Run | Performance reviewer | Outcome |
+|---|---|---|
+| 1 | BLOCK | Routed → correct set-based fix → tests pass → converged PASS |
+| 2 | BLOCK | Routed → identical correct fix → tests pass → converged PASS |
+| 3 | OK (miss) | Converged PASS immediately on the still-naive O(n²) code |
+
+Order preservation was correct in both successful fixes (`[3,1,3,2,1] →
+[3,1,2]`) — no analog to security's systematic cwd-sandbox error.
+
+### Cross-route comparison
+| Axis | Security | Performance |
+|---|---|---|
+| Routing mechanism | correct every time it fired | correct every time it fired |
+| Fix quality when it fires | broken or refused, 4/4 | clean and correct, 2/2 |
+| Reviewer recall | caught its defect reliably every run | missed the defect 1/3 runs |
+
+Routing itself (right category → right prompt → right fix path) is solid
+for both categories. The two routes fail in different places: security's
+weak point is fix quality (the model can't reconcile the review finding
+with the task's stated requirement); performance's weak point is reviewer
+recall (the review step itself sometimes doesn't notice the O(n²)
+pattern, so the graph never gets a chance to route at all).
+
+### Takeaway
+The 1/3 performance miss reproduces Phase 2's architectural ceiling
+finding — the system is only as good as what its reviewers report — but
+now demonstrated at the review-generation step rather than the judge
+step, and for a different category than the original (security) case.
+Two independent instances of the same ceiling, in different parts of the
+pipeline, is stronger evidence that this is a structural property of the
+fan-out design, not a one-off quirk of a single prompt.
