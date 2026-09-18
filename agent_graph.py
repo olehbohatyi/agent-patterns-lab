@@ -248,7 +248,11 @@ def route_fix(category_verdicts: dict, review_results: dict, task_description: s
     everything else (style, test_coverage, correctness) falls back to a generic
     fix path that just forwards the blocked reviews."""
 
+    blocked = [name for name, v in category_verdicts.items() if v == "BLOCK"]
+    print(f"\n[route_fix] Categories blocked this attempt: {blocked}")
+
     if category_verdicts.get("security") == "BLOCK":
+        print("[route_fix] Routing to: security-specific fix (other blocks, if any, are not addressed this attempt)")
         return (
             f"This code was flagged for a security issue:\n\n{review_results['security']}\n\n"
             f"Fix the function for this task: {task_description}, in the file solution.py. "
@@ -263,6 +267,7 @@ def route_fix(category_verdicts: dict, review_results: dict, task_description: s
         )
 
     if category_verdicts.get("performance") == "BLOCK":
+        print("[route_fix] Routing to: performance-specific fix (other blocks, if any, are not addressed this attempt)")
         return (
             f"This code was flagged for a performance issue:\n\n{review_results['performance']}\n\n"
             f"Fix the function for this task: {task_description}, in the file solution.py. "
@@ -272,8 +277,8 @@ def route_fix(category_verdicts: dict, review_results: dict, task_description: s
             "whole function as plain text only, no markdown, no explanations."
         )
 
+    print("[route_fix] Routing to: generic fix (style / test_coverage / correctness)")
     # Fallback: style / test_coverage / correctness — generic fix path
-    blocked = [name for name, v in category_verdicts.items() if v == "BLOCK"]
     blocked_reviews = "\n\n".join(f"[{name}]\n{review_results[name]}" for name in blocked)
     return (
         f"This code was flagged by review:\n\n{blocked_reviews}\n\n"
@@ -364,28 +369,28 @@ def main(task_description: str):
             print("\n❌ Graph attempt limit exhausted.")
             sys.exit(1)
 
-        # Route: pick the fix path based on which category blocked
-        route_taken = (
-            "security" if category_verdicts.get("security") == "BLOCK"
-            else "performance" if category_verdicts.get("performance") == "BLOCK"
-            else "generic"
-        )
-        print(f"\n=== Routing to: {route_taken} fix ===")
-
         fix_prompt = route_fix(category_verdicts, review_results, task_description)
         fixed_code = call_claude(fix_prompt)
         try:
-            code_text = clean_code(fixed_code)
+            candidate_code = clean_code(fixed_code)
         except NotPythonError as e:
-            sys.exit(f"❌ claude refused to fix solution.py: {e}")
+            print(f"\n⚠️ Fix produced invalid Python, treating as a failed attempt: {e}")
+            continue  # solution.py unchanged, next attempt re-reviews the same code
+
         with open("solution.py", "w") as f:
-            f.write(code_text)
+            f.write(candidate_code)
 
         # Re-verify tests still pass after the routed fix, before reviewing again
         tests_passed, test_output = run_tests()
         if not tests_passed:
-            print(f"\n⚠️ Fix broke tests:\n{test_output[-500:]}")
-            sys.exit(1)
+            print(f"\n⚠️ Fix broke tests, treating as a failed attempt:\n{test_output[-500:]}")
+            # Revert to the last known-good code so the next attempt starts clean,
+            # rather than compounding a broken fix with another fix on top of it.
+            with open("solution.py", "w") as f:
+                f.write(code_text)
+            continue
+
+        code_text = candidate_code
 
 if __name__ == "__main__":
     task = sys.argv[1]
