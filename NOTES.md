@@ -590,3 +590,48 @@ Two separate structural gaps, both real, distinct from each other:
    exits, rather than counting as a failed attempt and looping back. This
    is the one worth fixing directly — it's a control-flow gap, not a
    fundamental tradeoff.
+
+## Phase 4: Revert path — verified by inspection, and a cleaner Bug 2 case
+
+### Revert path verification
+Two follow-up runs on the security-only probe, neither triggered a
+test-breaking fix (see outcomes below) — so the revert branch itself
+didn't execute live. Verified instead by code inspection: `code_text` is
+only ever reassigned to `candidate_code` after `tests_passed` is
+confirmed True. At the point where `not tests_passed` is checked,
+`code_text` still unconditionally holds the last known-good value, so the
+revert write (`f.write(code_text)`) cannot leak a broken fix forward.
+This is a structural guarantee from the control flow, not something that
+needs a lucky run to confirm — treated as verified.
+
+### Two more runs, two more distinct outcomes
+- Run A: security reviewer missed the defect entirely (no block at all) —
+  same miss class as Phase 2's original Probe 1. Nothing to route or fix.
+- Run B: security blocked, fix applied — this time well-behaved: added
+  only type/null-byte/empty-string validation, no cwd-sandbox, genuinely
+  respecting "accept any path." Tests stayed green (confirmed no revert
+  needed). Attempt 2 still blocked security anyway: the judge correctly
+  identified that the core arbitrary-path-read capability is untouched,
+  and the task's own requirement *is* the vulnerability — no amount of
+  input-shape validation closes it. Graph exhausted its budget cleanly,
+  no crash.
+
+### Full tally across the session's security-route runs (7 total)
+| Outcome | Count |
+|---|---|
+| cwd-sandbox pattern, breaks tests | 2 |
+| outright refusal to fix | 1 |
+| isfile()-collapsing, breaks tests | 1 |
+| well-behaved fix, tests pass, still insufficient | 1 |
+| reviewer misses the defect, nothing to fix | 2 |
+
+### Takeaway
+Run B is the cleanest demonstration yet of Bug 2: this isn't fixable by
+better prompting the model into more careful validation, because the
+model in Run B *was* careful, respected the spec, broke nothing — and
+still can't win, because "accept any path" and "prevent arbitrary file
+access" are the same requirement stated as two different constraints.
+No fix prompt closes that gap; the task itself needs to change (e.g. an
+explicit allowlist or scoping parameter) for both to be satisfiable at
+once. This is now the strongest version of "architectural conflict, not
+a prompting problem" collected this session.
