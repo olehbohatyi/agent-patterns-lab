@@ -635,3 +635,40 @@ No fix prompt closes that gap; the task itself needs to change (e.g. an
 explicit allowlist or scoping parameter) for both to be satisfiable at
 once. This is now the strongest version of "architectural conflict, not
 a prompting problem" collected this session.
+
+## Phase 4: Rubric gap — performance BLOCK criteria don't cover memory/space complexity
+
+### Setup
+Task: line-count function required to work efficiently on multi-gigabyte
+files. Seeded a naive `content = f.read()` version — O(n) time, O(n)
+memory — specifically to trigger a memory-complexity defect distinct from
+the earlier O(n²) time-complexity dedupe trap.
+
+### Result
+Performance judge returned OK. The performance reviewer's own text
+confirmed the code is "O(n) in file size, no redundant reads, no per-line
+Python loop overhead" — accurate, and also not the actual defect. The
+real problem is O(n) memory vs. O(buffer size) memory, which is exactly
+what makes an in-memory read unsuitable for the file sizes the task
+explicitly requires.
+
+### Root cause
+The judge rubric's BLOCK criterion for performance is scoped to
+"algorithmic complexity defect (e.g. O(n²) or worse)" — time complexity
+only, no clause addressing space/memory complexity. Loading an entire
+multi-gigabyte file into memory is O(n) in time (technically fine by the
+letter of the rubric) while being the literal violation of the task's
+own stated constraint. This is not reviewer-recall noise like the dedupe
+miss (Phase 3) — the review accurately described the code; the rubric
+simply never asked the judge to treat memory footprint as blocking.
+
+### Takeaway
+A third distinct way the fan-out design's ceiling has now shown up:
+Phase 2 — judge blind to code, sees only review text.
+Phase 3 — reviewer sometimes fails to mention a real defect (recall).
+Phase 4 — rubric's own defect taxonomy has a category it never defined
+(memory complexity), so even a fully accurate review can't trigger BLOCK.
+Each is a different mechanism producing the same shape of failure: a real
+defect ships clean. Extending the rubric to include space complexity
+explicitly is a cheap, targeted fix — deferred here in favor of finishing
+the multi-target test that was in progress.
