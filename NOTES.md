@@ -543,3 +543,50 @@ step, and for a different category than the original (security) case.
 Two independent instances of the same ceiling, in different parts of the
 pipeline, is stronger evidence that this is a structural property of the
 fan-out design, not a one-off quirk of a single prompt.
+
+## Phase 4: Two-category-block test — routing drops findings, budget never engaged
+
+### Setup
+Task designed to trip two categories at once: path-traversal read
+function (security) with PascalCase/camelCase naming (style).
+
+### Q1 — do categories block simultaneously?
+Yes, cleanly: `security` and `style` both blocked in the same review
+pass, each correctly scoped to its own concern — no lens-distraction
+(unlike the earlier haiku cross-contamination finding).
+
+### Q2 — does priority routing drop the second finding?
+Yes, confirmed. `route_fix()`'s if/elif chain matched `security` first;
+the style finding (naming convention) was never included in the fix
+prompt and was silently dropped for this attempt.
+
+### Q3 — does MAX_GRAPH_ATTEMPTS give enough budget to eventually resolve both?
+Never got to find out — the security fix broke tests
+(`FileNotFoundError` instead of expected `IsADirectoryError`, because the
+fix's `os.path.isfile()` check collapses "doesn't exist" and "is a
+directory" into one case). On a post-fix test failure, `main()` calls
+`sys.exit(1)` immediately — there is no code path that treats "the fix
+broke something" as a retryable graph attempt. `MAX_GRAPH_ATTEMPTS` only
+governs the review→route→fix cycle when fixes keep tests green; a fix
+that breaks tests exits the whole run regardless of remaining budget.
+
+### Third failure mode for the security route
+This is a third distinct way the security fix has broken things, same
+root cause as Bug 2: the fix prompt has no visibility into the test
+suite it needs to keep passing.
+- Run 1: cwd-sandbox → `ValueError` (rejects legitimate paths)
+- Run 2: cwd-sandbox → `PermissionError` (same root cause, different code)
+- Run 3: `isfile()` check → `FileNotFoundError` (breaks a directory-error
+  contract the fix never knew existed)
+All three: the fix satisfies the security finding while breaking a
+constraint (task spec, or test contract) it wasn't given.
+
+### Takeaway
+Two separate structural gaps, both real, distinct from each other:
+1. Priority routing silently discards findings outside the winning
+   category — a design choice, not a bug, but currently undocumented and
+   unrecoverable within one graph attempt.
+2. A fix that breaks tests bypasses the retry budget entirely and hard-
+   exits, rather than counting as a failed attempt and looping back. This
+   is the one worth fixing directly — it's a control-flow gap, not a
+   fundamental tradeoff.
