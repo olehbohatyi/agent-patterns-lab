@@ -672,3 +672,50 @@ Each is a different mechanism producing the same shape of failure: a real
 defect ships clean. Extending the rubric to include space complexity
 explicitly is a cheap, targeted fix — deferred here in favor of finishing
 the multi-target test that was in progress.
+
+## Phase 4: Style rubric correctly excludes naming — original two-category test's premise was flawed
+
+### What was assumed
+The original two-category-block test (security + style, PascalCase/
+camelCase naming) was picked on the assumption that a PEP8 naming
+violation would reliably trigger a style BLOCK, since it's a mechanical,
+unambiguous rule violation.
+
+### What actually happened on reruns
+Three follow-up attempts at the same or a closely related pairing
+(security+style rerun, security+performance, hand-planted security+style)
+all returned `style: OK` on identical or equivalent naming violations.
+
+### Why this isn't reviewer/judge nondeterminism
+`judge_review()`'s own rubric explicitly lists BLOCK criteria as: security
+flaw, algorithmic complexity defect, or correctness bug — and explicitly
+states style nitpicks are OK. A naming-convention violation doesn't match
+any BLOCK category by the rubric's own text; the code still runs
+correctly, it's just non-idiomatically named. `style: OK` is the rubric
+being applied correctly, not a miss.
+
+### Implication
+The original two-category-block test's `style: BLOCK` result (Phase 4,
+first entry) is now the anomaly, not these three OKs — no reasoning text
+survives from that run to explain it (terse `VERDICT: BLOCK`, no
+elaboration), so the cause is unresolved. That test's finding about
+priority-routing dropping a second finding (Q2) is unaffected — the
+routing-drop behavior was confirmed independently by direct code
+inspection of `route_fix()`'s if/elif structure, not solely by that one
+run's output — but the specific reproduction task should not be reused
+as-is for further multi-target testing, since style blocking on naming
+isn't a reliably reproducible premise.
+
+### For next attempt at multi-target
+Pair security with a hand-planted test_coverage correctness bug (same
+shape as Phase 2's `is_prime(1) == True` trap) instead of style — that
+category is confirmed BLOCK-eligible by the rubric's own text, removing
+the guesswork this round ran into. Not attempted yet; scoped as a fresh
+follow-up rather than a continuation of this thread.
+
+### Standing question, still open
+Multi-target `route_fix()` is implemented but has not yet been exercised
+against two simultaneously-blocking categories in a single graph attempt.
+The three original test questions (attention dilution between combined
+findings, spurious "note the tension" claims on non-conflicting findings,
+new cross-defect bugs from combining fixes) remain unanswered.
