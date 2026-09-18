@@ -242,50 +242,25 @@ def aggregate_verdict(results: dict) -> tuple[bool, str, dict]:
     return passed, f"{summary}\n\n{details}", verdicts
 
 def route_fix(category_verdicts: dict, review_results: dict, task_description: str) -> str:
-    """The graph's routing node: decides which fix path to take based on which
-    category blocked, instead of one generic 'here's the error, fix it' prompt for
-    every failure type. Security and performance get defect-specific guidance;
-    everything else (style, test_coverage, correctness) falls back to a generic
-    fix path that just forwards the blocked reviews."""
-
+    """Multi-target: builds one fix prompt covering every blocked category in this
+    attempt, rather than picking a single winner (by category priority) and
+    silently dropping the rest for the attempt — the gap found in NOTES.md's
+    two-category-block test."""
     blocked = [name for name, v in category_verdicts.items() if v == "BLOCK"]
     print(f"\n[route_fix] Categories blocked this attempt: {blocked}")
+    print(f"[route_fix] Routing to: multi-target fix covering {blocked}")
 
-    if category_verdicts.get("security") == "BLOCK":
-        print("[route_fix] Routing to: security-specific fix (other blocks, if any, are not addressed this attempt)")
-        return (
-            f"This code was flagged for a security issue:\n\n{review_results['security']}\n\n"
-            f"Fix the function for this task: {task_description}, in the file solution.py. "
-            "Specifically: add explicit input validation and enforce a trust boundary — "
-            "do not assume the caller provides safe input. "
-            f"IMPORTANT: the task description above is a requirement, not just context — "
-            "if your fix would reject or restrict input that the task explicitly asks the "
-            "function to accept, that is not an acceptable fix. Find a way to address the "
-            "security finding without narrowing the function's stated behavior. "
-            "Do not write, save, or create any files yourself — respond with the fixed "
-            "code of the whole function as plain text only, no markdown, no explanations."
-        )
+    findings = "\n\n".join(f"[{name.upper()}]\n{review_results[name]}" for name in blocked)
 
-    if category_verdicts.get("performance") == "BLOCK":
-        print("[route_fix] Routing to: performance-specific fix (other blocks, if any, are not addressed this attempt)")
-        return (
-            f"This code was flagged for a performance issue:\n\n{review_results['performance']}\n\n"
-            f"Fix the function for this task: {task_description}, in the file solution.py. "
-            "Specifically: address the algorithmic complexity problem described above — "
-            "use an appropriate data structure to avoid the inefficiency. Do not write, "
-            "save, or create any files yourself — respond with the fixed code of the "
-            "whole function as plain text only, no markdown, no explanations."
-        )
-
-    print("[route_fix] Routing to: generic fix (style / test_coverage / correctness)")
-    # Fallback: style / test_coverage / correctness — generic fix path
-    blocked_reviews = "\n\n".join(f"[{name}]\n{review_results[name]}" for name in blocked)
     return (
-        f"This code was flagged by review:\n\n{blocked_reviews}\n\n"
+        f"This code was flagged by {len(blocked)} independent review(s):\n\n{findings}\n\n"
         f"Fix the function for this task: {task_description}, in the file solution.py, "
-        "to address the issues above. Do not write, save, or create any files yourself — "
-        "respond with the fixed code of the whole function as plain text only, no "
-        "markdown, no explanations."
+        "so that ALL of the issues above are addressed simultaneously. If any two "
+        "findings appear to conflict, resolve them as best you can and note the "
+        "tension in a comment, rather than fixing one at the expense of leaving the "
+        "other unresolved. Do not write, save, or create any files yourself — respond "
+        "with the fixed code of the whole function as plain text only, no markdown, "
+        "no explanations."
     )
 
 def main(task_description: str):
