@@ -833,3 +833,46 @@ changes an error contract it isn't told to preserve. That points to an
 instruction-level fix (explicit "don't change behavior the existing tests
 assert" / minimal-change constraint) rather than a context-level one.
 Next test, with context held constant in both arms.
+
+## Phase 4: Directory-error regression is rarer than initial data suggested; constraint instruction reduces size, not frequency
+
+### Updated regression rate
+Across all four current-wording arms run on legitimate tests (the two
+context A/B arms plus the two constraint A/B arms), 2 of 20 fixes broke
+the directory-error test — roughly 10%. The earlier figure (3 of 7
+security-route runs) isn't a like-for-like comparison: it counted whole
+pipeline runs under the older fix-prompt wording, including refusals and
+reviewer misses, while 2/20 is per fix under the current prompt. The
+direction (less frequent than first documented) is supported; the size of
+the drop isn't precisely comparable.
+
+### Constraint instruction test
+Added "make the smallest change that addresses the findings; do not
+change any exception types or behavior the existing tests assert" to the
+context-aware fix prompt, context held constant in both arms (6 fixes
+each).
+
+| arm | fully passing | lines (orig 3) |
+|---|---|---|
+| context only | 6/6 | mean 44 |
+| context + constraint | 6/6 | mean 31 |
+
+Both arms hit 0/6 failures — at a ~10% underlying rate, 6 fixes per arm
+cannot distinguish "the instruction helps" from "no failures this batch."
+Detecting a 10%-to-0% effect would need roughly 25–30 fixes per arm; not
+run, since the effect size in question doesn't justify that spend now.
+
+### What the data does support
+The constraint instruction reduced fix size by roughly 30% (mean 44 to
+31 lines), with only slight range overlap — suggestive at n=6, not
+established. It did not produce anything close to a minimal patch: every
+fix in both arms was still roughly 10x the 3-line original. The
+instruction appears to trim scope creep somewhat without preventing it,
+and its effect (if any) on the test-breaking regression specifically
+remains unmeasured.
+
+### Status
+Deprioritizing further work on this specific regression — at ~10%, it's
+no longer the dominant open problem. Multi-target `route_fix()` behavior
+against a genuine two-category block remains the standing open question
+from this session and is the next thing to test.
