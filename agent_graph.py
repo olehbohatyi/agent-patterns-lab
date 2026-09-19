@@ -261,7 +261,10 @@ def route_fix(category_verdicts: dict, review_results: dict, task_description: s
         "so that ALL of the issues above are addressed simultaneously. If any two "
         "findings appear to conflict, resolve them as best you can and note the "
         "tension in a comment, rather than fixing one at the expense of leaving the "
-        "other unresolved. Do not write, save, or create any files yourself — respond "
+        "other unresolved. Make the smallest change that addresses the findings. Keep "
+        "the function name. Do not change any exception type or any behavior that the "
+        "existing tests in test_solution.py assert — every existing test must still "
+        "pass. Do not write, save, or create any files yourself — respond "
         "with the fixed code of the whole function as plain text only, no markdown, "
         "no explanations."
     )
