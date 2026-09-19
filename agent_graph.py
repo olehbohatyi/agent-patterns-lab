@@ -241,7 +241,8 @@ def aggregate_verdict(results: dict) -> tuple[bool, str, dict]:
     )
     return passed, f"{summary}\n\n{details}", verdicts
 
-def route_fix(category_verdicts: dict, review_results: dict, task_description: str) -> str:
+def route_fix(category_verdicts: dict, review_results: dict, task_description: str,
+              code_text: str, test_text: str) -> str:
     """Multi-target: builds one fix prompt covering every blocked category in this
     attempt, rather than picking a single winner (by category priority) and
     silently dropping the rest for the attempt — the gap found in NOTES.md's
@@ -253,6 +254,8 @@ def route_fix(category_verdicts: dict, review_results: dict, task_description: s
     findings = "\n\n".join(f"[{name.upper()}]\n{review_results[name]}" for name in blocked)
 
     return (
+        f"Here is the current content of solution.py:\n\n{code_text}\n\n"
+        f"Here is the current content of test_solution.py:\n\n{test_text}\n\n"
         f"This code was flagged by {len(blocked)} independent review(s):\n\n{findings}\n\n"
         f"Fix the function for this task: {task_description}, in the file solution.py, "
         "so that ALL of the issues above are addressed simultaneously. If any two "
@@ -344,7 +347,7 @@ def main(task_description: str):
             print("\n❌ Graph attempt limit exhausted.")
             sys.exit(1)
 
-        fix_prompt = route_fix(category_verdicts, review_results, task_description)
+        fix_prompt = route_fix(category_verdicts, review_results, task_description, code_text, test_text)
         fixed_code = call_claude(fix_prompt)
         try:
             candidate_code = clean_code(fixed_code)
