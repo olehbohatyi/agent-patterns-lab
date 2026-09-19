@@ -774,3 +774,62 @@ requested it, and only security blocked again. Unlike `is_prime(1)`
 (objectively false, no spec basis), a task-mandated design choice gives
 the reviewer a legitimate reason to defer rather than block. Multi-target
 remains genuinely unexercised against a real two-category block.
+
+## Phase 4: route_fix context change — the claimed benefit doesn't hold
+
+### What was claimed (in discussion, never previously recorded here)
+`route_fix()` originally built its fix prompt from the review findings and
+the task text only — the model never saw the code it was fixing or the
+tests. Adding both to the prompt was tested first on a seeded `.strip()`
+task: 3/3 context-aware fixes passed the tests vs 0/3 controls. That result
+was flagged as confounded — the seeded test encoded a behavior that
+contradicts the task text ("returns the file's contents"), so the control,
+following the spec, dropped `.strip()` and "broke" a defective test, while
+the context arm deferred to the tests and preserved the defect. Recorded
+here because the follow-up shows it wasn't merely confounded: on a
+legitimate test suite the effect disappears.
+
+### Setup
+Fabricated-findings A/B, same methodology, on the original path-traversal
+probe with its real test suite (directory-error contract, tmp_path,
+absolute paths, `..` traversal, pathlib input) instead of the seeded task.
+One shared review, 4 fixes per condition.
+
+### Result
+| condition | fully passing | failure |
+|---|---|---|
+| control (no code/tests in prompt) | 3/4 | directory-error contract broken; `isfile()` in the fix |
+| with code + tests | 3/4 | same test broken; fix code not captured, no `isfile()` |
+
+Identical pass rate. The context arm was shown the exact
+`IsADirectoryError` test it went on to break — visibility into the test
+suite didn't prevent the regression.
+
+### Secondary observation: the cwd-sandbox pattern didn't reproduce
+Neither arm used `getcwd()` in 8 fixes. Fixes in the control arm used an
+opt-in base/allowed-root parameter in 4/4 (by regex match on
+`base_dir`/`allowed_root`-style names); the context arm in 1/4 by the same
+regex — other parameter names or approaches weren't captured. This
+suggests the cwd-sandbox pattern in Bug 2's original entries may have come
+from the older fix-prompt wording rather than being a stable property of
+the model's approach. Plausible, not confirmed.
+
+### Caveats
+n=4 per arm can't distinguish 25%-vs-25% from a small effect masked by
+noise. Line growth (12–33 lines from a 3-line original) was similar in
+both arms — also noise-level.
+
+### What survives
+Showing the fix step the code and tests remains a sensible default — a fix
+that can see what it's modifying is more principled — but it must not be
+described as a mitigation for test-breaking regressions; this data doesn't
+support that.
+
+### Revised hypothesis
+The directory-error regression looks intrinsic to "harden this function"
+fixes regardless of context: the model adds validation aimed at the
+security finding and a side effect (e.g. an "only regular files" check)
+changes an error contract it isn't told to preserve. That points to an
+instruction-level fix (explicit "don't change behavior the existing tests
+assert" / minimal-change constraint) rather than a context-level one.
+Next test, with context held constant in both arms.
