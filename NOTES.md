@@ -719,3 +719,58 @@ against two simultaneously-blocking categories in a single graph attempt.
 The three original test questions (attention dilution between combined
 findings, spurious "note the tension" claims on non-conflicting findings,
 new cross-defect bugs from combining fixes) remain unanswered.
+
+## Phase 4: Bug 2 correction — the code-level conflict IS resolvable; the judge's bar is not fixed
+
+### Correction to prior claim
+Earlier entries (multiple prior runs) concluded "no fix prompt closes
+this gap" — that accepting any path and preventing arbitrary access are
+the same requirement stated as two constraints, unresolvable by design.
+This run contradicts that specific claim.
+
+### What happened
+Seeded the same open-any-path defect. The fix this run recognized the
+conflict explicitly — it wrote `# TENSION: the task says to accept any
+path... an unrestricted read is a path-traversal risk` — and resolved it
+architecturally: an opt-in `base_dir` parameter, unrestricted by default
+(honoring the stated spec), confined when the caller opts in. This is
+exactly the "explicit scoping parameter" that earlier entries described
+as the only way out, previously assumed to require changing the task,
+not something a fix prompt could arrive at on its own.
+
+### But the judge still blocked it
+Objection: an unrestricted default still means no trust boundary exists
+unless the caller opts in. On top of that, the judge raised two findings
+that weren't present in attempt 1's review — a TOCTOU race and a missing
+size limit. Neither was part of the original security finding being
+fixed; both appear to be new findings prompted by reviewing the new code.
+
+### Revised understanding
+The conflict between "accept any path" and "prevent arbitrary access" is
+resolvable at the code level — a well-designed opt-in boundary can honor
+both. What isn't resolved is the judge's standard for "acceptable":
+it isn't a fixed bar the fix can clear, it's regenerated per review pass,
+so a fix that closes the originally-cited gap opens the door to whatever
+else a fresh review pass can find wrong with the new code. This is a
+different problem than an unresolvable spec conflict — it's closer to an
+unbounded target: there may be no fix that survives review, not because
+no good fix exists, but because each fix invites new scrutiny that the
+previous one hadn't drawn.
+
+### Secondary finding: scope creep in the fix
+The task spec mandated "missing file returns ''". The fix silently
+extended that beyond the spec to also cover directories and device files
+("non-regular files also return ''"), broadening the set of errors
+swallowed into an empty string. No test caught this, no reviewer flagged
+it as a defect. A fix aimed at one finding introduced unreviewed
+behavior beyond its stated scope, undetected by any part of the pipeline.
+
+### Multi-target status, still unresolved
+Attempted a security + test_coverage pairing to test multi-target, using
+a task where "missing file returns empty string" was spec-mandated by
+the task text itself. This didn't work as intended: the test_coverage
+reviewer read the behavior as debatable/intended, since the task itself
+requested it, and only security blocked again. Unlike `is_prime(1)`
+(objectively false, no spec basis), a task-mandated design choice gives
+the reviewer a legitimate reason to defer rather than block. Multi-target
+remains genuinely unexercised against a real two-category block.
