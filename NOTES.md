@@ -876,3 +876,72 @@ Deprioritizing further work on this specific regression — at ~10%, it's
 no longer the dominant open problem. Multi-target `route_fix()` behavior
 against a genuine two-category block remains the standing open question
 from this session and is the next thing to test.
+
+## Phase 4: Multi-target exercised — no dilution, but the security fix is often declined, independent of multi-target
+
+### Setup
+Fabricated `{security: BLOCK, test_coverage: BLOCK}` findings through
+`route_fix()` (now with the smallest-change constraint baked in), 6 fixes
+per arm, against a security-only baseline using the same prompt. Seeded
+code truncated reads at 1 MiB (correctness finding); the security finding
+was the usual unrestricted-path read. An AST-based check tested whether a
+security change is present in the code — an earlier regex-based pass
+matched words inside comments and overstated the rate (4/6 became 2/6 on
+correction).
+
+### Results
+| | multi-target | security-only baseline |
+|---|---|---|
+| existing tests pass | 6/6 | 6/6 |
+| truncation fixed (2 MB and 12 MB read in full) | 6/6 | n/a (not asked) |
+| security change present (AST) | 2/6 | 2/6 |
+| tension comment present | 6/6 | 5/6 |
+| lines (orig 3) | 7–17 | 7–15 |
+
+Measurement limits: the AST check counts any extra parameter or
+path-normalizing call as a "security change." In the multi-target arm all
+six fixes were read: two added an opt-in `allowed_root` (the real fix),
+three declined with a comment ("callers must validate untrusted input"),
+and one declined but added an unrelated `fstat` regular-file check. The
+security-only arm's code was not inspected, so its 2/6 may include changes
+unrelated to path traversal (e.g. a size-cap parameter).
+
+### The three original questions
+1. **Attention dilution**: none detected. The correctness fix landed 6/6;
+   the security-change rate matched the single-target baseline (2/6 vs
+   2/6), so combining findings didn't cost the correctness fix anything
+   and didn't make the security handling worse than it already was alone.
+2. **Spurious tension claims**: no. All 6 tension notes described the real
+   security-vs-spec conflict; none invented a conflict between the two
+   findings. But 4/6 multi-target fixes declined to change the code for the
+   security finding, resolving it by comment. The two `allowed_root` fixes
+   show this isn't forced — an opt-in boundary honoring the spec was
+   available. The clause ("note the tension in a comment") plausibly gives
+   the model permission to decline; not tested, since both arms carried
+   it.
+3. **Cross-defect bugs**: none affecting the test suite. One fix added an
+   `fstat` regular-file check that raises `IsADirectoryError` for
+   FIFOs/devices — a misleading error type, uncovered by any test.
+
+### What this shows
+Multi-target introduces no measurable dilution at this n. The more
+consequential observation is that the security finding is frequently not
+acted on at all (4/6 verified in the multi-target arm; the security-only
+arm's rate looks similar by AST but is unverified), which points at the
+fix step's handling of a finding that conflicts with the task spec — the
+Bug 2 pattern — rather than at combining findings.
+
+### Fix size vs. review breadth (inference)
+Fixes here were 7–17 lines, versus 26–60 in earlier runs. The earlier real
+reviews contained multiple sub-findings (size caps, error leakage,
+encoding) and fixes implemented them. This suggests fix size follows
+review breadth more than the model's own scope creep; it wasn't tested
+directly (finding breadth and the constraint instruction changed
+together across those runs).
+
+### Caveats
+Findings were fabricated, narrow, and non-conflicting; n=6. Open: whether
+two findings with genuinely conflicting remedies (e.g. "cap read size" vs.
+"don't truncate") behave differently, and how often two categories block
+simultaneously under natural (non-fabricated) review — still unmeasured
+across this session's attempts.
