@@ -1091,3 +1091,83 @@ Drop the /dev/zero example so the security finding addresses only "a very
 large file can exhaust memory," leaving no separable sub-case. This tests
 whether comment-only decline returns, whether the model picks a side
 outright, or whether some other narrowing move appears.
+
+## Phase 4: No-escape-hatch variant — the model picks a side, transparently, once narrowing isn't available
+
+### Setup
+Same hard correctness finding ("any size, no cap acceptable"), but the
+security finding now covers only large regular files — the "(e.g.
+/dev/zero)" example removed, closing off the narrowing move from the
+previous run. n=6.
+
+### Result
+| | result |
+|---|---|
+| 8 tests pass | 6/6 |
+| cap enforced by default | 0/6 |
+| 300MB regular-file probe | returned in full, 6/6 |
+| explicit decline, code unchanged from seed | 4/6 |
+| opt-in cap, default unbounded | 2/6 |
+| narrowing to a device/FIFO sub-case | 0/6 |
+
+### The escape hatch was load-bearing
+With no separable sub-case to narrow to, narrowing didn't occur — 0/6,
+versus 5/6 in the previous run. Instead 4/6 fixes explicitly declined, in
+their comments: "resolved in favor of the stated contract," "the risk is
+accepted as inherent to the 'read the whole file' contract," "memory
+exhaustion is the caller's responsibility." This reads as an honest
+trade-off decision rather than an evasion. The other 2/6 made the cap
+opt-in with a default of unbounded, so no fix enforced any limit by
+default.
+
+### The four-condition series
+| condition | security text | correctness finding | cap enforced by default | how the remedy landed |
+|---|---|---|---|---|
+| security-only control | with /dev/zero | none (50MB test in suite) | 6/6 | 100MiB x6 |
+| soft pairing | with /dev/zero | "50MB must work" | 6/6 | 100, 100, 256, 256, 256, 1024 MiB (4/6 above 100) |
+| hard, escape hatch present | with /dev/zero | "any size, no cap" | 0/6 | 5 narrowed to S_ISREG, 1 opt-in |
+| hard, no escape hatch | without | "any size, no cap" | 0/6 | 4 explicit decline, 2 opt-in |
+
+As the competing correctness requirement hardened, the security remedy
+weakened: full cap, then higher caps, then no default cap. The ordering is
+consistent across the series, but it's closer to a step than a curve
+(cap-by-default goes 6/6, 6/6, 0/6, 0/6), and the two statistical
+comparisons are small: soft pairing vs. control is 4/6 vs. 0/6 above 100MiB
+(p about 0.03 one-sided, about 0.06 two-sided at n=6). What's established
+is that the security remedy was the one that gave way in this setup;
+whether that reflects anything about security as a category is
+confounded (next section).
+
+### Confound: the setup favors correctness by construction
+The task text ("returns the file's contents"), the existing test suite,
+the "every existing test must pass" constraint, and the correctness
+finding all point one way; only the security finding argues the other. Four
+sources against one may be why security yields, rather than anything
+specific to security. Untested: whether the pattern reverses when the task
+text and test suite favor the security side.
+
+### Also differs across conditions
+The last row changed the security text as well as the correctness finding,
+so it differs from the control in two ways. The security-only control uses
+results from an earlier run, not this batch.
+
+### Decline-by-comment vs. decline-by-narrowing: degree, not kind
+An earlier multi-target fix (path-traversal + truncation run, fix #4) also
+framed a non-fix as resolved ("resolved by documenting that callers must
+validate untrusted paths"). It's the same shape as this run's explicit
+declines and, at one remove, the /dev/zero narrowing: satisfy one finding,
+write the other off as accepted risk. The distinction between the two
+patterns is how much cover a side-mechanism provides, not a different
+move underneath.
+
+### A design gap this exposes
+Nothing in the pipeline distinguishes "resolved" from "declined and
+labeled as resolved," or surfaces "this pair needs a human decision."
+Presumably the judge would re-BLOCK security on the next review (untested)
+and the graph loop would spend its retry budget on a pair with no
+code-level resolution. Not fixed here; scoped as a follow-up if pursued.
+
+### Caveats
+/dev/zero's runtime behavior was never directly tested in this series
+(memory exhaustion was assumed, not measured). Findings are fabricated;
+n=6 per condition.
