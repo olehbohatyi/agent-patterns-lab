@@ -945,3 +945,76 @@ two findings with genuinely conflicting remedies (e.g. "cap read size" vs.
 "don't truncate") behave differently, and how often two categories block
 simultaneously under natural (non-fabricated) review — still unmeasured
 across this session's attempts.
+
+## Phase 4: Conflicting-remedies pairing — resolved via threshold, not a genuine test of irreconcilable findings
+
+### Setup
+Attempted pairing: security ("cap read size, unbounded reads risk
+resource exhaustion") vs. test_coverage ("must return complete contents,
+byte-for-byte, for a 50MB file"). The seeded suite actually contains
+`test_returns_full_contents_for_large_file`, so the fabricated finding
+matches a real test. A security-only arm was added as a control (same
+prompt, same tests, no explicit correctness finding) to isolate what the
+finding itself changes versus what the test suite alone already pressures.
+n=6 per arm; all 12 fixes read directly rather than AST-flag-only.
+
+### The premise didn't hold
+A cap set above 50MB (all fixes: 100MiB–1GiB) satisfies the existing test
+while still bounding memory. This is a quantitative tradeoff with a
+satisfying middle ground, not two findings pulling toward mutually
+exclusive outcomes. "No code-level move satisfies both" was wrong for this
+pairing, which undercuts the run as a test of genuine tension: it's
+evidence that multi-target doesn't misbehave on a quantitative tradeoff,
+and not yet evidence about what happens with no quantitative escape valve.
+
+### Results
+| | multi-target | security-only |
+|---|---|---|
+| tests pass (8/8) | 6/6 | 6/6 |
+| cap present in code | 6/6 | 6/6 |
+| declined by comment | 0/6 | 0/6 |
+| cap size chosen (MiB) | 100, 100, 256, 256, 256, 1024 | 100 x6 |
+| 300MB sparse-file probe | 5 raise, 1 returns full (the 1GiB cap) | 6 raise |
+| comment names the two findings' tension | 6/6 | n/a (one finding) |
+| comment cites the 50MB test | — | 3/6 (other tension notes: accept-any-path spec) |
+
+The multi-target notes are the first documented inter-finding tension
+notes; earlier ones were all finding-vs-spec.
+
+### Zero declines, against 4/6 in the path-traversal pairing
+No fix declined to implement either finding. Hypothesis: a quantitative
+remedy (choose a threshold) allows a compromise that a binary one (accept
+any path vs. restrict paths) doesn't. Confounded — the two pairings also
+differ in the security finding itself (a size cap never conflicted with the
+accept-any-path spec) — so recorded as a hypothesis, not a result.
+
+### A possible effect of the correctness finding on the security remedy
+Security-only chose 100MiB in 6/6. With the correctness finding present,
+4/6 chose 256MiB–1GiB — weaker DoS protection. Suggestive at n=6, not
+established. If real: the finding pushed the cap higher than the stated
+test needed (100MiB already satisfied it in every case), at the cost of
+security strength; the larger cap does serve the finding's "complete
+contents" principle for files between 100MiB and the cap, but nothing in
+the test suite asked for that.
+
+### Defect found by reading code, not by any test
+`f.read(N)` in text mode reads *characters*, not bytes. Five of the 12
+fixes name the cap in bytes (`MAX_READ_BYTES`, `max_bytes`) while enforcing
+a character count; for multi-byte content, memory use can run up to about
+4x the nominal cap. No test caught it, and no review pass was run against
+these fixes, so whether a reviewer would have flagged it is unknown. Same
+discovery shape as the `isfile()` directory-error regression and the
+memory-complexity rubric gap: found by inspection of generated code rather
+than surfaced by the loop.
+
+### Caveats
+Findings are fabricated and single-issue. A real reviewer might object to
+the 1GiB cap or to the new `ValueError` past the cap (a behavior change
+against "returns the file's contents"). Multi-target's behavior under
+genuine irreconcilable tension remains untested.
+
+### Next: a genuinely hard variant
+Correctness finding restated as "must return complete contents for any
+size, no cap acceptable" — removes the threshold compromise. That is the
+actual test of whether decline-by-comment returns under real tension and
+of what multi-target does when no code-level move satisfies both findings.
