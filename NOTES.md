@@ -1171,3 +1171,97 @@ code-level resolution. Not fixed here; scoped as a follow-up if pursued.
 /dev/zero's runtime behavior was never directly tested in this series
 (memory exhaustion was assumed, not measured). Findings are fabricated;
 n=6 per condition.
+
+## Phase 4: Confound test — yielding tracked structural backing more than category
+
+### Setup
+Reversed the original pairing's polarity: the seeded code already enforces
+a 50MiB cap; the tests, the task text and the "existing tests must pass"
+constraint now back the cap (security), and the lone competing finding
+argues to remove or raise it (correctness). Same three conditions as the
+original series — control (competing finding only), soft, hard — with the
+varied finding now being the security one.
+
+Two design corrections were made before the numbers below:
+- The first seeded tests pinned the cap exactly (reject 50MiB+1, accept
+  exactly 50MiB), which forbids any change and would make the soft pairing
+  a foregone conclusion. Replaced with range tests (accept a 10MiB file,
+  reject a 200MiB sparse file), so any cap between them passes — the mirror
+  of the original 50MB test, which set only a lower bound.
+- The first task text ("must never read more than a fixed size limit") was
+  an explicit prohibition, stronger than the original's implicit backing
+  ("returns the file's contents"). It was softened to "safely handling
+  oversized files" (results for the explicit version below).
+
+### Explicit-prohibition control (first run, 6 fixes)
+Cap removed 0/6; raised 4/6; kept 50MiB 2/6; caller-override parameter 0/6.
+Two of the raised caps were 256MiB, which lets the 200MiB test file
+through and fails `test_rejects_file_far_over_size_limit` — while their own
+comments cite that test as the reason the cap can't be removed (one says
+files above 200MB "are still rejected"). The explicit prohibition
+suppressed the deferral move entirely, which is why it was softened.
+
+### Result (softened wording)
+Control: 6 requested, 5 valid (one rejected by `clean_code`, raw output not
+kept). Soft and hard: 8 requested each, all valid, first 6 analysed; one
+of soft's six is an empty output (see below), so 5 non-empty.
+
+| | control (5) | soft (6) | hard (6) |
+|---|---|---|---|
+| default cap | 100–150MiB (4), 1GiB (1, fails test) | 100–128MiB (3), 2GiB (2, fail test), empty (1) | 50MiB, 6/6 |
+| caller override parameter | 4/5 | 0/5 | 6/6 |
+| `None` disables the cap | 3/5 | 0/5 | 0/6 |
+| tension note names both findings | n/a | 5/5 | 6/6 |
+| tests pass | 4/5 | 3/6 | 6/6 |
+
+### The central result
+In the hard condition, the structurally-backed side kept its default
+position 6/6 in both orientations. Original: correctness was backed, and
+the fixes enforced no default cap (0/6 — security's remedy lost by
+default). Flipped: security is backed, and every fix kept the strict 50MiB
+default (6/6 — correctness's remedy lost by default). The lone opposing
+finding did not move the default in either direction. This bears directly
+on the earlier "security yields" reading: in this pairing the side that
+gave way was the one without task-text/test backing, whichever category it
+was. It does not extend to the control and soft conditions, where both
+orientations yielded partially (caps raised toward the competing finding).
+
+### The `None`-disables-cap escape narrowed; the override parameter did not
+Fully disabling the protection went 3/5, 0/5, 0/6 — any opposing security
+finding removed it. The override parameter itself was non-monotonic:
+4/5, 0/5, 6/6. In soft the finding's own wording ("raise it, but keep some
+bound") supplied a threshold to apply directly, so no deferral was needed.
+In hard no single value could satisfy both, so all six kept the strict
+default and moved relaxation behind an explicit `max_size`. Deferral
+appeared when no scalar compromise existed, not whenever tension was
+present — consistent with `allowed_root` and `max_bytes=None` earlier.
+
+### A residual, unresolved asymmetry
+In the flipped hard pairing the outnumbered side (correctness) got an
+opt-in override 6/6. In the original no-escape-hatch hard pairing the
+outnumbered side (security) got an opt-in cap 2/6, with 4/6 explicit
+declines. A secure-by-default norm is a plausible cause ("opt in to relax a
+protection" reads as acceptable design; "opt in to gain one" does not). Not
+established: n=6 per side, and the setups differ in more than orientation
+— seed code (unbounded vs. capped), the direction of the tests' bound, task
+wording, and how hard the constant finding is worded.
+
+### Conclusion on the earlier finding
+"Security yields under competing pressure" should be revised: in the hard
+pairing the side without structural backing yielded the default, and
+security was that side in the original series because every original
+setup anchored the task text and tests toward completeness. A residual
+category effect can't be ruled out (previous section), but the
+category-specific framing in earlier entries overstated what was shown.
+
+### Also observed (for follow-up)
+- `clean_code` accepted an empty response as valid Python (an empty string
+  parses and has no undefined names), so an empty fix would be written to
+  `solution.py`. The graph loop's test-and-revert gate contains it; the
+  other three agents would not.
+- Of 16 non-empty control/soft fixes, 5 set a cap above the 200MiB test
+  and failed it, and several comments contradict their own code (one says
+  "raise… to 2 GiB" and sets 100MB; one calls 100MB "the largest value that
+  still satisfies that test" when any value under 200MB does). Comments
+  asserting properties the code doesn't have are accumulating as their own
+  finding; to be written up separately.
