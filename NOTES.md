@@ -1330,3 +1330,52 @@ model not to assert unverified properties in comments changes the rate;
 whether the model can verify such claims itself when it has tool access
 (unknown in this setup). Counts here are instances found while reading
 fixes for other purposes, not a measured rate.
+
+## Phase 4: Escalation gap — scoped, deliberately not built
+
+### The gap
+Nothing in the graph loop distinguishes "this finding was resolved" from
+"this finding was declined and labeled as resolved," or surfaces "these
+findings can't both be satisfied; a person needs to decide." When the
+budget runs out the loop prints "Graph attempt limit exhausted" and exits
+1 — the same exit as any other failure, whether the cause was a stubborn
+bug, a broken fix, or an irreconcilable pair of findings.
+
+### How much it costs today
+Less than it sounds. With `MAX_GRAPH_ATTEMPTS = 2`, attempt 2 only
+re-reviews and then exits, so the loop performs at most one fix; there is
+no long retry sequence to burn. The gap matters if the budget is raised or
+if this becomes a tool that runs unattended. Also untested: that the judge
+would keep re-blocking an irreconcilable pair on a second review. It did
+re-block security on a second pass in earlier single-category runs (e.g.
+after the opt-in `base_dir` fix), but the conflicting-findings pairings
+were fabricated-findings runs and were never put through a second review.
+
+### What a fix would need to detect
+Not "the code changed" — a change made for an unrelated reason shouldn't
+count — but "the same category blocked again on a fresh review after a fix
+that was aimed at that category." Two subtleties from this project's data
+make that harder than it sounds:
+- **Finding identity.** Review text is regenerated on every pass, and
+  fixed code drew new objections it hadn't drawn before (a TOCTOU race and
+  a size limit appeared only after the first security fix). Comparing text
+  fails; comparing categories is coarse; asking a model "is this the same
+  finding?" adds another call subject to the same variance.
+- **Self-report is unreliable.** The fix step's own statement that it
+  resolved a finding is exactly what the false-claim entry shows can't be
+  trusted, so detection should rest on behavior across review passes, not
+  on parsing the fix's comments. A structured "decision" field from the
+  fix step could still be useful as an input, not as the judge.
+
+### Open design questions
+What counts as surfacing to a human (a distinct exit code, a written
+report of the conflicting findings and the fix's chosen side); whether
+irreconcilable pairs should stop the loop immediately or only after a
+second failed pass; and whether the tension notes the fix model already
+writes should become machine-readable so a conflict is recorded rather
+than buried in a code comment.
+
+### Status
+Identified and documented; not implemented. It is graph/control-flow
+engineering rather than an experiment, and belongs at the start of the
+tool-building work, not appended to the end of the research phase.
