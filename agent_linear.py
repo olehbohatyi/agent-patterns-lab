@@ -89,6 +89,9 @@ def clean_code(text: str) -> str:
     match = re.search(r"```(?:python)?\n(.*?)\n```", text, re.DOTALL)
     code = match.group(1) if match else text.strip()
 
+    if not code.strip():
+        raise NotPythonError("claude returned empty output instead of code")
+
     try:
         tree = ast.parse(code)
     except SyntaxError as e:
