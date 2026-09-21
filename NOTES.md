@@ -1379,3 +1379,35 @@ than buried in a code comment.
 Identified and documented; not implemented. It is graph/control-flow
 engineering rather than an experiment, and belongs at the start of the
 tool-building work, not appended to the end of the research phase.
+
+## Corrections and addenda (added at the close of the research phase)
+
+Earlier entries are left as written; these notes correct or complete them.
+
+### Phase 1: the loop-vs-linear result doesn't show what its conclusion says
+The raw logs (`RESULTS.md` at commit `bbe4a8d`; deleted in `95f9dfa` but
+still in history) show all 5 loop-agent runs passing on attempt 1 — the
+retry loop never fired in Phase 1. The Phase 1 conclusion says that on the
+palindrome task the loop agent "received the actual pytest error output...
+and rewrote the code on the second attempt"; the log shows attempt 1
+passing. The linear agent's one failure (palindrome) was a `NameError`
+from a missing import in the generated test file, which the Phase 2 entry
+later traced to the test-generation prompt not showing `solution.py`. The
+conclusion's own explanation ("didn't account for ignoring spaces/case")
+doesn't match that log either. So 5/5 vs 4/5 is a one-run difference
+caused by test-generation variance, not evidence that self-correction
+improves reliability. Whether it does on these tasks is not established by
+Phase 1. What does exist: Phase 0 (n=1, deliberately contradictory
+instruction) recovered on attempt 2, and the Phase 2 palindrome `NameError`
+run shows the loop retrying 3 times without effect, because it only ever
+rewrites `solution.py` and the defect was in the test file.
+
+### The revert path fired live once
+The Revert-path entry says the revert was verified by inspection because it
+hadn't executed live. It did execute once afterwards: in the seeded
+`.strip()` run of the route_fix context test, the routed fix renamed
+`read_file_contents` to `read_file`, the tests failed with `ImportError`
+("Post-fix tests: FAILED"), `solution.py` on disk was back to the seeded
+code, and attempt 2's review described the original code. The loop then
+exhausted its budget without crashing. n=1, consistent with the
+inspection argument.
