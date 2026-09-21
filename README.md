@@ -5,7 +5,12 @@ solution and its tests, then repeatedly runs pytest and feeds failures back to C
 prompt until the tests pass or an attempt limit is reached.
 
 The repo also compares that loop against a "linear" agent that gets only one attempt, to measure
-whether the self-correction loop actually improves reliability (see [NOTES.md](NOTES.md)).
+whether the self-correction loop actually improves reliability (see [NOTES.md](NOTES.md); that
+first comparison turned out not to establish it — see the correction in [FINDINGS.md](FINDINGS.md)).
+
+**Start with [FINDINGS.md](FINDINGS.md)**: the consolidated, corrected results of the research phase,
+with confidence levels and known gaps. [NOTES.md](NOTES.md) is the chronological lab notebook with the
+evidence and every correction.
 
 ## How it works
 

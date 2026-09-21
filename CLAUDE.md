@@ -24,8 +24,10 @@ All four take the task description as `sys.argv[1]`. [solution.py](solution.py) 
 gitignored, not committed. Because all four scripts share those same two filenames, concurrent runs
 in the same directory clobber each other — run one at a time.
 
-[NOTES.md](NOTES.md) tracks the experiment log and conclusions phase by phase (Phase 0: baseline loop
-agent; Phase 1: linear vs. loop comparison across 5 tasks; Phase 2: diamond pattern, reviewer and
+[FINDINGS.md](FINDINGS.md) is the consolidated, corrected synthesis of the research phase — read it
+first. [NOTES.md](NOTES.md) tracks the experiment log and conclusions phase by phase (Phase 0: baseline loop
+agent; Phase 1: linear vs. loop comparison across 5 tasks, whose headline result was later found
+unsupported — see the correction at the end of NOTES.md; Phase 2: diamond pattern, reviewer and
 aggregator calibration probes, including a lane-aware rubric fix and its trade-offs; Phase 3: sonnet
 vs. haiku reviewer tiering; Phase 4: graph routing, security vs. performance route comparison, and a
 `claude -p` tool-access caveat). Its findings are the reason several prompts here are worded the way
