@@ -129,6 +129,22 @@ non-conflicting. Natural two-category blocks were never reproduced reliably.
   because it only rewrites `solution.py`. Fixed by including the code.
   *Inspected.*
 
+**X5. Escalation gap closed — with mechanical history, not a stuck classifier.**
+A design that had the fix step self-declare what it addressed, cross-checked
+against the diff, was rejected: judging whether a diff "addresses" a finding
+needs the same semantic call the false-claim pattern (C1) already showed is
+unreliable — it would move that problem up a layer, not remove it. Built
+instead on two zero-trust, mechanical signals tracked per category per
+attempt: did `solution.py`'s text change since this category last blocked,
+and does it still block. Ambiguous cases (code changed, still blocks — which
+covers both an insufficient fix and a real fix that shifted the review
+surface, as in K1) are left unclassified and printed as a transcript for a
+human, not resolved automatically. Validated on 3 synthetic histories and 1
+live exhausted run, where a security fix's added validation opened a new,
+real `test_coverage` finding on attempt 2 — previously invisible behind a
+bare exit — correctly reported as "changed, unresolved." *Inspected +
+single live observation.* (NOTES: "Escalation gap addressed".)
+
 ### 3.3 How the fix step handles conflicting requirements
 
 **K1. Security finding vs task spec ("accept any path").** In the
@@ -181,13 +197,6 @@ code doesn't have".)
 
 ## 4. Known gaps, not addressed
 
-- **Escalation.** Nothing distinguishes "resolved" from "declined and labeled
-  as resolved," or surfaces an irreconcilable pair for a human decision. Its
-  cost is small today (the loop performs at most one fix at
-  `MAX_GRAPH_ATTEMPTS = 2`) and grows if the budget or autonomy grows.
-  Detection can't rely on the fix's own account, and finding identity is hard
-  because review text is regenerated each pass. Scoped, not built.
-  (NOTES: "Escalation gap".)
 - **Judge blindness** (V1) is architectural; the memory-complexity rubric gap
   and the lane-check trade-off (V4) are unresolved.
 - **Isolation** is a convention (V2); nothing enforces "do not use tools."
