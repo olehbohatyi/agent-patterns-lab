@@ -1411,3 +1411,63 @@ hadn't executed live. It did execute once afterwards: in the seeded
 code, and attempt 2's review described the original code. The loop then
 exhausted its budget without crashing. n=1, consistent with the
 inspection argument.
+
+## Phase 4: Escalation gap addressed — mechanical history, not a stuck classifier
+
+### Design
+Rejected an earlier design (structured self-declaration cross-checked
+against diff relevance) because determining whether a diff "addresses" a
+specific finding requires the same semantic judgment call as the
+free-text comments already shown to be unreliable (see the false-claim
+pattern) — it would have added a new place for that exact problem to
+recur, just one layer up.
+
+Replaced it with two fully mechanical, zero-trust signals tracked per
+category per attempt: did solution.py's text change since this
+category's last blocking round, and does it still block. Four resulting
+states, two unambiguous:
+- unchanged code, still blocks → declined or no-op fix
+- changed code, now passes → resolved
+- changed code, still blocks → ambiguous by design — covers both
+  genuinely-insufficient fixes and the base_dir shape (a real, targeted
+  fix that resolves the original objection but draws new ones). No
+  attempt made to distinguish these; both are labeled "changed,
+  unresolved" and left for a human to read, not auto-classified.
+- unchanged code, verdict flipped → labeled with its likely cause
+  (reviewer nondeterminism on byte-identical input — already documented
+  repeatedly this session, e.g. style BLOCK/OK flips on the same naming
+  violation, security's 2/7 miss rate) rather than as an anomaly, so a
+  reader isn't sent hunting for a tooling bug that probably isn't there.
+
+### What changed in the graph
+On budget exhaustion with categories still blocking, `main()` no longer
+exits bare. It calls `summarize_unresolved()`, which walks each
+unresolved category's round-by-round (code-changed, verdict) history and
+prints it alongside the actual review text from each round — handed to a
+person as a transcript, not compressed into a single verdict the
+mechanism isn't equipped to make reliably.
+
+### Validation
+- Synthetic base_dir-shaped history: correctly labeled "changed,
+  unresolved," not a false stagnation flag.
+- Synthetic decline/no-op history: correctly labeled "unchanged, still
+  blocked."
+- Synthetic fully-resolved history: correctly reports nothing.
+- Live run (seeded naive `read_file_contents`, driven to exhaustion):
+  attempt 2 saw a new category — `test_coverage` — block for the first
+  time, not security. The security fix's non-regular-file check
+  (`IsADirectoryError` guard) opened an untested code path, which
+  test_coverage correctly flagged as new. The summary reported "changed,
+  unresolved" for test_coverage, accurately — real code change, real new
+  finding, same shape as base_dir but on a different category. This is
+  evidence the mechanism isn't security-specific: whatever produces
+  base_dir-shaped sequences (a real fix that shifts rather than closes
+  the review surface) generalizes across categories.
+
+### Standing scope
+The mechanism deliberately does not attempt to distinguish "insufficient
+fix" from "fix shifted the finding to something new" — both produce the
+same mechanical signature, and telling them apart needs the semantic
+judgment this design specifically avoided reintroducing. That's a
+conscious limitation, not an oversight: the report exists to inform a
+human decision, not to replace one.
