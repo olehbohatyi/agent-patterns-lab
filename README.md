@@ -42,17 +42,20 @@ evidence and every correction.
   haiku's habit of restating an obvious defect across every lens — while sonnet stays scoped — turned
   out to make haiku *more* robust to the lane-check regression above, not less. See `NOTES.md` Phase 3.
 
-- [agent_graph.py](agent_graph.py) — adds routing on top of the diamond pattern: which category
-  blocked decides which fix prompt runs next (a security-specific prompt, a performance-specific
-  prompt, or a generic fallback), and the loop re-reviews after each fix rather than reviewing once.
-  Routing itself is reliable — right category, right prompt, every time it's fired — but the two tested
-  routes fail in different places: the security route's fix quality is the weak point (across several
-  runs it either refused outright or "fixed" the flaw by adding a hardcoded directory sandbox that
-  silently breaks the task's own "accept any path" requirement), while the performance route's fixes
-  were clean every time they fired, but the *reviewer* itself missed the O(n²) defect entirely on 1 of
-  3 runs, so the route never got a chance to trigger. Also surfaced along the way: `claude -p` isn't a
+- [agent_graph.py](agent_graph.py) — adds routing on top of the diamond pattern: whichever categories
+  blocked are all passed into a single fix prompt (`route_fix()`), so one fix pass can address several
+  findings at once instead of picking one category and dropping the rest. On a test-breaking fix, the
+  loop reverts to the last known-good code and treats it as a failed attempt rather than exiting
+  immediately, then re-reviews, up to `MAX_GRAPH_ATTEMPTS` (2). Routing itself is reliable — the right
+  categories reach the fix prompt every time — but fix quality varies by category: security fixes, across
+  several runs, either declined the finding outright (satisfying it by comment rather than code) or
+  "fixed" it in a way that broke the task's own "accept any path" requirement (early runs did this via a
+  hardcoded, cwd-scoped directory sandbox — plausibly tied to the older, per-category fix prompt this
+  file used before switching to the single multi-target one, though that's not confirmed); performance
+  fixes were clean whenever they fired, but the *reviewer* itself missed the underlying defect on some
+  runs, so the route never got a chance to trigger. Also surfaced along the way: `claude -p` isn't a
   sandboxed blank slate — it can read files in the working directory unless told not to (verified
-  directly), though the diamond judge doesn't do so in practice. See `NOTES.md` Phase 4.
+  directly), though the diamond judge doesn't do so in practice. See `FINDINGS.md` and `NOTES.md` Phase 4.
 
 All four scripts take the task description as a command-line argument, and all overwrite
 `solution.py` and `test_solution.py` on each run — those two files are generated output, not
@@ -91,7 +94,7 @@ Run the loop agent plus diamond review (4 parallel reviewers + aggregator) on a 
 python agent_diamond.py "reverse a string"
 ```
 
-Run the diamond agent plus category-routed fixes (re-reviews after each fix, up to 2 rounds):
+Run the diamond agent plus multi-target routed fixes (re-reviews after each fix, up to 2 rounds):
 
 ```bash
 python agent_graph.py "reverse a string"
