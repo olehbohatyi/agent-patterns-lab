@@ -21,6 +21,23 @@ MAX_ATTEMPTS = 3
 BACKENDS = ("local", "api")
 _backend = "local"
 
+# --- Judges ---------------------------------------------------------------------
+# Which judge grades each review in the diamond/graph agents: "llm" is the isolated
+# `claude` verdict call (default; everything in NOTES.md / FINDINGS.md was measured
+# with it), "jev" asks a TypeSafe Jev model one yes/no question instead (see
+# judge_review_jev in agent_review.py). Held here so parse_cli() can set it.
+JUDGES = ("llm", "jev")
+_judge = "llm"
+
+def set_judge(name: str) -> None:
+    global _judge
+    if name not in JUDGES:
+        raise ValueError(f"unknown judge {name!r}; expected one of {JUDGES}")
+    _judge = name
+
+def get_judge() -> str:
+    return _judge
+
 # CLI aliases used throughout the agents -> API model IDs. IDs are from the Models
 # overview page (platform.claude.com/docs/en/models/overview); the API needs real
 # IDs. Whether the CLI's "sonnet"/"haiku" aliases resolve to exactly these models has
@@ -99,15 +116,21 @@ def call_claude(prompt: str, model: str = "sonnet") -> str:
     return _call_local(prompt, model)
 
 def parse_cli(description: str | None = None) -> str:
-    """Shared command line for every agent script: a task description plus an optional
-    --backend {local,api} (default local). Applies the backend and returns the task."""
+    """Shared command line for every agent script: a task description plus optional
+    --backend {local,api} (default local) and --judge {llm,jev} (default llm; only the
+    diamond and graph agents have a judge). Applies both and returns the task."""
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument("task", help="description of the function to write")
     parser.add_argument("--backend", choices=BACKENDS, default="local",
                         help="local: the `claude -p` CLI (default); api: the Anthropic API "
                              "(needs `pip install anthropic` and ANTHROPIC_API_KEY)")
+    parser.add_argument("--judge", choices=JUDGES, default="llm",
+                        help="llm: the isolated `claude` verdict call (default); jev: a TypeSafe "
+                             "Jev yes/no question (needs `uv pip install typesafe-sdk` and "
+                             "TYPESAFE_API_KEY; only affects agent_diamond.py / agent_graph.py)")
     args = parser.parse_args()
     set_backend(args.backend)
+    set_judge(args.judge)
     return args.task
 
 

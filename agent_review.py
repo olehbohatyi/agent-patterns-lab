@@ -3,9 +3,10 @@ parallel reviewers, one isolated judge call per review, and the Python-side
 aggregation that fails if any category blocks. See NOTES.md / FINDINGS.md for why the
 judge prompt, the VERDICT marker and the per-category aggregation are shaped this way."""
 import re
+import threading
 from concurrent.futures import ThreadPoolExecutor
 
-from agent_common import call_claude
+from agent_common import call_claude, get_judge
 
 # Model is per-reviewer so tiering can be tested one role at a time. The judge in
 # judge_review() is deliberately left on the default (sonnet) — changing reviewers
@@ -52,14 +53,11 @@ def run_diamond_review(code: str, tests: str) -> dict:
             results[name] = verdict
     return results
 
-def judge_review(name: str, review: str) -> tuple[str, str, str]:
-    """Judges one review in isolation — this call never sees the other three, so a
-    real finding can't be softened by sitting next to clean reports."""
-    prompt = (
-        "You are a strict, isolated verifier. You have no context on how this code "
-        "was written or fixed — you are judging only the review text below.\n\n"
-        f"This review's assigned lens is: {name}.\n\n"
-        f"Review ({name}):\n{review}\n\n"
+def _judge_rubric(name: str) -> str:
+    """The severity rubric (BLOCK criteria, anti-hedge clause, lane check, OK cases),
+    shared verbatim by the LLM judge and the Jev judge so the two differ in substrate
+    only, not in wording."""
+    return (
         "Severity rubric — BLOCK if the review describes ANY of the following AND "
         f"the defect genuinely belongs to the {name} lens (not a defect the reviewer "
         "is only mentioning about a different lens), even conditionally or hedged "
@@ -80,6 +78,17 @@ def judge_review(name: str, review: str) -> tuple[str, str, str]:
         "OK for genuine style nitpicks, missing docstrings, coverage suggestions for "
         "behavior that already works correctly, or an accurate out-of-lane mention "
         "with no in-lane defect of its own.\n\n"
+    )
+
+def judge_review_llm(name: str, review: str) -> tuple[str, str, str]:
+    """Judges one review in isolation — this call never sees the other three, so a
+    real finding can't be softened by sitting next to clean reports."""
+    prompt = (
+        "You are a strict, isolated verifier. You have no context on how this code "
+        "was written or fixed — you are judging only the review text below.\n\n"
+        f"This review's assigned lens is: {name}.\n\n"
+        f"Review ({name}):\n{review}\n\n"
+        f"{_judge_rubric(name)}"
         "Think through your reasoning first if you need to. Then output your final "
         "verdict on its own last line, in exactly this format and nothing else:\n\n"
         "VERDICT: BLOCK\n"
@@ -88,6 +97,97 @@ def judge_review(name: str, review: str) -> tuple[str, str, str]:
     )
     response = call_claude(prompt)
     return name, parse_verdict(response), response
+
+# --- Jev judge ------------------------------------------------------------------
+# One holistic yes/no question per review — deliberately NOT split per BLOCK criterion,
+# so the swap from the LLM judge changes the substrate and nothing else (the rubric text
+# is the same object, see _judge_rubric). A per-criterion split is a separate, later
+# experiment. Verdict is BLOCK when the returned probability of "yes, block" reaches the
+# threshold. 0.5 is an uncalibrated starting point (the docs suggest validating
+# thresholds on your own data), not a measured value.
+JEV_BLOCK_THRESHOLD = 0.5
+
+_jev_client = None
+_jev_client_lock = threading.Lock()
+
+def _get_jev_client():
+    """One shared TypeSafe client (the aggregator judges four reviews in threads). The
+    key comes from TYPESAFE_API_KEY in the environment — never from code. A failed
+    construction is not cached."""
+    global _jev_client
+    with _jev_client_lock:
+        if _jev_client is None:
+            import typesafe_sdk
+            _jev_client = typesafe_sdk.TypeSafeClient()
+        return _jev_client
+
+def _jev_failure(name: str, category: str, detail: str) -> tuple[str, str, str]:
+    """Fail-safe BLOCK, worded so an integration failure can't be mistaken for a genuine
+    judgment when reading a report (a judge that blocks everything is either working or
+    broken — the text has to say which)."""
+    return name, "BLOCK", (
+        f"[jev] INTEGRATION ERROR ({category}) — failing safe to BLOCK, this is not a "
+        f"judgment of the review: {detail}"
+    )
+
+def judge_review_jev(name: str, review: str) -> tuple[str, str, str]:
+    """Judges one review in isolation with a single TypeSafe Noul question. Any failure
+    to obtain a usable probability fails safe to BLOCK, with the failure category named:
+    sdk-missing, schema-error, api-error, client-error, bad-response."""
+    try:
+        import typesafe_sdk
+    except ImportError:
+        return _jev_failure(name, "sdk-missing", "typesafe-sdk is not installed "
+                            "(uv pip install typesafe-sdk)")
+    try:
+        question = typesafe_sdk.Noul(
+            instructions=(
+                f"Does the review of the code, assigned to the '{name}' lens, describe a "
+                "defect that should be blocked under this rubric?\n\n" + _judge_rubric(name)
+            ),
+            criteria={
+                "true": "The review describes an in-lane defect that meets the BLOCK rubric.",
+                "false": "The review has no in-lane defect that meets the BLOCK rubric "
+                         "(clean, only nitpicks, or an accurate out-of-lane mention).",
+            },
+        )
+    except Exception as e:  # pydantic validation of the question shape
+        return _jev_failure(name, "schema-error", f"{type(e).__name__}: {e}")
+    try:
+        response = _get_jev_client().system_one(
+            {"lens": name, "review": review}, questions={"block": question},
+        )
+    except (typesafe_sdk.TypeSafeBadRequestError,
+            typesafe_sdk.TypeSafeUnprocessableEntityError) as e:
+        return _jev_failure(name, "schema-error", f"{type(e).__name__}: {e}")
+    except typesafe_sdk.TypeSafeAPIError as e:
+        return _jev_failure(name, "api-error", f"{type(e).__name__}: {e}")
+    except typesafe_sdk.TypeSafeError as e:  # no/invalid key at client creation, timeouts, connection
+        return _jev_failure(name, "client-error", f"{type(e).__name__}: {e}")
+    try:
+        probability = response.nouls["block"].noul
+        if isinstance(probability, bool) or not isinstance(probability, (int, float)):
+            raise TypeError(f"probability is not a number: {probability!r}")
+        if not 0.0 <= probability <= 1.0:  # also rejects NaN
+            raise ValueError(f"probability out of range: {probability!r}")
+        probability = float(probability)
+    except Exception as e:  # missing answer, wrong type, NaN/out of range
+        return _jev_failure(name, "bad-response", f"{type(e).__name__}: {e}")
+    verdict = "BLOCK" if probability >= JEV_BLOCK_THRESHOLD else "OK"
+    try:
+        request_id = response.request_id
+    except Exception:  # the SDK raises (not returns None) when the header is absent
+        request_id = None
+    return name, verdict, (
+        f"[jev] P(block)={probability:.3f}, threshold={JEV_BLOCK_THRESHOLD} -> {verdict} "
+        f"(request_id={request_id})"
+    )
+
+def judge_review(name: str, review: str) -> tuple[str, str, str]:
+    """The judge selected by --judge (llm by default). Returns (name, verdict, response)."""
+    if get_judge() == "jev":
+        return judge_review_jev(name, review)
+    return judge_review_llm(name, review)
 
 def parse_verdict(response: str) -> str:
     """Extracts the verdict from an explicit VERDICT: marker. Anything ambiguous —
