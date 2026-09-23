@@ -2,16 +2,86 @@
 test runner, and the two steps every agent repeats (write solution + tests; fix
 until the tests pass). Extracted from four near-identical copies; see NOTES.md for
 why several of these pieces are shaped the way they are."""
+import argparse
 import ast
 import builtins
 import re
 import subprocess
 import sys
+import threading
 
 MAX_ATTEMPTS = 3
 
+# --- Backends -------------------------------------------------------------------
+# "local" shells out to the `claude -p` CLI (the default; every result in NOTES.md /
+# FINDINGS.md was measured this way). "api" calls the Anthropic Messages API through
+# the Python SDK instead. The two are NOT interchangeable systems: `claude -p` runs
+# inside the working directory and can read files there, an API call sees only the
+# prompt (see the "Backends" caveat in FINDINGS.md).
+BACKENDS = ("local", "api")
+_backend = "local"
 
-def call_claude(prompt: str, model: str = "sonnet") -> str:
+# CLI aliases used throughout the agents -> API model IDs. IDs are from the Models
+# overview page (platform.claude.com/docs/en/models/overview); the API needs real
+# IDs. Whether the CLI's "sonnet"/"haiku" aliases resolve to exactly these models has
+# not been verified. Names not in the map pass through, so a full ID also works.
+API_MODEL_IDS = {
+    "sonnet": "claude-sonnet-5",
+    "haiku": "claude-haiku-4-5-20251001",
+    "opus": "claude-opus-5-5",
+}
+API_MAX_TOKENS = 16000        # generous: adaptive thinking may share the budget with the reply
+API_TIMEOUT_SECONDS = 120.0   # same limit as the local backend's subprocess timeout
+
+_api_client = None
+_api_client_lock = threading.Lock()
+
+def set_backend(name: str) -> None:
+    """Selects the backend for every later call_claude(). Call once, before any agent
+    work starts (parse_cli() does this from --backend)."""
+    global _backend
+    if name not in BACKENDS:
+        raise ValueError(f"unknown backend {name!r}; expected one of {BACKENDS}")
+    _backend = name
+
+def get_backend() -> str:
+    return _backend
+
+def resolve_api_model(model: str) -> str:
+    return API_MODEL_IDS.get(model, model)
+
+def _get_api_client():
+    """One shared Anthropic client (the diamond's reviewers call from several threads).
+    The API key comes from ANTHROPIC_API_KEY in the environment — never from code."""
+    global _api_client
+    with _api_client_lock:
+        if _api_client is None:
+            try:
+                import anthropic
+            except ImportError as e:
+                raise RuntimeError(
+                    "--backend api needs the Anthropic SDK: pip install anthropic "
+                    "(and set ANTHROPIC_API_KEY in the environment)"
+                ) from e
+            _api_client = anthropic.Anthropic(timeout=API_TIMEOUT_SECONDS)
+        return _api_client
+
+def _call_api(prompt: str, model: str) -> str:
+    """One Messages API call. SDK errors (auth, rate limit, timeout, after the SDK's own
+    retries) propagate: a failed model call should stop the run, not read as an empty
+    answer."""
+    client = _get_api_client()
+    response = client.messages.create(
+        model=resolve_api_model(model),
+        max_tokens=API_MAX_TOKENS,
+        messages=[{"role": "user", "content": prompt}],
+    )
+    if response.stop_reason == "max_tokens":
+        print(f"⚠️ API response hit max_tokens={API_MAX_TOKENS} and may be truncated",
+              file=sys.stderr)
+    return "".join(block.text for block in response.content if block.type == "text").strip()
+
+def _call_local(prompt: str, model: str) -> str:
     """Calls Claude Code in non-interactive mode and returns the response."""
     result = subprocess.run(
         ["claude", "--model", model, "-p", prompt],
@@ -20,6 +90,26 @@ def call_claude(prompt: str, model: str = "sonnet") -> str:
         timeout=120
     )
     return result.stdout.strip()
+
+def call_claude(prompt: str, model: str = "sonnet") -> str:
+    """Sends one prompt to Claude and returns the response text, through the active
+    backend (see set_backend): the local `claude -p` CLI by default, or the API."""
+    if _backend == "api":
+        return _call_api(prompt, model)
+    return _call_local(prompt, model)
+
+def parse_cli(description: str | None = None) -> str:
+    """Shared command line for every agent script: a task description plus an optional
+    --backend {local,api} (default local). Applies the backend and returns the task."""
+    parser = argparse.ArgumentParser(description=description)
+    parser.add_argument("task", help="description of the function to write")
+    parser.add_argument("--backend", choices=BACKENDS, default="local",
+                        help="local: the `claude -p` CLI (default); api: the Anthropic API "
+                             "(needs `pip install anthropic` and ANTHROPIC_API_KEY)")
+    args = parser.parse_args()
+    set_backend(args.backend)
+    return args.task
+
 
 class NotPythonError(RuntimeError):
     """Raised when claude's response isn't valid Python (e.g. a refusal or explanation)."""

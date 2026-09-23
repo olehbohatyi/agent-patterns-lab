@@ -1,6 +1,6 @@
 import sys
 
-from agent_common import fix_until_green, write_solution_and_tests
+from agent_common import fix_until_green, parse_cli, write_solution_and_tests
 from agent_review import aggregate_verdict, run_diamond_review
 
 def main(task_description: str):
@@ -23,5 +23,5 @@ def main(task_description: str):
     sys.exit(0 if final_pass else 1)
 
 if __name__ == "__main__":
-    task = sys.argv[1]
+    task = parse_cli("Loop agent plus a four-reviewer diamond review of the passing code.")
     main(task)

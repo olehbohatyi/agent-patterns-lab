@@ -1,7 +1,7 @@
 import sys
 
 from agent_common import (
-    NotPythonError, call_claude, clean_code, fix_until_green, run_tests,
+    NotPythonError, call_claude, clean_code, fix_until_green, parse_cli, run_tests,
     write_solution_and_tests,
 )
 from agent_review import aggregate_verdict, run_diamond_review
@@ -137,5 +137,5 @@ def main(task_description: str):
         code_text = candidate_code
 
 if __name__ == "__main__":
-    task = sys.argv[1]
+    task = parse_cli("Diamond agent plus multi-target routed fixes with re-review.")
     main(task)

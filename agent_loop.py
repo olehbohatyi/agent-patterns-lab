@@ -1,6 +1,6 @@
 import sys
 
-from agent_common import fix_until_green, write_solution_and_tests
+from agent_common import fix_until_green, parse_cli, write_solution_and_tests
 
 
 def main(task_description: str):
@@ -12,5 +12,5 @@ def main(task_description: str):
     sys.exit(0)
 
 if __name__ == "__main__":
-    task = sys.argv[1]
+    task = parse_cli("Self-correcting agent: write a function and tests, fix until the tests pass.")
     main(task)
