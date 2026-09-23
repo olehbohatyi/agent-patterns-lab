@@ -19,6 +19,12 @@ then check the result against pytest.
   picks a category-specific fix prompt (security, performance, or a generic fallback), applies the fix,
   re-reviews, and repeats up to `MAX_GRAPH_ATTEMPTS` (2) rather than reviewing once and stopping.
 
+The four scripts share their code through two modules: [agent_common.py](agent_common.py) (`call_claude`,
+`clean_code` and its undefined-name check, `run_tests`, and the two steps every agent repeats —
+`write_solution_and_tests` and `fix_until_green`) and [agent_review.py](agent_review.py) (the four
+reviewers, `judge_review`, `parse_verdict`, `aggregate_verdict`), the latter used by `agent_diamond.py`
+and `agent_graph.py`. Each `agent_*.py` is now mostly its own `main()` flow.
+
 All four take the task description as `sys.argv[1]`. [solution.py](solution.py) and
 [test_solution.py](test_solution.py) are generated output overwritten on every run — they are
 gitignored, not committed. Because all four scripts share those same two filenames, concurrent runs
@@ -58,19 +64,19 @@ Re-run just the diamond review against whatever is already on disk, skipping cod
 for probing reviewer/judge behavior on hand-planted code):
 ```bash
 python3 -c "
-from agent_diamond import run_diamond_review, aggregate_verdict
+from agent_review import run_diamond_review, aggregate_verdict
 code = open('solution.py').read()
 tests = open('test_solution.py').read()
-passed, report = aggregate_verdict(run_diamond_review(code, tests))
+passed, report, _category_verdicts = aggregate_verdict(run_diamond_review(code, tests))
 print('PASS' if passed else 'FAIL'); print(report)
 "
 ```
 
-`agent_graph.py`'s `aggregate_verdict()` returns a 3-tuple (`passed, report, category_verdicts`)
-instead of `agent_diamond.py`'s 2-tuple — the extra dict is what `route_fix()` reads to pick a route,
-so entering the graph loop's body directly (review → route → fix → re-test, skipping `main()`'s Step
-A/B code generation) needs it unpacked accordingly; see Phase 4's security/performance probes in
-`NOTES.md` for the full pattern.
+`aggregate_verdict()` returns a 3-tuple (`passed, report, category_verdicts`); the per-category dict is
+what `route_fix()` in `agent_graph.py` reads to build its fix prompt (`agent_diamond.py` ignores it).
+Entering the graph loop's body directly (review → route → fix → re-test, skipping `main()`'s Step A/B
+code generation) is how the Phase 4 probes in `NOTES.md` were run. (Before the shared-module refactor,
+`agent_diamond.py` had its own copy returning a 2-tuple; older NOTES.md entries may show that.)
 
 ## Architecture notes
 
@@ -91,10 +97,10 @@ A/B code generation) needs it unpacked accordingly; see Phase 4's security/perfo
   file by name. Without it the model can't know the real function name and guesses the import, which
   produced test files that failed with `NameError` — and the fix loop can't recover from that, since
   it only ever rewrites `solution.py`, never the test file.
-- The fix loop in `agent_loop.py`'s `main()` is intentionally simple: on failure it re-prompts with the
+- `fix_until_green()` (in `agent_common.py`, used by the loop, diamond and graph agents) is intentionally simple: on failure it re-prompts with the
   *entire* pytest output appended, asking for a fixed version of the whole function — there's no
   diffing or partial patching.
-- In `agent_diamond.py`, `judge_review()` grades one review at a time and never sees the other three;
+- In `agent_review.py` (used by `agent_diamond.py` and `agent_graph.py`), `judge_review()` grades one review at a time and never sees the other three;
   `aggregate_verdict()` then decides in Python (fail if any category blocks) rather than asking the
   model for a holistic verdict. The judge prompt carries an explicit severity rubric, including a
   clause that hedged phrasing ("if untrusted input...", "at scale...") is not grounds for dismissal —

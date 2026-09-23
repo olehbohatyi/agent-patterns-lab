@@ -57,6 +57,11 @@ evidence and every correction.
   sandboxed blank slate — it can read files in the working directory unless told not to (verified
   directly), though the diamond judge doesn't do so in practice. See `FINDINGS.md` and `NOTES.md` Phase 4.
 
+The scripts share their code through [agent_common.py](agent_common.py) (the `claude` call, output
+validation, the test runner, and the write-solution/fix-until-green steps) and
+[agent_review.py](agent_review.py) (the reviewers, the judge and the aggregation used by the diamond and
+graph agents), so each `agent_*.py` is mostly its own control flow.
+
 All four scripts take the task description as a command-line argument, and all overwrite
 `solution.py` and `test_solution.py` on each run — those two files are generated output, not
 hand-authored source, and are gitignored.
