@@ -52,6 +52,11 @@ Run the tests for the shared infrastructure's local/API backend switch (no live 
 pytest test_backend.py -v
 ```
 
+Run the tests for the `--judge` switch and the Jev judge (faked `typesafe_sdk`, no live calls):
+```bash
+pytest test_judge.py -v
+```
+
 Run a single test:
 ```bash
 pytest test_solution.py -v -k <test_name>
@@ -68,6 +73,8 @@ python agent_graph.py "<task description>"
 Each accepts `--backend {local,api}` (default `local`, the `claude -p` CLI; `api` uses the Anthropic SDK
 and needs `pip install anthropic` plus `ANTHROPIC_API_KEY`). Don't run `--backend api` casually — it makes
 billable requests. The backends are different systems (see the note under Architecture).
+`agent_diamond.py`/`agent_graph.py` also accept `--judge {llm,jev}` (default `llm`; `jev` needs
+`uv pip install typesafe-sdk` and `TYPESAFE_API_KEY`, and sends review text to TypeSafe).
 
 Re-run just the diamond review against whatever is already on disk, skipping code generation (useful
 for probing reviewer/judge behavior on hand-planted code):
@@ -127,6 +134,12 @@ code generation) is how the Phase 4 probes in `NOTES.md` were run. (Before the s
   `VERDICT: BLOCK`/`VERDICT: OK` marker, parsed via `parse_verdict()` — reading just the first word was
   tried first and was actively wrong, since a judge reasoning aloud before answering ("BLOCK — wait,
   no... OK") got scored on the word it started with, not the verdict it reached.
+- `--judge jev` swaps only the judge's substrate: `judge_review_jev()` asks one holistic Noul question per
+  review with the same rubric (`_judge_rubric()`), blocks at `JEV_BLOCK_THRESHOLD` (0.5, uncalibrated), and
+  fails safe to BLOCK on any error with the category named (`sdk-missing`, `schema-error`, `api-error`,
+  `client-error`, `bad-response`). It is deliberately not split per criterion (that would change two things at
+  once), and it has never been run live or calibrated — see NOTES.md "Jev judge". Keep `judge_review()`
+  as the dispatcher; `aggregate_verdict()` is unchanged.
 - Known limit of the diamond design: the judge reads only review text, never the code, so a reviewer
   that misses a defect entirely cannot be caught downstream (confirmed directly by feeding a fabricated
   "no issues found" review against genuinely vulnerable code — clean OK). Giving the judge the code

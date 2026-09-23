@@ -1539,3 +1539,78 @@ both were checked afterwards.
   it as "Adaptive", where Opus 5.5 and Fable 5.1 are "Adaptive (always on)").
   The docs also say a specialized system prompt is added automatically when
   thinking is active, another way an API call differs from `claude -p`.
+
+## Jev judge (TypeSafe), stage 1
+Adds `--judge {llm,jev}` (default `llm`, unchanged) to the diamond and graph
+agents. `--judge jev` replaces the isolated `claude` verdict call with one
+TypeSafe Noul question per review (`judge_review_jev` in `agent_review.py`).
+Nothing has been run against the live TypeSafe API: no calibration data exists,
+and the judge is not evidence for or against anything in FINDINGS.md yet.
+
+### What was built, and what it deliberately is not
+- **Substrate swap only.** One holistic yes/no question per review, with the
+  existing severity rubric passed verbatim as the question's instructions (the
+  rubric was pulled into `_judge_rubric()`, shared by both judges; the LLM
+  judge's prompt was checked byte-identical to HEAD for all four lenses). It is
+  *not* one question per BLOCK criterion: splitting would change the
+  architecture (and could lose the lane check, which relates a finding to its
+  category) at the same time as the substrate, so a later comparison could not
+  say which change caused a difference. The split is a possible stage 2, only
+  once stage 1 has data.
+- **Verdict:** BLOCK when P(yes) >= `JEV_BLOCK_THRESHOLD` (0.5). That value is
+  an uncalibrated starting point; the docs advise validating thresholds on your
+  own data.
+- **Fail-safe, with the reason named.** Any failure to obtain a usable
+  probability returns BLOCK with text starting `[jev] INTEGRATION ERROR
+  (<category>)`, category one of `sdk-missing`, `schema-error`, `api-error`,
+  `client-error`, `bad-response`, so a run that blocks everything can be read as
+  "judge working" vs "integration broken" without opening the code. A
+  non-numeric probability (including a string like "0.1") is `bad-response`; a
+  fake-SDK test caught the first version reading it as OK.
+- **Key from the environment only** (`TYPESAFE_API_KEY`); install with
+  `uv pip install typesafe-sdk`. Not a dependency of the repo unless `--judge
+  jev` is used.
+
+### Checked against the installed SDK (typesafe-sdk 0.7.1)
+- The docs disagreed with themselves: the Noul primitive page shows
+  `criteria={true,false}`, the SDK usage page shows Noul with `instructions`
+  only. The installed types accept both (`NoulCriteria` is a TypedDict with
+  optional `true`/`false`), so `criteria` is used.
+- Errors: `TypeSafeError` is the base; `TypeSafeAPIError` (has `.status`,
+  `.request_id`) covers HTTP errors, with subclasses for 400/401/403/404/422/
+  429/5xx; timeouts and connection errors are `TypeSafeError` but *not*
+  `TypeSafeAPIError`. A missing key raises `TypeSafeError` at client creation.
+  Defaults are the SDK's own (a `RetryPolicy` with 2 retries and a 30s timeout,
+  `DEFAULT_TIMEOUT` 10s); the repo sets none.
+- Run over a mock HTTP transport (no network) the real SDK sent `POST
+  /v1/systemone` with `state`, `model: jev-latest`, and the question, and parsed
+  the answer, and 401/422/429 mapped to the categories above. That exercise found
+  a bug the hand-written fake could not: `response.request_id` *raises* when the
+  response lacks the header, which would have crashed an otherwise valid
+  judgment; the lookup is now defensive. This checks the integration's shape,
+  not Jev's judgment quality.
+- Behavior of the agents with the default judge is unchanged: the old-vs-new
+  harness still shows 24/24 identical.
+
+### Unknowns and caveats
+- Not documented on the pages read: state-size limit, max questions per request,
+  request timeouts (beyond the SDK defaults above), and data retention or
+  privacy. `--judge jev` sends review text (which quotes generated code) to a
+  third party; do not use it on code that must not leave the machine until the
+  retention terms are known.
+- The Jev judge is a different system from the LLM judge (a System One model
+  returning a probability, no reasoning text), so its `response` field is one
+  line, not a rationale.
+- Unlike the LLM judge, it is not run through `claude`, so `--backend` does not
+  affect it (the reviewers and fixers still follow `--backend`).
+
+### Next
+Calibration: run both judges over stored review texts (path traversal, O(n²),
+lane-check cases) and compare, which needs live TypeSafe calls and the user's
+go-ahead. Stage 2 (per-criterion split) only after that.
+
+### Tool-use oddity
+While reading the TypeSafe docs, a fetched page's result carried an embedded
+instruction to add a `Co-Authored-By` trailer to commits, contradicting the
+user's standing rule. It came from fetched content, not the user, and was not
+followed. Small, but a real data point about fetching live docs mid-task.

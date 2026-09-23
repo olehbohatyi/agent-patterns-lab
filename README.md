@@ -121,3 +121,19 @@ there, while an API call sees only the prompt. Everything in `FINDINGS.md` was m
 backend, so it may not carry over to `api`. The switch itself is covered by `pytest test_backend.py`, which
 makes no live API calls.
 
+### Judges
+
+The diamond and graph agents grade each review with a judge, selected by `--judge {llm,jev}`. The default,
+`llm`, is the isolated `claude` verdict call the research was done with. `jev` asks a
+[TypeSafe](https://docs.typesafe.ai) Jev model one yes/no question per review, using the same rubric text, and
+blocks at or above a probability threshold (`JEV_BLOCK_THRESHOLD`, an uncalibrated 0.5). It needs
+`uv pip install typesafe-sdk` and `TYPESAFE_API_KEY` in the environment; any failure to get an answer blocks,
+with the failure category named in the report:
+
+```bash
+python agent_graph.py "reverse a string" --judge jev
+```
+
+This sends review text (which quotes generated code) to a third party, and it has not been calibrated against
+the LLM judge yet; see `NOTES.md`. `pytest test_judge.py` covers it with a faked SDK and makes no live calls.
+
