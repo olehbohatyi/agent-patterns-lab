@@ -30,6 +30,9 @@ from reviewer variance.
 Samples are small: typically 4–8 fixes per condition and 1–7 runs per probe.
 No number below is a general rate. Everything was measured through the local `claude -p` backend; the
 Anthropic API backend added afterwards is a different system (see "Backend dependence" in section 4).
+Model aliases (`sonnet`, `haiku`) track the latest model and aren't pinned, and the resolved model wasn't
+recorded during the research phase; today they resolve to `claude-sonnet-5` and
+`claude-haiku-4-5-20251001`.
 Tags:
 
 - **Measured**: counted across repeated runs, small n.

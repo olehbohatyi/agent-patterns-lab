@@ -30,7 +30,7 @@ API_MODEL_IDS = {
     "haiku": "claude-haiku-4-5-20251001",
     "opus": "claude-opus-5-5",
 }
-API_MAX_TOKENS = 16000        # generous: adaptive thinking may share the budget with the reply
+API_MAX_TOKENS = 16000        # thinking tokens count toward max_tokens (docs: thinking-steering-and-cost)
 API_TIMEOUT_SECONDS = 120.0   # same limit as the local backend's subprocess timeout
 
 _api_client = None

@@ -1515,3 +1515,27 @@ finding (the API enforces isolation by construction, where `-p` only follows
 a prompt convention), the context findings, and the decline patterns (one
 early fix response quoted this repo's own NOTES.md). Nothing has been measured
 on the API backend.
+
+### Follow-up checks on the backends entry
+Two claims in the entry above rested on recollection or hadn't been checked;
+both were checked afterwards.
+
+- **Alias equivalence.** The CLI's JSON output (`--output-format json`) includes
+  `modelUsage`, the models that actually ran (not the model's self-report):
+  `--model sonnet` -> `claude-sonnet-5`, `--model haiku` ->
+  `claude-haiku-4-5-20251001`, with no `ANTHROPIC_DEFAULT_*_MODEL` overrides
+  set. Both match the API alias map exactly. `opus` -> `claude-opus-5-5` rests
+  on the Claude Code docs table (Anthropic API provider) and was not run. The
+  docs say aliases track the latest model and are not pinned, and resolve
+  differently on other providers (e.g. Sonnet 4.5 on Bedrock), so a pinned API
+  map can drift from the local alias, and the `sonnet` alias during the
+  research phase was whatever was current then; the resolved model was not
+  recorded. Worth recording `modelUsage` in future experiments.
+- **`max_tokens` behavior.** Now sourced from the docs: `stop_reason` is a field
+  on every Messages API response and `"max_tokens"` is the truncation value;
+  thinking tokens count toward `max_tokens` (a hard cap on thinking plus text
+  combined). Still unstated on the pages read: whether Sonnet 5 thinks by
+  default when the `thinking` parameter is omitted (the Models overview lists
+  it as "Adaptive", where Opus 5.5 and Fable 5.1 are "Adaptive (always on)").
+  The docs also say a specialized system prompt is added automatically when
+  thinking is active, another way an API call differs from `claude -p`.
