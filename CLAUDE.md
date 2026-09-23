@@ -46,6 +46,12 @@ Run the tests for whatever solution/tests were last generated:
 pytest test_solution.py -v
 ```
 
+Run the tests for the shared infrastructure's local/API backend switch (no live API calls; the
+`anthropic` module is faked):
+```bash
+pytest test_backend.py -v
+```
+
 Run a single test:
 ```bash
 pytest test_solution.py -v -k <test_name>
@@ -59,6 +65,9 @@ python agent_linear.py "<task description>"
 python agent_diamond.py "<task description>"
 python agent_graph.py "<task description>"
 ```
+Each accepts `--backend {local,api}` (default `local`, the `claude -p` CLI; `api` uses the Anthropic SDK
+and needs `pip install anthropic` plus `ANTHROPIC_API_KEY`). Don't run `--backend api` casually — it makes
+billable requests. The backends are different systems (see the note under Architecture).
 
 Re-run just the diamond review against whatever is already on disk, skipping code generation (useful
 for probing reviewer/judge behavior on hand-planted code):
@@ -80,8 +89,12 @@ code generation) is how the Phase 4 probes in `NOTES.md` were run. (Before the s
 
 ## Architecture notes
 
-- `call_claude()` invokes `claude -p` as a subprocess with a 120s timeout and returns raw stdout — there
-  is no structured output parsing, just string prompts in and code out. Prompts explicitly tell Claude
+- `call_claude()` (in `agent_common.py`) dispatches on a module-level backend set once by `parse_cli()`:
+  `local` invokes `claude -p` as a subprocess with a 120s timeout and returns raw stdout; `api` makes one
+  Anthropic Messages API call (aliases mapped to real model IDs, one shared client, SDK errors propagate
+  rather than reading as an empty answer). All findings were measured on `local`; `claude -p` can read the
+  working directory and the API can't, so treat the backends as different systems. There is no structured
+  output parsing, just string prompts in and code out. Prompts explicitly tell Claude
   not to write files itself (no tool use) — earlier versions that just said "save it in a single file"
   caused Claude to invoke its own Write tool instead of returning code as text, which the subprocess
   can't approve non-interactively and which silently corrupted the generated files.

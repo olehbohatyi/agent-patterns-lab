@@ -72,6 +72,7 @@ hand-authored source, and are gitignored.
 - [pytest](https://pytest.org)
 - The `claude` CLI available on `PATH` (only needed to run the agent scripts themselves, not to run
   the tests)
+- Optional, only for `--backend api`: `pip install anthropic` and an `ANTHROPIC_API_KEY` in the environment
 
 ## Usage
 
@@ -104,3 +105,19 @@ Run the diamond agent plus multi-target routed fixes (re-reviews after each fix,
 ```bash
 python agent_graph.py "reverse a string"
 ```
+
+### Backends
+
+Every agent accepts `--backend {local,api}`. The default, `local`, calls the `claude -p` CLI; `api` calls
+the Anthropic Messages API through the Python SDK (model aliases `sonnet`/`haiku`/`opus` map to real API
+model IDs in `agent_common.py`):
+
+```bash
+python agent_graph.py "reverse a string" --backend api
+```
+
+The two backends are not interchangeable systems: `claude -p` runs inside the repository and can read files
+there, while an API call sees only the prompt. Everything in `FINDINGS.md` was measured on the local
+backend, so it may not carry over to `api`. The switch itself is covered by `pytest test_backend.py`, which
+makes no live API calls.
+

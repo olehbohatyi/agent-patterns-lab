@@ -1471,3 +1471,47 @@ same mechanical signature, and telling them apart needs the semantic
 judgment this design specifically avoided reintroducing. That's a
 conscious limitation, not an oversight: the report exists to inform a
 human decision, not to replace one.
+
+## Backends: local `claude -p` vs the Anthropic API
+
+### What was added
+`call_claude()` now dispatches on a backend set once by `parse_cli()`
+(`--backend {local,api}`, default `local`, on every agent script). `local`
+is unchanged. `api` makes one Messages API call through the Python SDK:
+key from `ANTHROPIC_API_KEY` in the environment (never from code), a shared
+client with the same 120s timeout, `max_tokens=16000`, text blocks only
+(thinking blocks ignored), a stderr warning if the reply hit `max_tokens`,
+and SDK errors propagate instead of reading as an empty answer.
+
+### Checked against the docs, not memory
+Call shape, error classes, retry/timeout options and the requirement to set
+`max_tokens` were read from the SDK page. Model IDs were read from the Models
+overview: `sonnet` -> `claude-sonnet-5`, `haiku` -> `claude-haiku-4-5-20251001`,
+`opus` -> `claude-opus-5-5`. A recalled `claude-opus-5` turned out to be the
+legacy Opus 5, not the current lineup, which is the reason not to hardcode from
+memory. Unverified: that the CLI's `sonnet`/`haiku` aliases resolve to exactly
+these models.
+
+### Verification (no live API calls were made)
+- 16 unit tests (`test_backend.py`) against a faked `anthropic` module and a
+  stubbed `subprocess.run`: alias mapping and pass-through, text extraction,
+  truncation warning, one shared client, no key passed from code, missing-SDK
+  message, error propagation, CLI parsing.
+- Equivalence harness over 4 agents x 6 scripted scenarios: the working tree
+  matches the committed refactor on the local path (24/24), and the local and
+  API backends produce identical stdout, exit status, prompts and files when
+  the model's answers are scripted identically (24/24), with `claude-sonnet-5`
+  sent on the API side. This shows the switch doesn't change the agents'
+  control flow; it says nothing about model behavior on the API.
+
+### The API backend is a different system, not a drop-in
+`claude -p` runs inside the repository: it can read files in the working
+directory (verified in the isolation entry), can load project context from it,
+and runs under the CLI's own system prompt. An API call sees only the prompt
+text. Sampling and thinking defaults may also differ. So every result in
+FINDINGS.md is backend-specific, not just tied to a Claude Code version. Which
+findings might depend on it is unknown; obvious candidates are the isolation
+finding (the API enforces isolation by construction, where `-p` only follows
+a prompt convention), the context findings, and the decline patterns (one
+early fix response quoted this repo's own NOTES.md). Nothing has been measured
+on the API backend.

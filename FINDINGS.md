@@ -28,7 +28,9 @@ from reviewer variance.
 ## 2. How to read the confidence
 
 Samples are small: typically 4–8 fixes per condition and 1–7 runs per probe.
-No number below is a general rate. Tags:
+No number below is a general rate. Everything was measured through the local `claude -p` backend; the
+Anthropic API backend added afterwards is a different system (see "Backend dependence" in section 4).
+Tags:
 
 - **Measured**: counted across repeated runs, small n.
 - **Inspected**: verified by reading or executing specific generated code.
@@ -200,6 +202,10 @@ code doesn't have".)
 - **Judge blindness** (V1) is architectural; the memory-complexity rubric gap
   and the lane-check trade-off (V4) are unresolved.
 - **Isolation** is a convention (V2); nothing enforces "do not use tools."
+- **Backend dependence.** `claude -p` runs in the repository, can read files there and loads project
+  context; a bare API call sees only the prompt and carries no CLI system prompt. Whether any finding
+  depended on those differences (context-related ones such as X2, the isolation finding V2, and the
+  decline patterns are the obvious candidates) is unknown: nothing has been measured on the API backend.
 - **Reviewer coverage of false claims** (C1) and of the extra behavior fixes
   introduce is untested, because the fix experiments ran without a second
   review pass.
