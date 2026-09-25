@@ -248,3 +248,40 @@ def test_aggregate_verdict_works_with_the_jev_judge(monkeypatch, fake_sdk):
     assert not passed
     assert verdicts == {"security": "BLOCK", "performance": "OK", "style": "OK", "test_coverage": "OK"}
     assert report.startswith("security: BLOCK")
+
+
+# --- .env loader -------------------------------------------------------------------
+
+def test_loader_reads_only_the_named_key(tmp_path, monkeypatch):
+    env = tmp_path / ".env"
+    env.write_text("ANTHROPIC_API_KEY=should-not-load\n# c\nexport TYPESAFE_API_KEY='ts-secret'\nOTHER=1\n")
+    for k in ("TYPESAFE_API_KEY", "ANTHROPIC_API_KEY", "OTHER"):
+        monkeypatch.delenv(k, raising=False)
+    agent_common.load_env_key("TYPESAFE_API_KEY", str(env))
+    assert agent_common.os.environ["TYPESAFE_API_KEY"] == "ts-secret"
+    assert "ANTHROPIC_API_KEY" not in agent_common.os.environ and "OTHER" not in agent_common.os.environ
+    monkeypatch.delenv("TYPESAFE_API_KEY")
+
+
+def test_loader_never_overrides_the_environment(tmp_path, monkeypatch):
+    env = tmp_path / ".env"
+    env.write_text("TYPESAFE_API_KEY=from-file\n")
+    monkeypatch.setenv("TYPESAFE_API_KEY", "from-env")
+    agent_common.load_env_key("TYPESAFE_API_KEY", str(env))
+    assert agent_common.os.environ["TYPESAFE_API_KEY"] == "from-env"
+
+
+def test_loader_tolerates_a_missing_file_and_empty_value(tmp_path, monkeypatch):
+    monkeypatch.delenv("TYPESAFE_API_KEY", raising=False)
+    agent_common.load_env_key("TYPESAFE_API_KEY", str(tmp_path / "nope"))
+    (tmp_path / ".env").write_text("TYPESAFE_API_KEY=\n")
+    agent_common.load_env_key("TYPESAFE_API_KEY", str(tmp_path / ".env"))
+    assert "TYPESAFE_API_KEY" not in agent_common.os.environ
+
+
+def test_jev_client_construction_triggers_the_loader(fake_sdk, monkeypatch):
+    seen = []
+    monkeypatch.setattr(agent_review, "load_env_key", lambda name: seen.append(name))
+    set_judge("jev")
+    judge_review("security", "x")
+    assert seen == ["TYPESAFE_API_KEY"]

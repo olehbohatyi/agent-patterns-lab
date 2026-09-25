@@ -6,7 +6,7 @@ import re
 import threading
 from concurrent.futures import ThreadPoolExecutor
 
-from agent_common import call_claude, get_judge
+from agent_common import call_claude, get_judge, load_env_key
 
 # Model is per-reviewer so tiering can be tested one role at a time. The judge in
 # judge_review() is deliberately left on the default (sonnet) — changing reviewers
@@ -112,12 +112,14 @@ _jev_client_lock = threading.Lock()
 
 def _get_jev_client():
     """One shared TypeSafe client (the aggregator judges four reviews in threads). The
-    key comes from TYPESAFE_API_KEY in the environment — never from code. A failed
+    key comes from TYPESAFE_API_KEY in the environment, or failing that a gitignored .env
+    (only that one variable is read) — never from code. A failed
     construction is not cached."""
     global _jev_client
     with _jev_client_lock:
         if _jev_client is None:
             import typesafe_sdk
+            load_env_key("TYPESAFE_API_KEY")  # gitignored .env fallback; env var wins
             _jev_client = typesafe_sdk.TypeSafeClient()
         return _jev_client
 

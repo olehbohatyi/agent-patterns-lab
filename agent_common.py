@@ -5,6 +5,7 @@ why several of these pieces are shaped the way they are."""
 import argparse
 import ast
 import builtins
+import os
 import re
 import subprocess
 import sys
@@ -37,6 +38,31 @@ def set_judge(name: str) -> None:
 
 def get_judge() -> str:
     return _judge
+
+def load_env_key(name: str, path: str = ".env") -> None:
+    """Sets os.environ[name] from a `NAME=value` line in a dotenv-style file, if it is not
+    already set. Deliberately reads ONLY `name` — every other line in the file is ignored,
+    so it can never change the environment for anything else (e.g. ANTHROPIC_API_KEY and
+    the local backend). A missing file is fine. Never prints or returns the value."""
+    if os.environ.get(name):
+        return
+    try:
+        with open(path) as f:
+            lines = f.read().splitlines()
+    except OSError:
+        return
+    for line in lines:
+        line = line.strip()
+        if line.startswith("export "):
+            line = line[len("export "):].lstrip()
+        key, sep, value = line.partition("=")
+        if sep and key.strip() == name:
+            value = value.strip()
+            if len(value) >= 2 and value[0] == value[-1] and value[0] in "\"'":
+                value = value[1:-1]
+            if value:
+                os.environ[name] = value
+            return
 
 # CLI aliases used throughout the agents -> API model IDs. IDs are from the Models
 # overview page (platform.claude.com/docs/en/models/overview); the API needs real
