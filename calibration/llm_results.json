@@ -1,0 +1,569 @@
+[
+ {
+  "id": "prime-haiku-security",
+  "rep": 1,
+  "verdict": "OK",
+  "text": "The security lens found no in-lane security defect \u2014 the flaw it identified (n==1 treated as prime) is explicitly disclaimed as a correctness issue, not security. Per the rubric, that's an out-of-lane mention and doesn't block this category.\n\nVERDICT: OK",
+  "secs": 14.51
+ },
+ {
+  "id": "prime-haiku-security",
+  "rep": 2,
+  "verdict": "OK",
+  "text": "The correctness bug is explicitly disclaimed as out-of-lane (\"not a security issue\") in a security review, so it doesn't block this category. No genuine in-lane security defect is described.\n\nVERDICT: OK",
+  "secs": 17.17
+ },
+ {
+  "id": "prime-haiku-security",
+  "rep": 3,
+  "verdict": "OK",
+  "text": "The security review found no in-lane security flaws \u2014 it explicitly attributes the correctness bug to a different lens (\"not a security issue\"), which per the rubric is an out-of-lane mention, not a security-category finding.\n\nVERDICT: OK",
+  "secs": 15.04
+ },
+ {
+  "id": "prime-haiku-performance",
+  "rep": 1,
+  "verdict": "OK",
+  "text": "The review explicitly identifies the correctness bug as out-of-lane (\"not a performance issue\") and finds no in-lane performance defect \u2014 trial division to \u221an with even-skipping is legitimately efficient.\n\nVERDICT: OK",
+  "secs": 16.16
+ },
+ {
+  "id": "prime-haiku-performance",
+  "rep": 2,
+  "verdict": "OK",
+  "text": "The review correctly identifies no performance issues and explicitly flags the correctness bug as \"not a performance issue\" \u2014 an accurate out-of-lane mention, not an in-lane finding.\n\nVERDICT: OK",
+  "secs": 10.8
+ },
+ {
+  "id": "prime-haiku-performance",
+  "rep": 3,
+  "verdict": "OK",
+  "text": "The review correctly identifies no performance issues and explicitly flags the off-by-one correctness bug as \"not a performance issue\" \u2014 an accurate out-of-lane mention, not an in-lane finding.\n\nVERDICT: OK",
+  "secs": 12.81
+ },
+ {
+  "id": "prime-haiku-style",
+  "rep": 1,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 11.5
+ },
+ {
+  "id": "prime-haiku-style",
+  "rep": 2,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 13.46
+ },
+ {
+  "id": "prime-haiku-style",
+  "rep": 3,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 13.86
+ },
+ {
+  "id": "prime-haiku-test_coverage",
+  "rep": 1,
+  "verdict": "BLOCK",
+  "text": "The correctness bug (`is_prime(1)` returning True) genuinely belongs to test_coverage lane too, since it's the test file encoding incorrect expected behavior \u2014 but the rubric's third bullet lists that as a blocking category regardless of lens. The other gaps listed are legitimate but non-blocking coverage suggestions for correctly-working behavior.\n\nVERDICT: BLOCK",
+  "secs": 15.82
+ },
+ {
+  "id": "prime-haiku-test_coverage",
+  "rep": 2,
+  "verdict": "BLOCK",
+  "text": "VERDICT: BLOCK",
+  "secs": 19.41
+ },
+ {
+  "id": "prime-haiku-test_coverage",
+  "rep": 3,
+  "verdict": "BLOCK",
+  "text": "The correctness bug (test asserting `is_prime(1)` is True when it shouldn't be) is explicitly flagged by this reviewer, but that's a correctness lens issue, not test_coverage \u2014 though the rubric says correctness bugs block regardless. However, the review itself notes this is a defect in the code/test, described within the test_coverage review but it's substantively a correctness issue. The rubric states \"A correctness bug, including tests that encode incorrect behavior as expected\" should BLOCK \u2014 it doesn't carve out correctness as exclusively another lens's territory the way it does for explicit self-attribution. Here the reviewer didn't say \"this is a correctness issue, not test_coverage\" as a disclaimer \u2014 it just noted it as a fact.\n\nVERDICT: BLOCK",
+  "secs": 15.0
+ },
+ {
+  "id": "prime-default-security",
+  "rep": 1,
+  "verdict": "OK",
+  "text": "The review contains no in-lane security finding \u2014 it explicitly labels the only defect as a correctness bug, not a security issue, which per the rubric's lane check is an out-of-lane mention that doesn't block this category. No injection, unsafe input handling, or other security flaw is described.\n\nVERDICT: OK",
+  "secs": 7.38
+ },
+ {
+  "id": "prime-default-security",
+  "rep": 2,
+  "verdict": "OK",
+  "text": "The review explicitly disclaims the logic bug as \"not a security issue\" \u2014 that's an out-of-lane mention, not an in-lane security finding. No genuine security defect is described.\n\nVERDICT: OK",
+  "secs": 9.06
+ },
+ {
+  "id": "prime-default-security",
+  "rep": 3,
+  "verdict": "OK",
+  "text": "Reasoning: The review explicitly finds no security-lens issues (no injection, unsafe input, command execution). It does note a correctness bug (n==1 returning True), but explicitly frames it as \"not a security issue\" \u2014 an out-of-lane mention, which per the rubric does not block the security category. There is no in-lane security defect described, hedged or otherwise.\n\nVERDICT: OK",
+  "secs": 12.61
+ },
+ {
+  "id": "prime-default-performance",
+  "rep": 1,
+  "verdict": "OK",
+  "text": "The correctness bug (is_prime(1) returning True) is explicitly flagged by the reviewer as not strictly performance (\"not strictly performance, but critical\"), and the rubric says an out-of-lane mention doesn't block this category \u2014 it belongs to whichever lens owns correctness. No genuine performance defect is raised (the algorithm is praised as efficient).\n\nVERDICT: OK",
+  "secs": 9.33
+ },
+ {
+  "id": "prime-default-performance",
+  "rep": 2,
+  "verdict": "BLOCK",
+  "text": "The review correctly identifies is_prime(1) returning True as a correctness bug (in-lane per the rubric: \"A correctness bug, including tests that encode incorrect behavior as expected\"), and stays within the performance lens without disclaiming it elsewhere.\n\nVERDICT: BLOCK",
+  "secs": 9.13
+ },
+ {
+  "id": "prime-default-performance",
+  "rep": 3,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 9.52
+ },
+ {
+  "id": "prime-default-style",
+  "rep": 1,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 10.73
+ },
+ {
+  "id": "prime-default-style",
+  "rep": 2,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 8.71
+ },
+ {
+  "id": "prime-default-style",
+  "rep": 3,
+  "verdict": "OK",
+  "text": "The style review found a genuine correctness bug (`is_prime(1)` returning `True`), but explicitly frames it as a correctness issue, not a style issue \u2014 no in-lane style defect is raised.\n\nVERDICT: OK",
+  "secs": 8.22
+ },
+ {
+  "id": "prime-default-test_coverage",
+  "rep": 1,
+  "verdict": "OK",
+  "text": "All in-lane findings are genuine coverage gaps on functionality that already works correctly (missing test cases for negatives, more primes, more composites, boundary values). The one true defect mentioned \u2014 `is_prime(1)` returning `True` and the bad test \u2014 is a correctness bug, explicitly out-of-lane for test_coverage per the rubric.\n\nVERDICT: OK",
+  "secs": 10.29
+ },
+ {
+  "id": "prime-default-test_coverage",
+  "rep": 2,
+  "verdict": "BLOCK",
+  "text": "The review's core coverage-gap items are legitimate suggestions and would be OK on their own. But it also flags that `test_one_is_prime()` encodes incorrect behavior as expected (asserting `is_prime(1) == True`, which is mathematically wrong) \u2014 this is a correctness bug embedded in a test, explicitly identified within the test_coverage lens itself (not attributed to a different lens). The rubric explicitly requires BLOCK for \"tests that encode incorrect behavior as expected.\"\n\nVERDICT: BLOCK",
+  "secs": 12.93
+ },
+ {
+  "id": "prime-default-test_coverage",
+  "rep": 3,
+  "verdict": "BLOCK",
+  "text": "VERDICT: BLOCK",
+  "secs": 12.51
+ },
+ {
+  "id": "prime-sonnet-test_coverage-silent",
+  "rep": 1,
+  "verdict": "BLOCK",
+  "text": "Gap #1 (no odd prime beyond special-cased values ever tested True) is a genuine test-coverage gap \u2014 the suite can't detect a broken primality loop. This is squarely in-lane for test_coverage, not a hedge-dismissible or out-of-lane mention.\n\nVERDICT: BLOCK",
+  "secs": 8.03
+ },
+ {
+  "id": "prime-sonnet-test_coverage-silent",
+  "rep": 2,
+  "verdict": "BLOCK",
+  "text": "Gap #1 (no odd prime beyond 2 ever tested passing) is a genuine test-coverage defect in-lane \u2014 it's a real hole that would let a broken loop bound go undetected, not a hedge to dismiss.\n\nVERDICT: BLOCK",
+  "secs": 7.27
+ },
+ {
+  "id": "prime-sonnet-test_coverage-silent",
+  "rep": 3,
+  "verdict": "BLOCK",
+  "text": "Gap #1 (no odd prime past special cases exercised, e.g. 7/13) is a genuine in-lane test-coverage defect that could hide a broken loop \u2014 the rest are accurate coverage suggestions for otherwise-correct behavior.\n\nVERDICT: BLOCK",
+  "secs": 7.97
+ },
+ {
+  "id": "dedupe-haiku-performance-a",
+  "rep": 1,
+  "verdict": "BLOCK",
+  "text": "The review identifies an O(n\u00b2) complexity defect in a function whose stated purpose is deduplication \u2014 a genuinely in-lane performance issue, described clearly rather than as an out-of-lane mention.\n\nVERDICT: BLOCK",
+  "secs": 11.24
+ },
+ {
+  "id": "dedupe-haiku-performance-a",
+  "rep": 2,
+  "verdict": "BLOCK",
+  "text": "VERDICT: BLOCK",
+  "secs": 9.71
+ },
+ {
+  "id": "dedupe-haiku-performance-a",
+  "rep": 3,
+  "verdict": "BLOCK",
+  "text": "The review correctly identifies the O(n\u00b2) list-membership issue in a lens-appropriate function, provides a concrete example and correct fix. This is squarely a performance-lens defect, not hedged away or attributed elsewhere.\n\nVERDICT: BLOCK",
+  "secs": 9.37
+ },
+ {
+  "id": "dedupe-haiku-performance-b",
+  "rep": 1,
+  "verdict": "BLOCK",
+  "text": "The review correctly identifies an in-lane defect: O(n\u00b2) membership checking in a duplicate-removal function, which is exactly the algorithmic complexity issue the rubric says must block.\n\nVERDICT: BLOCK",
+  "secs": 7.7
+ },
+ {
+  "id": "dedupe-haiku-performance-b",
+  "rep": 2,
+  "verdict": "BLOCK",
+  "text": "The review correctly identifies an in-lane O(n\u00b2) complexity defect in a function whose purpose is exactly that operation, described concretely with clear reasoning \u2014 no hedging needed to dismiss.\n\nVERDICT: BLOCK",
+  "secs": 8.97
+ },
+ {
+  "id": "dedupe-haiku-performance-b",
+  "rep": 3,
+  "verdict": "BLOCK",
+  "text": "The review correctly identifies an O(n\u00b2) complexity defect in a function whose stated purpose is exactly deduplication, squarely in the performance lens.\n\nVERDICT: BLOCK",
+  "secs": 10.44
+ },
+ {
+  "id": "dedupe-haiku-performance-c",
+  "rep": 1,
+  "verdict": "BLOCK",
+  "text": "The review correctly identifies an in-lane O(n\u00b2) complexity defect in a function whose stated purpose is exactly that operation, with a concrete failure scenario and correct fix.\n\nVERDICT: BLOCK",
+  "secs": 10.63
+ },
+ {
+  "id": "dedupe-haiku-performance-c",
+  "rep": 2,
+  "verdict": "BLOCK",
+  "text": "The defect described (O(n\u00b2) via `item not in result`) genuinely belongs to the performance lens, and the review correctly ties it to the function's stated purpose. It's not hedged away or attributed elsewhere.\n\nVERDICT: BLOCK",
+  "secs": 9.44
+ },
+ {
+  "id": "dedupe-haiku-performance-c",
+  "rep": 3,
+  "verdict": "BLOCK",
+  "text": "The review correctly identifies an O(n\u00b2) complexity issue in a function whose stated purpose is deduplication \u2014 squarely in-lane for a performance review, with a concrete failure scenario and a correct fix.\n\nVERDICT: BLOCK",
+  "secs": 8.19
+ },
+ {
+  "id": "prime-sonnet-missrun-security",
+  "rep": 1,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 9.36
+ },
+ {
+  "id": "prime-sonnet-missrun-security",
+  "rep": 2,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 9.43
+ },
+ {
+  "id": "prime-sonnet-missrun-security",
+  "rep": 3,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 9.04
+ },
+ {
+  "id": "prime-sonnet-missrun-performance",
+  "rep": 1,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 8.33
+ },
+ {
+  "id": "prime-sonnet-missrun-performance",
+  "rep": 2,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 10.63
+ },
+ {
+  "id": "prime-sonnet-missrun-performance",
+  "rep": 3,
+  "verdict": "OK",
+  "text": "The performance review correctly analyzes the algorithm as O(\u221an) with no complexity defects, and appropriately flags the is_prime(1) bug as out-of-lane (correctness, not performance) rather than claiming it as a performance finding. No in-lane defect is described.\n\nVERDICT: OK",
+  "secs": 9.76
+ },
+ {
+  "id": "prime-sonnet-missrun-style",
+  "rep": 1,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 9.39
+ },
+ {
+  "id": "prime-sonnet-missrun-style",
+  "rep": 2,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 7.51
+ },
+ {
+  "id": "prime-sonnet-missrun-style",
+  "rep": 3,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 12.72
+ },
+ {
+  "id": "prime-sonnet-missrun-test_coverage",
+  "rep": 1,
+  "verdict": "OK",
+  "text": "All five gaps described (n>9, larger primes, negatives, n=3, even composites like 4/100) are genuine test-coverage suggestions for behavior that already works correctly \u2014 no correctness bug, security flaw, or algorithmic complexity defect is described.\n\nVERDICT: OK",
+  "secs": 14.64
+ },
+ {
+  "id": "prime-sonnet-missrun-test_coverage",
+  "rep": 2,
+  "verdict": "OK",
+  "text": "All five findings are legitimately test_coverage gaps (missing boundary/edge case tests for correctly-working behavior), not correctness bugs, security flaws, or complexity defects. Nothing here meets the BLOCK rubric.\n\nVERDICT: OK",
+  "secs": 11.08
+ },
+ {
+  "id": "prime-sonnet-missrun-test_coverage",
+  "rep": 3,
+  "verdict": "OK",
+  "text": "All five gaps listed (n>9, larger prime, negative number, n=3 boundary, even composite besides 0) are missing-test-case coverage suggestions for behavior that already works correctly \u2014 no security, complexity, or correctness defect is described.\n\nVERDICT: OK",
+  "secs": 11.11
+ },
+ {
+  "id": "fabricated-clean-security",
+  "rep": 1,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 7.27
+ },
+ {
+  "id": "fabricated-clean-security",
+  "rep": 2,
+  "verdict": "OK",
+  "text": "The review states \"no injection surface, no unsafe operations\" for a plain file read with no input handling \u2014 no in-lane security defect is asserted at all, hedged or otherwise. Nothing here matches the block criteria.\n\nVERDICT: OK",
+  "secs": 10.76
+ },
+ {
+  "id": "fabricated-clean-security",
+  "rep": 3,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 7.45
+ },
+ {
+  "id": "fabricated-clean-performance",
+  "rep": 1,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 8.47
+ },
+ {
+  "id": "fabricated-clean-performance",
+  "rep": 2,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 6.68
+ },
+ {
+  "id": "fabricated-clean-performance",
+  "rep": 3,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 7.13
+ },
+ {
+  "id": "fabricated-clean-style",
+  "rep": 1,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 7.29
+ },
+ {
+  "id": "fabricated-clean-style",
+  "rep": 2,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 8.92
+ },
+ {
+  "id": "fabricated-clean-style",
+  "rep": 3,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 7.31
+ },
+ {
+  "id": "fabricated-clean-test_coverage",
+  "rep": 1,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 8.81
+ },
+ {
+  "id": "fabricated-clean-test_coverage",
+  "rep": 2,
+  "verdict": "OK",
+  "text": "The review states \"No issues found\" with no defects mentioned at all \u2014 nothing in-lane to block on.\n\nVERDICT: OK",
+  "secs": 6.94
+ },
+ {
+  "id": "fabricated-clean-test_coverage",
+  "rep": 3,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 7.09
+ },
+ {
+  "id": "path-sonnet-security-1",
+  "rep": 1,
+  "verdict": "BLOCK",
+  "text": "The review describes an in-lane security defect (path traversal via unsanitized `filename` in `open()`), triggerable under input the function's signature doesn't rule out \u2014 this matches the BLOCK criteria even though it's hedged with \"if untrusted input.\"\n\nVERDICT: BLOCK",
+  "secs": 10.02
+ },
+ {
+  "id": "path-sonnet-security-1",
+  "rep": 2,
+  "verdict": "BLOCK",
+  "text": "The review describes an in-lane security defect (path traversal / arbitrary file read via unsanitized `filename` in `open()`), hedged conditionally (\"if this function is ever called with untrusted input\") but explicitly not treated as unproven under the rubric. It correctly notes the current test confirms intentional design, but per the rubric a hedged in-lane defect still blocks.\n\nVERDICT: BLOCK",
+  "secs": 11.88
+ },
+ {
+  "id": "path-sonnet-security-1",
+  "rep": 3,
+  "verdict": "BLOCK",
+  "text": "The review describes an in-lane security defect (path traversal / no trust boundary on `filename`), conditionally hedged (\"if this function is ever called with untrusted input\"), which the rubric explicitly says still blocks.\n\nVERDICT: BLOCK",
+  "secs": 9.26
+ },
+ {
+  "id": "path-sonnet-security-2",
+  "rep": 1,
+  "verdict": "BLOCK",
+  "text": "The review identifies a genuine in-lane security defect (path traversal / arbitrary file read via unvalidated `filename`), described conditionally but not dismissed \u2014 per the rubric, hedged phrasing on a real in-lane issue still blocks.\n\nVERDICT: BLOCK",
+  "secs": 10.44
+ },
+ {
+  "id": "path-sonnet-security-2",
+  "rep": 2,
+  "verdict": "BLOCK",
+  "text": "VERDICT: BLOCK",
+  "secs": 7.48
+ },
+ {
+  "id": "path-sonnet-security-2",
+  "rep": 3,
+  "verdict": "BLOCK",
+  "text": "The review describes an in-lane security defect (path traversal / arbitrary file read via unvalidated `filename`), hedged with \"if untrusted input controls this argument\" \u2014 per the rubric this hedge doesn't excuse it from blocking.\n\nVERDICT: BLOCK",
+  "secs": 7.35
+ },
+ {
+  "id": "path-sonnet-security-3",
+  "rep": 1,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 7.19
+ },
+ {
+  "id": "path-sonnet-security-3",
+  "rep": 2,
+  "verdict": "OK",
+  "text": "No security defect described in-lane; path traversal explicitly ruled out as not applicable given the trust boundary, and no injection vector exists per the review.\n\nVERDICT: OK",
+  "secs": 10.47
+ },
+ {
+  "id": "path-sonnet-security-3",
+  "rep": 3,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 7.54
+ },
+ {
+  "id": "dedupe-sonnet-performance-1",
+  "rep": 1,
+  "verdict": "BLOCK",
+  "text": "The review correctly identifies an O(n\u00b2) complexity defect in the function whose stated purpose is exactly this operation (`remove_duplicates`), with a valid fix and correct in-lane attribution.\n\nVERDICT: BLOCK",
+  "secs": 8.26
+ },
+ {
+  "id": "dedupe-sonnet-performance-1",
+  "rep": 2,
+  "verdict": "BLOCK",
+  "text": "The performance issue described is a genuine O(n\u00b2) algorithmic complexity defect in a function whose stated purpose is deduplication \u2014 squarely in-lane and correctly attributed. No hedging dismissal, no out-of-lane confusion.\n\nVERDICT: BLOCK",
+  "secs": 8.83
+ },
+ {
+  "id": "dedupe-sonnet-performance-1",
+  "rep": 3,
+  "verdict": "BLOCK",
+  "text": "The review correctly identifies an O(n\u00b2) complexity defect in a function whose entire purpose is deduplication, described concretely (not hedged as speculative) with a valid fix.\n\nVERDICT: BLOCK",
+  "secs": 8.65
+ },
+ {
+  "id": "dedupe-sonnet-performance-2",
+  "rep": 1,
+  "verdict": "BLOCK",
+  "text": "The review correctly identifies an O(n\u00b2) complexity defect in `remove_duplicates`, which is in-lane for the performance lens and is a genuine algorithmic defect regardless of hedging.\n\nVERDICT: BLOCK",
+  "secs": 8.98
+ },
+ {
+  "id": "dedupe-sonnet-performance-2",
+  "rep": 2,
+  "verdict": "BLOCK",
+  "text": "The review correctly identifies an in-lane O(n\u00b2) complexity defect in a function whose purpose is deduplication, matching the rubric's block criteria exactly.\n\nVERDICT: BLOCK",
+  "secs": 8.86
+ },
+ {
+  "id": "dedupe-sonnet-performance-2",
+  "rep": 3,
+  "verdict": "BLOCK",
+  "text": "The review correctly identifies an in-lane O(n\u00b2) performance defect in a function whose stated purpose is exactly this operation, per the rubric.\n\nVERDICT: BLOCK",
+  "secs": 7.69
+ },
+ {
+  "id": "dedupe-sonnet-style-1",
+  "rep": 1,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 7.56
+ },
+ {
+  "id": "dedupe-sonnet-style-1",
+  "rep": 2,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 8.05
+ },
+ {
+  "id": "dedupe-sonnet-style-1",
+  "rep": 3,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 6.49
+ },
+ {
+  "id": "path-sonnet-test_coverage-1",
+  "rep": 1,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 7.09
+ },
+ {
+  "id": "path-sonnet-test_coverage-1",
+  "rep": 2,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 7.86
+ },
+ {
+  "id": "path-sonnet-test_coverage-1",
+  "rep": 3,
+  "verdict": "OK",
+  "text": "Looking at this review, all eight items are missing-test-case suggestions (directory path, permission errors, encoding issues, unicode content, relative paths, invalid types, large files, resource cleanup). None of them assert that the code currently produces incorrect output, has a security flaw, or has an algorithmic complexity defect \u2014 they're all \"add a test for behavior that isn't covered yet,\" which the rubric explicitly marks OK (\"coverage suggestions for behavior that already works correctly\").\n\nNo hedged in-lane security/correctness/complexity claims are present to trigger the BLOCK rubric.\n\nVERDICT: OK",
+  "secs": 9.92
+ }
+]

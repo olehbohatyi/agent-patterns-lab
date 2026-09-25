@@ -1,0 +1,292 @@
+[
+ {
+  "id": "prime-haiku-security",
+  "lens": "security",
+  "review": "**No issues found** from a security perspective.\n\nThe code has no injection vulnerabilities, unsafe input handling, or exploitable security flaws. The `is_prime()` function performs only arithmetic operations on the input and doesn't process external data, execute commands, or interact with system resources.\n\n**Note:** There is a **correctness bug** (not a security issue) \u2014 the function returns `True` for `n == 1`, but mathematically 1 is not considered prime. The first test `test_one_is_prime()` is incorrect and will pass despite the wrong result.",
+  "provenance": "recovered-verbatim",
+  "origin": "Phase 3 haiku tiering run (is_prime(1)==True planted bug), full reviews printed",
+  "transcript_line": 1139,
+  "label": "OK",
+  "label_rationale": "explicit 'correctness bug (not a security issue)'",
+  "contestable": false
+ },
+ {
+  "id": "prime-haiku-performance",
+  "lens": "performance",
+  "review": "**No performance issues found** in the prime-checking algorithm itself.\n\nThe implementation uses a standard trial-division approach with good efficiency:\n- \u2713 Checks divisibility only up to \u221an (not all the way to n)\n- \u2713 Skips even numbers after handling 2\n- \u2713 Loop iterations are minimal and necessary\n\n**However, there is a correctness bug** (not a performance issue): The function returns `True` for `n == 1`, but **1 is not a prime number** by mathematical definition. A prime is a natural number *greater than 1* with no divisors except 1 and itself. \n\nThe test `test_one_is_prime()` expecting `is_prime(1)` to return `True` is incorrect. This should return `False`. The line `if n == 1: return True` should be removed (the subsequent `if n < 2: return False` already handles 1 correctly).",
+  "provenance": "recovered-verbatim",
+  "origin": "Phase 3 haiku tiering run (is_prime(1)==True planted bug), full reviews printed",
+  "transcript_line": 1139,
+  "label": "OK",
+  "label_rationale": "explicit 'correctness bug (not a performance issue)'",
+  "contestable": false
+ },
+ {
+  "id": "prime-haiku-style",
+  "lens": "style",
+  "review": "No issues found.\n\nThe code follows PEP8 conventions:\n- Function and variable names use snake_case\n- Proper indentation and spacing\n- Clear, readable logic\n- Appropriate short variable names (`n` for number parameter, `i` for loop counter)\n- Clean imports in tests\n\nThe only concern is **correctness, not style**: the function returns `True` for `n == 1`, but 1 is not a prime number by mathematical definition. The test `test_one_is_prime()` also expects this behavior, so both the implementation and test are internally consistent\u2014but mathematically incorrect.",
+  "provenance": "recovered-verbatim",
+  "origin": "Phase 3 haiku tiering run (is_prime(1)==True planted bug), full reviews printed",
+  "transcript_line": 1139,
+  "label": "OK",
+  "label_rationale": "explicit 'correctness, not style'",
+  "contestable": false
+ },
+ {
+  "id": "prime-haiku-test_coverage",
+  "lens": "test_coverage",
+  "review": "Looking at the test file, I've identified the following **coverage gaps**:\n\n1. **Negative numbers** \u2014 no tests for negative inputs (e.g., -1, -5). The function returns False for n < 2, but this edge case is uncovered.\n\n2. **Missing small primes** \u2014 only tests 2. Should test 3, 5, 7, 11, etc. to verify the loop logic works on primes.\n\n3. **Missing small composites** \u2014 only tests 9. Should test other composites like 4, 6, 8, 10, 15, 21, 25, etc., especially:\n   - Even composites (4, 6, 8, 10)\n   - Odd composites that aren't perfect squares (15, 21, 35)\n   - Perfect square composites (4, 9, 25, 49)\n\n4. **Larger numbers** \u2014 no tests for numbers beyond single digits to verify the `sqrt(n)` optimization works correctly for larger inputs.\n\n**Note:** There's also a **correctness issue** in the code itself: `is_prime(1)` returns `True`, but 1 is not considered prime by the mathematical definition. The test `test_one_is_prime()` is asserting incorrect behavior.",
+  "provenance": "recovered-verbatim",
+  "origin": "Phase 3 haiku tiering run (is_prime(1)==True planted bug), full reviews printed",
+  "transcript_line": 1139,
+  "label": "BLOCK",
+  "label_rationale": "test_coverage owns 'tests encoding incorrect behavior'; says test asserts a wrong fact; no lane disclaimer",
+  "contestable": true
+ },
+ {
+  "id": "prime-default-security",
+  "lens": "security",
+  "review": "No issues found.\n\nThe code contains no injection vulnerabilities, unsafe input handling, command execution, or other security issues. It's a simple mathematical function with no I/O, no external data processing, and no exposed attack surfaces.\n\n**Note:** There is a **logic bug** (not a security issue): the function returns `True` for `n == 1`, but 1 is not considered prime by mathematical definition. The test also expects this incorrect behavior, so they're consistent with each other, but the specification itself is wrong.",
+  "provenance": "recovered-verbatim",
+  "origin": "Phase 3 run on is_prime(1)==True, reviewer model not recorded",
+  "transcript_line": 1154,
+  "label": "OK",
+  "label_rationale": "explicit 'logic bug (not a security issue)'",
+  "contestable": false
+ },
+ {
+  "id": "prime-default-performance",
+  "lens": "performance",
+  "review": "Looking at the `is_prime` function, the algorithm itself is efficient \u2014 it uses the standard square-root optimization and skips even divisors, making it O(\u221an), which is good for basic primality testing.\n\nHowever, there is a **correctness issue** (not strictly performance, but critical):\n\n**Issue: `is_prime(1)` returns `True`, but 1 is not prime**\n\nThe line `if n == 1: return True` is mathematically incorrect. By definition, prime numbers are natural numbers greater than 1 with no positive divisors other than 1 and itself. The order of checks should be reversed:\n\n```python\nif n < 2:\n    return False  # Catches both 0, 1, and negatives\n```\n\nThis single check handles all non-prime values \u2264 1 and is simpler than the current two separate checks.\n\n**Current checks:**\n```python\nif n == 1:\n    return True      # \u274c Wrong!\nif n < 2:\n    return False\n```\n\n**Should be:**\n```python\nif n < 2:\n    return False     # \u2713 Correct\n```\n\nThe test `test_one_is_prime` also expects 1 to be prime, which is a test bug rather than a code bug \u2014 both need correction to match the actual mathematical definition of prime numbers.",
+  "provenance": "recovered-verbatim",
+  "origin": "Phase 3 run on is_prime(1)==True, reviewer model not recorded",
+  "transcript_line": 1154,
+  "label": "OK",
+  "label_rationale": "'correctness issue (not strictly performance...)' \u2014 out-of-lane, but softer wording",
+  "contestable": true
+ },
+ {
+  "id": "prime-default-style",
+  "lens": "style",
+  "review": "**No style issues found.**\n\nThe code follows PEP8 well: function and test names are clear and use snake_case, indentation is correct, spacing is proper, and line lengths are reasonable.\n\nHowever, there **is a correctness issue**: the function returns `True` for `is_prime(1)`, but by mathematical definition, 1 is not a prime number. This contradicts the test, which expects 1 to be prime \u2014 so either the function logic or the test is wrong, depending on the intended behavior.",
+  "provenance": "recovered-verbatim",
+  "origin": "Phase 3 run on is_prime(1)==True, reviewer model not recorded",
+  "transcript_line": 1154,
+  "label": "OK",
+  "label_rationale": "'No style issues... However, correctness issue' \u2014 implicit out-of-lane",
+  "contestable": true
+ },
+ {
+  "id": "prime-default-test_coverage",
+  "lens": "test_coverage",
+  "review": "Looking at the code and tests, I found several **coverage gaps**:\n\n1. **No tests for negative numbers** \u2014 The code handles `n < 2` but there's no test for negative inputs (e.g., -5, -1).\n\n2. **Limited prime coverage** \u2014 Only tests 2 (the smallest prime). Missing tests for other small primes: 3, 5, 7, 11, 13, etc.\n\n3. **Limited composite coverage** \u2014 Only tests 9 (odd composite). Missing tests for:\n   - Even composites: 4, 6, 8, 10\n   - Other odd composites: 15, 21, 25\n\n4. **No large prime tests** \u2014 Tests only work with small numbers. Should verify correctness on larger primes (e.g., 97, 101).\n\n5. **Boundary edge case** \u2014 No test near the sqrt cutoff (e.g., n=121 = 11\u00d711, testing the algorithm's loop boundary).\n\n---\n\n**Also note:** There's a **semantic bug** in the code itself: `is_prime(1)` returns `True`, but mathematically 1 is not considered prime. The test `test_one_is_prime()` tests this behavior, but it's asserting an incorrect mathematical fact. This should either be:\n- Fixed in the code (`n <= 1` instead of `n < 2`), or  \n- Acknowledged as intended behavior",
+  "provenance": "recovered-verbatim",
+  "origin": "Phase 3 run on is_prime(1)==True, reviewer model not recorded",
+  "transcript_line": 1154,
+  "label": "BLOCK",
+  "label_rationale": "same as prime-haiku-test_coverage",
+  "contestable": true
+ },
+ {
+  "id": "prime-sonnet-test_coverage-silent",
+  "lens": "test_coverage",
+  "review": "Reviewing the test file against `is_prime`'s branches for uncovered paths.\n\n**Gaps found:**\n\n1. **No odd prime ever asserted `True`.** The core loop (`for i in range(3, int(n**0.5)+1, 2)`) that actually determines primality for numbers beyond the special-cased 2 is never exercised on a passing path \u2014 e.g. `is_prime(7)`, `is_prime(13)`. All four tests either hit early-return branches (`n==1`, `n<2`, `n==2`) or the `n%2==0`/composite branch via 9. A bug in the loop itself (e.g. wrong range bounds) would go undetected.\n\n2. **No even composite > 2 tested.** `test_zero_is_not_prime` covers `n<2`, but the `n % 2 == 0` branch (for even numbers \u2265 4) is untested \u2014 e.g. `is_prime(4)` or `is_prime(10)`.\n\n3. **No perfect-square boundary case.** `int(n ** 0.5) + 1` is an off-by-one-prone expression; `is_prime(25)` (sqrt exactly 5) is a classic edge case that could slip through if the range bound were wrong.\n\n4. **No negative number tested.** `test_zero_is_not_prime` only covers `n=0`; a negative input like `is_prime(-5)` takes the same `n < 2` branch but isn't explicitly verified.\n\n5. **No larger/two-digit prime tested** to build confidence the loop terminates correctly for `n` where `int(n**0.5)` is nontrivial (e.g. `is_prime(97)`).\n\nOf these, gap #1 is the most significant \u2014 the test suite currently cannot detect a broken primality loop as long as the special-cased values (1, 0, 2, 9) still behave correctly.",
+  "provenance": "recovered-verbatim",
+  "origin": "Phase 3 sonnet run, owner lens silent on the bug",
+  "transcript_line": 1228,
+  "label": "OK",
+  "label_rationale": "coverage suggestions only; owner lens silent on the bug (reviewer-level miss)",
+  "contestable": false
+ },
+ {
+  "id": "dedupe-haiku-performance-a",
+  "lens": "performance",
+  "review": "Looking at the code, I found a significant performance issue:\n\n**O(n\u00b2) time complexity from list membership checks**\n\nThe line `if item not in result` searches through the entire `result` list each iteration. For an input of size n, this performs:\n- Item 1: check 1 item (worst case)\n- Item 2: check 2 items\n- Item 3: check 3 items\n- ...\n- Item n: check n items\n\nTotal: ~n\u00b2/2 comparisons for large n.\n\n**Example impact:** Removing duplicates from 10,000 items performs ~50 million comparisons. A 100,000-item list would perform ~5 billion comparisons.\n\n**Fix:** Use a set to track seen items (O(1) lookup):\n\n```python\ndef remove_duplicates(items):\n    seen = set()\n    result = []\n    for item in items:\n        if item not in seen:\n            seen.add(item)\n            result.append(item)\n    return result\n```\n\nThis reduces complexity to **O(n)** \u2014 roughly 10,000x faster for 10,000 items. The tests will still pass; only the performance improves.",
+  "provenance": "recovered-verbatim",
+  "origin": "Phase 3 haiku run, O(n^2) remove_duplicates",
+  "transcript_line": 1238,
+  "label": "BLOCK",
+  "label_rationale": "in-lane O(n^2) in a function whose purpose is dedupe",
+  "contestable": false
+ },
+ {
+  "id": "dedupe-haiku-performance-b",
+  "lens": "performance",
+  "review": "**Performance Issue Found:**\n\n**Inefficient membership checking in loop** (O(n\u00b2) time complexity)\n\nThe `if item not in result` check performs a linear search through the `result` list for each item. With n items, this is O(n\u00b2) overall:\n- Each `in` check takes O(k) time where k is the current size of `result`\n- Across all items: 1 + 2 + 3 + ... + n = O(n\u00b2)\n\n**Better approach:** Use a set for O(1) membership checks:\n\n```python\ndef remove_duplicates(items):\n    seen = set()\n    result = []\n    for item in items:\n        if item not in seen:\n            seen.add(item)\n            result.append(item)\n    return result\n```\n\nThis reduces time complexity to **O(n)** while still preserving insertion order.\n\nAlternatively, the most concise Python idiom:\n```python\ndef remove_duplicates(items):\n    return list(dict.fromkeys(items))\n```\n\nBoth approaches are suitable for the test cases and significantly faster on larger inputs.",
+  "provenance": "recovered-verbatim",
+  "origin": "Phase 3 haiku repeat run 1, O(n^2) remove_duplicates",
+  "transcript_line": 1243,
+  "label": "BLOCK",
+  "label_rationale": "same",
+  "contestable": false
+ },
+ {
+  "id": "dedupe-haiku-performance-c",
+  "lens": "performance",
+  "review": "The `remove_duplicates` function has a **quadratic time complexity O(n\u00b2) performance issue**:\n\n**Problem:** The line `if item not in result` performs a linear search through the result list for every item. With n items, this means up to n \u00d7 n comparisons in the worst case.\n\n**Failure scenario:** On a list of 10,000 unique items, the function performs ~50 million membership checks instead of the 10,000 needed. This becomes noticeably slow even at moderate input sizes.\n\n**Why it happens:** Lists in Python have O(n) lookup time. The membership check is done inside a loop, making the overall algorithm O(n\u00b2).\n\n**Fix:** Use a set for membership checks (O(1) average) instead:\n```python\ndef remove_duplicates(items):\n    seen = set()\n    result = []\n    for item in items:\n        if item not in seen:\n            seen.add(item)\n            result.append(item)\n    return result\n```\n\nThis reduces time complexity to O(n) while preserving insertion order (and all tests pass unchanged).",
+  "provenance": "recovered-verbatim",
+  "origin": "Phase 3 haiku repeat run 2, O(n^2) remove_duplicates",
+  "transcript_line": 1243,
+  "label": "BLOCK",
+  "label_rationale": "same",
+  "contestable": false
+ },
+ {
+  "id": "prime-sonnet-missrun-security",
+  "lens": "security",
+  "review": "No issues found.\n\nThe `is_prime` function only takes an integer and performs arithmetic/comparison operations on it \u2014 there's no injection surface (no shell/SQL/eval/file/network I/O), and no unsafe input handling concerns beyond normal Python type behavior (e.g., a non-int argument would raise a `TypeError`, which is standard and not a security issue here). The tests are plain, non-executing assertions with no unsafe input paths either.",
+  "provenance": "recovered-verbatim",
+  "origin": "Phase 3 sonnet run 3 (all four judged OK by the then-current judge)",
+  "transcript_line": 1257,
+  "label": "OK",
+  "label_rationale": "clean",
+  "contestable": false
+ },
+ {
+  "id": "prime-sonnet-missrun-performance",
+  "lens": "performance",
+  "review": "No performance issues found. The algorithm is O(\u221an) trial division with even numbers skipped (checking only odd divisors from 3 to \u221an), which is standard and efficient for a primality test. The loop bound `int(n ** 0.5) + 1` is computed once via `range()`, not recomputed per iteration.\n\n(Out of scope for this review, but worth flagging separately: `is_prime(1)` returns `True`, which is a correctness bug, not a performance one \u2014 1 is not prime.)",
+  "provenance": "recovered-verbatim",
+  "origin": "Phase 3 sonnet run 3 (all four judged OK by the then-current judge)",
+  "transcript_line": 1257,
+  "label": "OK",
+  "label_rationale": "explicit out-of-scope parenthetical",
+  "contestable": false
+ },
+ {
+  "id": "prime-sonnet-missrun-style",
+  "lens": "style",
+  "review": "**Style review:**\n\n1. **No docstring** \u2014 `is_prime` has no docstring explaining its contract (e.g., accepts an int, returns whether it's prime). Would help readability for a public-looking function.\n2. **No type hints** \u2014 `def is_prime(n: int) -> bool:` would be more readable and self-documenting.\n3. **Redundant/awkward branch ordering** \u2014 `if n == 1: return True` followed by `if n < 2: return False` followed by `if n == 2: return True` reads oddly; three separate early-return checks for small values could be consolidated (e.g., a single `if n < 2` guard plus a `n in (2, 3)` check) for clarity.\n4. **Magic literal `0.5`** \u2014 `n ** 0.5` is fine but `math.isqrt(n)` would be both clearer intent-wise and avoid floating-point exponentiation for an integer operation.\n5. Naming (`n`, `i`) and PEP8 formatting (indentation, spacing, line length) are all fine \u2014 no violations there.\n6. Tests: naming and structure are clean and PEP8-compliant; no issues.\n\nNo blocking style issues \u2014 these are minor readability suggestions.",
+  "provenance": "recovered-verbatim",
+  "origin": "Phase 3 sonnet run 3 (all four judged OK by the then-current judge)",
+  "transcript_line": 1257,
+  "label": "OK",
+  "label_rationale": "cosmetic nitpicks; branch ordering not framed as a bug (per NOTES Phase 3)",
+  "contestable": false
+ },
+ {
+  "id": "prime-sonnet-missrun-test_coverage",
+  "lens": "test_coverage",
+  "review": "Gaps in `test_solution.py`:\n\n1. **No test for numbers > 9** \u2014 nothing exercises the main loop beyond a single iteration. A perfect square of an odd prime (e.g. `is_prime(25)` \u2192 False, `is_prime(49)` \u2192 False) is the classic case that catches off-by-one errors in `int(n ** 0.5) + 1`.\n2. **No larger prime** \u2014 e.g. `is_prime(17)` or `is_prime(97)` to confirm the loop correctly returns `True` after checking multiple divisors.\n3. **No negative number test** \u2014 e.g. `is_prime(-5)` should be `False`; not covered (only `0` is tested for the `n < 2` branch).\n4. **No test for `n=3`** \u2014 the smallest input that actually enters the `for` loop (`range(3, int(3**0.5)+1, 2)` is empty), a boundary worth locking down explicitly.\n5. **No even composite besides 0** \u2014 e.g. `is_prime(4)` or `is_prime(100)` isn't tested; only the `n % 2 == 0` branch for `0` is implicitly covered, not a \"real\" even composite like 4.",
+  "provenance": "recovered-verbatim",
+  "origin": "Phase 3 sonnet run 3 (all four judged OK by the then-current judge)",
+  "transcript_line": 1257,
+  "label": "OK",
+  "label_rationale": "coverage gaps only; does not mention the bug (reviewer-level miss)",
+  "contestable": false
+ },
+ {
+  "id": "fabricated-clean-security",
+  "lens": "security",
+  "review": "No issues found. The function performs a simple file read with no user-facing input handling, no injection surface, and no unsafe operations.",
+  "provenance": "recovered-verbatim",
+  "origin": "hand-written 'no issues found' reviews used as the fabricated-review probe (code was the vulnerable read_file_contents)",
+  "transcript_line": 951,
+  "label": "OK",
+  "label_rationale": "clean review text; code was vulnerable but the judge only sees text (known blind spot)",
+  "contestable": false
+ },
+ {
+  "id": "fabricated-clean-performance",
+  "lens": "performance",
+  "review": "No issues found. A single open/read call is optimal for this task.",
+  "provenance": "recovered-verbatim",
+  "origin": "hand-written 'no issues found' reviews used as the fabricated-review probe (code was the vulnerable read_file_contents)",
+  "transcript_line": 951,
+  "label": "OK",
+  "label_rationale": "clean",
+  "contestable": false
+ },
+ {
+  "id": "fabricated-clean-style",
+  "lens": "style",
+  "review": "No issues found. Naming and structure are idiomatic.",
+  "provenance": "recovered-verbatim",
+  "origin": "hand-written 'no issues found' reviews used as the fabricated-review probe (code was the vulnerable read_file_contents)",
+  "transcript_line": 951,
+  "label": "OK",
+  "label_rationale": "clean",
+  "contestable": false
+ },
+ {
+  "id": "fabricated-clean-test_coverage",
+  "lens": "test_coverage",
+  "review": "No issues found. The tests cover the main paths adequately.",
+  "provenance": "recovered-verbatim",
+  "origin": "hand-written 'no issues found' reviews used as the fabricated-review probe (code was the vulnerable read_file_contents)",
+  "transcript_line": 951,
+  "label": "OK",
+  "label_rationale": "clean",
+  "contestable": false
+ },
+ {
+  "id": "path-sonnet-security-1",
+  "lens": "security",
+  "review": "No path validation \u2014 `filename` is passed directly to `open()` with no sanitization or restriction to an intended base directory.\n\n- **Path traversal / arbitrary file read**: `read_file_contents` accepts any path (relative, absolute, or containing `../`) and reads it. If this function is ever called with untrusted input (e.g., a filename from a web request or user upload), an attacker can read arbitrary files on the filesystem (e.g., `/etc/passwd`, config files with secrets, etc.). There's no allowlist, no `os.path.realpath` + prefix check against a base directory, and no rejection of absolute paths or `..` segments.\n\nThis isn't necessarily a bug in isolation \u2014 the function's contract is \"read whatever path you're given,\" and the tests confirm that's intentional (`test_accepts_absolute_path`). But if `filename` ever originates from an untrusted source, this needs a trust-boundary check (restrict to a base directory, reject `..`, reject symlinks pointing outside it) before opening. No other issues (no injection vectors, no unsafe deserialization, resource is properly closed via context manager).",
+  "provenance": "regenerated",
+  "origin": "fresh run of the current reviewer prompt (sonnet, claude -p, local backend) on the code named in the id",
+  "label": "BLOCK",
+  "label_rationale": "in-lane path traversal, hedged ('if ever called with untrusted input', 'not necessarily a bug in isolation') \u2014 anti-hedge clause",
+  "contestable": false
+ },
+ {
+  "id": "path-sonnet-security-2",
+  "lens": "security",
+  "review": "No path validation \u2014 `read_file_contents` opens whatever `filename` it's given. If untrusted input controls this argument (web upload path, API parameter, etc.), it's a **path traversal / arbitrary file read**: e.g. `read_file_contents(\"/etc/passwd\")` or `\"../../../../etc/shadow\"` returns the file's contents with no restriction to an intended directory. There's also no limit on file size (potential DoS via huge files) and no handling of symlinks.\n\nWhether this is exploitable depends entirely on the caller \u2014 the function itself has no notion of a trust boundary, so if it's ever exposed to user-controlled input without an allowlist/base-directory check upstream, that's the vulnerability.\n\nNo other issues (no injection vectors, no shell/eval usage).",
+  "provenance": "regenerated",
+  "origin": "fresh run of the current reviewer prompt (sonnet, claude -p, local backend) on the code named in the id",
+  "label": "BLOCK",
+  "label_rationale": "in-lane path traversal, hedged ('depends entirely on the caller')",
+  "contestable": false
+ },
+ {
+  "id": "path-sonnet-security-3",
+  "lens": "security",
+  "review": "No issues found.\n\nThe function opens the given path and reads its contents with no shell invocation, string interpolation, or deserialization \u2014 there's no injection vector here. Path traversal isn't applicable: the caller fully controls and is expected to supply the path (per the tests, including absolute paths), so this isn't crossing a trust boundary that needs restriction.",
+  "provenance": "regenerated",
+  "origin": "fresh run of the current reviewer prompt (sonnet, claude -p, local backend) on the code named in the id",
+  "label": "OK",
+  "label_rationale": "reports no defect ('path traversal isn't applicable'); reviewer-level miss, judge sees only text",
+  "contestable": false
+ },
+ {
+  "id": "dedupe-sonnet-performance-1",
+  "lens": "performance",
+  "review": "`item not in result` is an O(n) scan through a list for every element, making the whole function O(n\u00b2).\n\n**Issue found:**\n- `remove_duplicates` is O(n\u00b2) in the worst case (all-unique input): the `in` check against `result` (a list) scans linearly each time. For large inputs this degrades badly. Fix: track seen items with a `set` for O(1) membership checks while still building `result` in order:\n\n```python\ndef remove_duplicates(items):\n    seen = set()\n    result = []\n    for item in items:\n        if item not in seen:\n            seen.add(item)\n            result.append(item)\n    return result\n```\n\nNote this requires items to be hashable \u2014 fine for the given tests (ints/strings), but a behavior change if unhashable items (e.g. lists) were ever passed.",
+  "provenance": "regenerated",
+  "origin": "fresh run of the current reviewer prompt (sonnet, claude -p, local backend) on the code named in the id",
+  "label": "BLOCK",
+  "label_rationale": "in-lane O(n^2)",
+  "contestable": false
+ },
+ {
+  "id": "dedupe-sonnet-performance-2",
+  "lens": "performance",
+  "review": "The `item not in result` check inside the loop is O(n) on a list, making the whole function O(n\u00b2) for a list with many unique items.\n\n**Issue:**\n- `remove_duplicates`: `if item not in result` scans the entire `result` list on every iteration. For a large input with many distinct elements, this degrades to O(n\u00b2) time. A better approach uses a `set` to track seen items in O(1) average time per lookup while still preserving order:\n\n```python\ndef remove_duplicates(items):\n    seen = set()\n    result = []\n    for item in items:\n        if item not in seen:\n            seen.add(item)\n            result.append(item)\n    return result\n```\n\nNote: this only works directly for hashable items (fine for the ints/strings in the tests); if unhashable items need support, that's a correctness tradeoff, not a performance one.",
+  "provenance": "regenerated",
+  "origin": "fresh run of the current reviewer prompt (sonnet, claude -p, local backend) on the code named in the id",
+  "label": "BLOCK",
+  "label_rationale": "in-lane O(n^2)",
+  "contestable": false
+ },
+ {
+  "id": "dedupe-sonnet-style-1",
+  "lens": "style",
+  "review": "No issues found.",
+  "provenance": "regenerated",
+  "origin": "fresh run of the current reviewer prompt (sonnet, claude -p, local backend) on the code named in the id",
+  "label": "OK",
+  "label_rationale": "clean",
+  "contestable": false
+ },
+ {
+  "id": "path-sonnet-test_coverage-1",
+  "lens": "test_coverage",
+  "review": "Gaps found:\n\n- No test for a directory path passed instead of a file (`IsADirectoryError`).\n- No test for permission-denied access (`PermissionError`).\n- No test for non-UTF-8/binary content or content with invalid encoding for the default codec (`UnicodeDecodeError`).\n- No test for a file containing multi-byte/unicode characters (e.g. emoji, non-ASCII text) to confirm correct decoding.\n- No test for a relative path input (only absolute/tmp_path-derived paths are covered).\n- No test passing a non-string/invalid type (e.g. `None` or an int) for `filename`.\n- No test for very large file content (behavior is unverified beyond small strings).\n- No test verifying the file handle is properly closed after reading (e.g. via mocking or checking no `ResourceWarning`).",
+  "provenance": "regenerated",
+  "origin": "fresh run of the current reviewer prompt (sonnet, claude -p, local backend) on the code named in the id",
+  "label": "OK",
+  "label_rationale": "coverage suggestions only",
+  "contestable": false
+ }
+]

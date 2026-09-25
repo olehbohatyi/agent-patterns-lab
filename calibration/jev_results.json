@@ -1,0 +1,812 @@
+[
+ {
+  "id": "prime-haiku-security",
+  "rep": 1,
+  "verdict": "OK",
+  "text": "[jev] P(block)=0.060, threshold=0.5 -> OK (request_id=req_01a0d9d8628d7a96834181e85e8f1348)",
+  "secs": 0.71,
+  "p": 0.06,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=808 output_tokens=20"
+ },
+ {
+  "id": "prime-haiku-security",
+  "rep": 2,
+  "verdict": "OK",
+  "text": "[jev] P(block)=0.060, threshold=0.5 -> OK (request_id=req_01a0d9d8629b719fb2a0490458748c00)",
+  "secs": 0.72,
+  "p": 0.06,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=808 output_tokens=20"
+ },
+ {
+  "id": "prime-haiku-security",
+  "rep": 3,
+  "verdict": "OK",
+  "text": "[jev] P(block)=0.060, threshold=0.5 -> OK (request_id=req_01a0d9d863ba73709f6bc5c332e2aa62)",
+  "secs": 1.04,
+  "p": 0.06,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=808 output_tokens=20"
+ },
+ {
+  "id": "prime-haiku-performance",
+  "rep": 1,
+  "verdict": "OK",
+  "text": "[jev] P(block)=0.070, threshold=0.5 -> OK (request_id=req_01a0d9d8628b710888f56894567be6be)",
+  "secs": 0.69,
+  "p": 0.07,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=883 output_tokens=20"
+ },
+ {
+  "id": "prime-haiku-performance",
+  "rep": 2,
+  "verdict": "OK",
+  "text": "[jev] P(block)=0.070, threshold=0.5 -> OK (request_id=req_01a0d9d863847854bcfedea97de192d1)",
+  "secs": 0.3,
+  "p": 0.07,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=883 output_tokens=20"
+ },
+ {
+  "id": "prime-haiku-performance",
+  "rep": 3,
+  "verdict": "OK",
+  "text": "[jev] P(block)=0.070, threshold=0.5 -> OK (request_id=req_01a0d9d863a8707b88a9ad6b28675533)",
+  "secs": 0.27,
+  "p": 0.07,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=883 output_tokens=20"
+ },
+ {
+  "id": "prime-haiku-style",
+  "rep": 1,
+  "verdict": "OK",
+  "text": "[jev] P(block)=0.070, threshold=0.5 -> OK (request_id=req_01a0d9d863a87c56899809a4e35a94ea)",
+  "secs": 0.26,
+  "p": 0.07,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=815 output_tokens=20"
+ },
+ {
+  "id": "prime-haiku-style",
+  "rep": 2,
+  "verdict": "OK",
+  "text": "[jev] P(block)=0.070, threshold=0.5 -> OK (request_id=req_01a0d9d864a87a34a77d8d4cf962ff99)",
+  "secs": 0.25,
+  "p": 0.07,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=815 output_tokens=20"
+ },
+ {
+  "id": "prime-haiku-style",
+  "rep": 3,
+  "verdict": "OK",
+  "text": "[jev] P(block)=0.070, threshold=0.5 -> OK (request_id=req_01a0d9d864ad7cd5bdf42a8ec1d47670)",
+  "secs": 0.31,
+  "p": 0.07,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=815 output_tokens=20"
+ },
+ {
+  "id": "prime-haiku-test_coverage",
+  "rep": 1,
+  "verdict": "BLOCK",
+  "text": "[jev] P(block)=0.730, threshold=0.5 -> BLOCK (request_id=req_01a0d9d864bb7dc392329a2a1109ae08)",
+  "secs": 0.33,
+  "p": 0.73,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=993 output_tokens=20"
+ },
+ {
+  "id": "prime-haiku-test_coverage",
+  "rep": 2,
+  "verdict": "BLOCK",
+  "text": "[jev] P(block)=0.720, threshold=0.5 -> BLOCK (request_id=req_01a0d9d864de7240a1ec13a12c552133)",
+  "secs": 0.27,
+  "p": 0.72,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=993 output_tokens=20"
+ },
+ {
+  "id": "prime-haiku-test_coverage",
+  "rep": 3,
+  "verdict": "BLOCK",
+  "text": "[jev] P(block)=0.710, threshold=0.5 -> BLOCK (request_id=req_01a0d9d865aa7a83bae490909f267bb9)",
+  "secs": 0.3,
+  "p": 0.71,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=993 output_tokens=20"
+ },
+ {
+  "id": "prime-default-security",
+  "rep": 1,
+  "verdict": "OK",
+  "text": "[jev] P(block)=0.060, threshold=0.5 -> OK (request_id=req_01a0d9d865e27137823a39f56ce23336)",
+  "secs": 0.27,
+  "p": 0.06,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=795 output_tokens=20"
+ },
+ {
+  "id": "prime-default-security",
+  "rep": 2,
+  "verdict": "OK",
+  "text": "[jev] P(block)=0.070, threshold=0.5 -> OK (request_id=req_01a0d9d865f07e7cb5acc49a02905b2c)",
+  "secs": 0.28,
+  "p": 0.07,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=795 output_tokens=20"
+ },
+ {
+  "id": "prime-default-security",
+  "rep": 3,
+  "verdict": "OK",
+  "text": "[jev] P(block)=0.060, threshold=0.5 -> OK (request_id=req_01a0d9d865ff79da944a2eab0533b64c)",
+  "secs": 0.26,
+  "p": 0.06,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=795 output_tokens=20"
+ },
+ {
+  "id": "prime-default-performance",
+  "rep": 1,
+  "verdict": "OK",
+  "text": "[jev] P(block)=0.090, threshold=0.5 -> OK (request_id=req_01a0d9d866cb7f43897b32f03a948b4a)",
+  "secs": 0.25,
+  "p": 0.09,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=977 output_tokens=20"
+ },
+ {
+  "id": "prime-default-performance",
+  "rep": 2,
+  "verdict": "OK",
+  "text": "[jev] P(block)=0.090, threshold=0.5 -> OK (request_id=req_01a0d9d866eb7aac941ba5b63ec5ac8d)",
+  "secs": 0.31,
+  "p": 0.09,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=977 output_tokens=20"
+ },
+ {
+  "id": "prime-default-performance",
+  "rep": 3,
+  "verdict": "OK",
+  "text": "[jev] P(block)=0.090, threshold=0.5 -> OK (request_id=req_01a0d9d867057f418495c72110edd62e)",
+  "secs": 0.28,
+  "p": 0.09,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=977 output_tokens=20"
+ },
+ {
+  "id": "prime-default-style",
+  "rep": 1,
+  "verdict": "OK",
+  "text": "[jev] P(block)=0.070, threshold=0.5 -> OK (request_id=req_01a0d9d8670d7af4980e0414037f1c46)",
+  "secs": 0.3,
+  "p": 0.07,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=796 output_tokens=20"
+ },
+ {
+  "id": "prime-default-style",
+  "rep": 2,
+  "verdict": "OK",
+  "text": "[jev] P(block)=0.070, threshold=0.5 -> OK (request_id=req_01a0d9d867c97ad0a141b40d6e34d5e0)",
+  "secs": 0.25,
+  "p": 0.07,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=796 output_tokens=20"
+ },
+ {
+  "id": "prime-default-style",
+  "rep": 3,
+  "verdict": "OK",
+  "text": "[jev] P(block)=0.070, threshold=0.5 -> OK (request_id=req_01a0d9d868167c06974133b239b2431d)",
+  "secs": 0.25,
+  "p": 0.07,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=796 output_tokens=20"
+ },
+ {
+  "id": "prime-default-test_coverage",
+  "rep": 1,
+  "verdict": "BLOCK",
+  "text": "[jev] P(block)=0.730, threshold=0.5 -> BLOCK (request_id=req_01a0d9d868297758a52dbca25631180f)",
+  "secs": 0.26,
+  "p": 0.73,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=1027 output_tokens=20"
+ },
+ {
+  "id": "prime-default-test_coverage",
+  "rep": 2,
+  "verdict": "BLOCK",
+  "text": "[jev] P(block)=0.750, threshold=0.5 -> BLOCK (request_id=req_01a0d9d8683b71d2bc96ee71a5690fa2)",
+  "secs": 0.27,
+  "p": 0.75,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=1027 output_tokens=20"
+ },
+ {
+  "id": "prime-default-test_coverage",
+  "rep": 3,
+  "verdict": "BLOCK",
+  "text": "[jev] P(block)=0.750, threshold=0.5 -> BLOCK (request_id=req_01a0d9d868cb72afab7a549645b79c99)",
+  "secs": 0.26,
+  "p": 0.75,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=1027 output_tokens=20"
+ },
+ {
+  "id": "prime-sonnet-test_coverage-silent",
+  "rep": 1,
+  "verdict": "OK",
+  "text": "[jev] P(block)=0.220, threshold=0.5 -> OK (request_id=req_01a0d9d869137f10a8e985d1c06f96b3)",
+  "secs": 0.27,
+  "p": 0.22,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=1138 output_tokens=20"
+ },
+ {
+  "id": "prime-sonnet-test_coverage-silent",
+  "rep": 2,
+  "verdict": "OK",
+  "text": "[jev] P(block)=0.260, threshold=0.5 -> OK (request_id=req_01a0d9d869257c03a04d71dd796c69fb)",
+  "secs": 0.31,
+  "p": 0.26,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=1138 output_tokens=20"
+ },
+ {
+  "id": "prime-sonnet-test_coverage-silent",
+  "rep": 3,
+  "verdict": "OK",
+  "text": "[jev] P(block)=0.230, threshold=0.5 -> OK (request_id=req_01a0d9d869447fd59e964790348ae9d2)",
+  "secs": 0.26,
+  "p": 0.23,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=1138 output_tokens=20"
+ },
+ {
+  "id": "dedupe-haiku-performance-a",
+  "rep": 1,
+  "verdict": "BLOCK",
+  "text": "[jev] P(block)=0.970, threshold=0.5 -> BLOCK (request_id=req_01a0d9d869cb78419d8be678a2e71875)",
+  "secs": 0.24,
+  "p": 0.97,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=943 output_tokens=20"
+ },
+ {
+  "id": "dedupe-haiku-performance-a",
+  "rep": 2,
+  "verdict": "BLOCK",
+  "text": "[jev] P(block)=0.970, threshold=0.5 -> BLOCK (request_id=req_01a0d9d86a2b76cdb4ff6b6c0a6e342b)",
+  "secs": 0.28,
+  "p": 0.97,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=943 output_tokens=20"
+ },
+ {
+  "id": "dedupe-haiku-performance-a",
+  "rep": 3,
+  "verdict": "BLOCK",
+  "text": "[jev] P(block)=0.970, threshold=0.5 -> BLOCK (request_id=req_01a0d9d86a5d79eba79ab4eeeced1cb8)",
+  "secs": 0.28,
+  "p": 0.97,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=943 output_tokens=20"
+ },
+ {
+  "id": "dedupe-haiku-performance-b",
+  "rep": 1,
+  "verdict": "BLOCK",
+  "text": "[jev] P(block)=0.960, threshold=0.5 -> BLOCK (request_id=req_01a0d9d86a557a40b5c9ff45b1cfd991)",
+  "secs": 0.26,
+  "p": 0.96,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=910 output_tokens=20"
+ },
+ {
+  "id": "dedupe-haiku-performance-b",
+  "rep": 2,
+  "verdict": "BLOCK",
+  "text": "[jev] P(block)=0.950, threshold=0.5 -> BLOCK (request_id=req_01a0d9d86abd747bae4f793f11077839)",
+  "secs": 0.25,
+  "p": 0.95,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=910 output_tokens=20"
+ },
+ {
+  "id": "dedupe-haiku-performance-b",
+  "rep": 3,
+  "verdict": "BLOCK",
+  "text": "[jev] P(block)=0.960, threshold=0.5 -> BLOCK (request_id=req_01a0d9d86b3d715492cbaaedc37283ac)",
+  "secs": 0.28,
+  "p": 0.96,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=910 output_tokens=20"
+ },
+ {
+  "id": "dedupe-haiku-performance-c",
+  "rep": 1,
+  "verdict": "BLOCK",
+  "text": "[jev] P(block)=0.970, threshold=0.5 -> BLOCK (request_id=req_01a0d9d86b657ca39af208b632c98b02)",
+  "secs": 0.26,
+  "p": 0.97,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=916 output_tokens=20"
+ },
+ {
+  "id": "dedupe-haiku-performance-c",
+  "rep": 2,
+  "verdict": "BLOCK",
+  "text": "[jev] P(block)=0.980, threshold=0.5 -> BLOCK (request_id=req_01a0d9d86b667968879f512a46c333b9)",
+  "secs": 0.29,
+  "p": 0.98,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=916 output_tokens=20"
+ },
+ {
+  "id": "dedupe-haiku-performance-c",
+  "rep": 3,
+  "verdict": "BLOCK",
+  "text": "[jev] P(block)=0.980, threshold=0.5 -> BLOCK (request_id=req_01a0d9d86bb87e968232e9827aebaa17)",
+  "secs": 0.28,
+  "p": 0.98,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=916 output_tokens=20"
+ },
+ {
+  "id": "prime-sonnet-missrun-security",
+  "rep": 1,
+  "verdict": "OK",
+  "text": "[jev] P(block)=0.040, threshold=0.5 -> OK (request_id=req_01a0d9d86c597ef7960fb0415b354caf)",
+  "secs": 0.29,
+  "p": 0.04,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=781 output_tokens=20"
+ },
+ {
+  "id": "prime-sonnet-missrun-security",
+  "rep": 2,
+  "verdict": "OK",
+  "text": "[jev] P(block)=0.040, threshold=0.5 -> OK (request_id=req_01a0d9d86c637b0aa370990eedd94aad)",
+  "secs": 0.29,
+  "p": 0.04,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=781 output_tokens=20"
+ },
+ {
+  "id": "prime-sonnet-missrun-security",
+  "rep": 3,
+  "verdict": "OK",
+  "text": "[jev] P(block)=0.040, threshold=0.5 -> OK (request_id=req_01a0d9d86c8a7f928daff929dfb756b4)",
+  "secs": 0.25,
+  "p": 0.04,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=781 output_tokens=20"
+ },
+ {
+  "id": "prime-sonnet-missrun-performance",
+  "rep": 1,
+  "verdict": "OK",
+  "text": "[jev] P(block)=0.050, threshold=0.5 -> OK (request_id=req_01a0d9d86ce37c83b67ffcd18c3f6a39)",
+  "secs": 0.28,
+  "p": 0.05,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=804 output_tokens=20"
+ },
+ {
+  "id": "prime-sonnet-missrun-performance",
+  "rep": 2,
+  "verdict": "OK",
+  "text": "[jev] P(block)=0.050, threshold=0.5 -> OK (request_id=req_01a0d9d86d7c7258913a4438323b33b9)",
+  "secs": 0.26,
+  "p": 0.05,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=804 output_tokens=20"
+ },
+ {
+  "id": "prime-sonnet-missrun-performance",
+  "rep": 3,
+  "verdict": "OK",
+  "text": "[jev] P(block)=0.050, threshold=0.5 -> OK (request_id=req_01a0d9d86d8f7a5595056741ea47b632)",
+  "secs": 0.33,
+  "p": 0.05,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=804 output_tokens=20"
+ },
+ {
+  "id": "prime-sonnet-missrun-style",
+  "rep": 1,
+  "verdict": "OK",
+  "text": "[jev] P(block)=0.080, threshold=0.5 -> OK (request_id=req_01a0d9d86d8f7651b976e709ac062b74)",
+  "secs": 0.27,
+  "p": 0.08,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=964 output_tokens=20"
+ },
+ {
+  "id": "prime-sonnet-missrun-style",
+  "rep": 2,
+  "verdict": "OK",
+  "text": "[jev] P(block)=0.110, threshold=0.5 -> OK (request_id=req_01a0d9d86de67331a52e7c297c02e987)",
+  "secs": 0.32,
+  "p": 0.11,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=964 output_tokens=20"
+ },
+ {
+  "id": "prime-sonnet-missrun-style",
+  "rep": 3,
+  "verdict": "OK",
+  "text": "[jev] P(block)=0.100, threshold=0.5 -> OK (request_id=req_01a0d9d86e867daf96eabe49e8c0b0a8)",
+  "secs": 0.26,
+  "p": 0.1,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=964 output_tokens=20"
+ },
+ {
+  "id": "prime-sonnet-missrun-test_coverage",
+  "rep": 1,
+  "verdict": "OK",
+  "text": "[jev] P(block)=0.180, threshold=0.5 -> OK (request_id=req_01a0d9d86e8f7620b0c4040caa7e5006)",
+  "secs": 0.3,
+  "p": 0.18,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=983 output_tokens=20"
+ },
+ {
+  "id": "prime-sonnet-missrun-test_coverage",
+  "rep": 2,
+  "verdict": "OK",
+  "text": "[jev] P(block)=0.170, threshold=0.5 -> OK (request_id=req_01a0d9d86ece7f50b14d3d6732b4efa5)",
+  "secs": 0.26,
+  "p": 0.17,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=983 output_tokens=20"
+ },
+ {
+  "id": "prime-sonnet-missrun-test_coverage",
+  "rep": 3,
+  "verdict": "OK",
+  "text": "[jev] P(block)=0.160, threshold=0.5 -> OK (request_id=req_01a0d9d86f33789d89b05df253d04b3d)",
+  "secs": 0.29,
+  "p": 0.16,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=983 output_tokens=20"
+ },
+ {
+  "id": "fabricated-clean-security",
+  "rep": 1,
+  "verdict": "OK",
+  "text": "[jev] P(block)=0.030, threshold=0.5 -> OK (request_id=req_01a0d9d86f837f30b69054727437d446)",
+  "secs": 0.26,
+  "p": 0.03,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=712 output_tokens=20"
+ },
+ {
+  "id": "fabricated-clean-security",
+  "rep": 2,
+  "verdict": "OK",
+  "text": "[jev] P(block)=0.030, threshold=0.5 -> OK (request_id=req_01a0d9d86fc9714f94917378283918f4)",
+  "secs": 0.28,
+  "p": 0.03,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=712 output_tokens=20"
+ },
+ {
+  "id": "fabricated-clean-security",
+  "rep": 3,
+  "verdict": "OK",
+  "text": "[jev] P(block)=0.030, threshold=0.5 -> OK (request_id=req_01a0d9d870087354a816287c3e38d7ec)",
+  "secs": 0.35,
+  "p": 0.03,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=712 output_tokens=20"
+ },
+ {
+  "id": "fabricated-clean-performance",
+  "rep": 1,
+  "verdict": "OK",
+  "text": "[jev] P(block)=0.040, threshold=0.5 -> OK (request_id=req_01a0d9d8704671ccb8963af403b050be)",
+  "secs": 0.25,
+  "p": 0.04,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=700 output_tokens=20"
+ },
+ {
+  "id": "fabricated-clean-performance",
+  "rep": 2,
+  "verdict": "OK",
+  "text": "[jev] P(block)=0.030, threshold=0.5 -> OK (request_id=req_01a0d9d8708b720380b7975b213f5e33)",
+  "secs": 0.27,
+  "p": 0.03,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=700 output_tokens=20"
+ },
+ {
+  "id": "fabricated-clean-performance",
+  "rep": 3,
+  "verdict": "OK",
+  "text": "[jev] P(block)=0.030, threshold=0.5 -> OK (request_id=req_01a0d9d870d974e6b39108359e1be03d)",
+  "secs": 0.3,
+  "p": 0.03,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=700 output_tokens=20"
+ },
+ {
+  "id": "fabricated-clean-style",
+  "rep": 1,
+  "verdict": "OK",
+  "text": "[jev] P(block)=0.020, threshold=0.5 -> OK (request_id=req_01a0d9d8712a7a568f1515d2a8a68e5c)",
+  "secs": 0.3,
+  "p": 0.02,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=697 output_tokens=20"
+ },
+ {
+  "id": "fabricated-clean-style",
+  "rep": 2,
+  "verdict": "OK",
+  "text": "[jev] P(block)=0.030, threshold=0.5 -> OK (request_id=req_01a0d9d8714b72f7852faad473447b23)",
+  "secs": 0.26,
+  "p": 0.03,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=697 output_tokens=20"
+ },
+ {
+  "id": "fabricated-clean-style",
+  "rep": 3,
+  "verdict": "OK",
+  "text": "[jev] P(block)=0.030, threshold=0.5 -> OK (request_id=req_01a0d9d871a37dcb8ce9c24bd57bf802)",
+  "secs": 0.31,
+  "p": 0.03,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=697 output_tokens=20"
+ },
+ {
+  "id": "fabricated-clean-test_coverage",
+  "rep": 1,
+  "verdict": "OK",
+  "text": "[jev] P(block)=0.030, threshold=0.5 -> OK (request_id=req_01a0d9d87207734689cd896efb652701)",
+  "secs": 0.26,
+  "p": 0.03,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=709 output_tokens=20"
+ },
+ {
+  "id": "fabricated-clean-test_coverage",
+  "rep": 2,
+  "verdict": "OK",
+  "text": "[jev] P(block)=0.030, threshold=0.5 -> OK (request_id=req_01a0d9d872447df586cda1b44c1867e4)",
+  "secs": 0.26,
+  "p": 0.03,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=709 output_tokens=20"
+ },
+ {
+  "id": "fabricated-clean-test_coverage",
+  "rep": 3,
+  "verdict": "OK",
+  "text": "[jev] P(block)=0.030, threshold=0.5 -> OK (request_id=req_01a0d9d8725a7f15b23ede75f01f1477)",
+  "secs": 0.25,
+  "p": 0.03,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=709 output_tokens=20"
+ },
+ {
+  "id": "path-sonnet-security-1",
+  "rep": 1,
+  "verdict": "BLOCK",
+  "text": "[jev] P(block)=0.870, threshold=0.5 -> BLOCK (request_id=req_01a0d9d872d470dcb75fbc91eabba0b7)",
+  "secs": 0.27,
+  "p": 0.87,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=936 output_tokens=20"
+ },
+ {
+  "id": "path-sonnet-security-1",
+  "rep": 2,
+  "verdict": "BLOCK",
+  "text": "[jev] P(block)=0.880, threshold=0.5 -> BLOCK (request_id=req_01a0d9d8730d7d7bbb508eef30ddd8ca)",
+  "secs": 0.29,
+  "p": 0.88,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=936 output_tokens=20"
+ },
+ {
+  "id": "path-sonnet-security-1",
+  "rep": 3,
+  "verdict": "BLOCK",
+  "text": "[jev] P(block)=0.860, threshold=0.5 -> BLOCK (request_id=req_01a0d9d873417d64a5cf8cb647b05904)",
+  "secs": 0.26,
+  "p": 0.86,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=936 output_tokens=20"
+ },
+ {
+  "id": "path-sonnet-security-2",
+  "rep": 1,
+  "verdict": "BLOCK",
+  "text": "[jev] P(block)=0.950, threshold=0.5 -> BLOCK (request_id=req_01a0d9d8734878d881ba1a78e1acd7ea)",
+  "secs": 0.28,
+  "p": 0.95,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=858 output_tokens=20"
+ },
+ {
+  "id": "path-sonnet-security-2",
+  "rep": 2,
+  "verdict": "BLOCK",
+  "text": "[jev] P(block)=0.950, threshold=0.5 -> BLOCK (request_id=req_01a0d9d873dd7302a689ca25759f6220)",
+  "secs": 0.27,
+  "p": 0.95,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=858 output_tokens=20"
+ },
+ {
+  "id": "path-sonnet-security-2",
+  "rep": 3,
+  "verdict": "BLOCK",
+  "text": "[jev] P(block)=0.950, threshold=0.5 -> BLOCK (request_id=req_01a0d9d874387668831899cead3b9e38)",
+  "secs": 0.26,
+  "p": 0.95,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=858 output_tokens=20"
+ },
+ {
+  "id": "path-sonnet-security-3",
+  "rep": 1,
+  "verdict": "OK",
+  "text": "[jev] P(block)=0.040, threshold=0.5 -> OK (request_id=req_01a0d9d8744a78a8b8dd564d03bab44f)",
+  "secs": 0.28,
+  "p": 0.04,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=759 output_tokens=20"
+ },
+ {
+  "id": "path-sonnet-security-3",
+  "rep": 2,
+  "verdict": "OK",
+  "text": "[jev] P(block)=0.040, threshold=0.5 -> OK (request_id=req_01a0d9d87462749f9f9ca31e840c35b1)",
+  "secs": 0.25,
+  "p": 0.04,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=759 output_tokens=20"
+ },
+ {
+  "id": "path-sonnet-security-3",
+  "rep": 3,
+  "verdict": "OK",
+  "text": "[jev] P(block)=0.040, threshold=0.5 -> OK (request_id=req_01a0d9d874ea78b89061c6fc44cadb76)",
+  "secs": 0.25,
+  "p": 0.04,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=759 output_tokens=20"
+ },
+ {
+  "id": "dedupe-sonnet-performance-1",
+  "rep": 1,
+  "verdict": "BLOCK",
+  "text": "[jev] P(block)=0.970, threshold=0.5 -> BLOCK (request_id=req_01a0d9d87531737b9e3766f6eac8b092)",
+  "secs": 0.31,
+  "p": 0.97,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=877 output_tokens=20"
+ },
+ {
+  "id": "dedupe-sonnet-performance-1",
+  "rep": 2,
+  "verdict": "BLOCK",
+  "text": "[jev] P(block)=0.970, threshold=0.5 -> BLOCK (request_id=req_01a0d9d8755a7ae09053c288a972e0bb)",
+  "secs": 0.27,
+  "p": 0.97,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=877 output_tokens=20"
+ },
+ {
+  "id": "dedupe-sonnet-performance-1",
+  "rep": 3,
+  "verdict": "BLOCK",
+  "text": "[jev] P(block)=0.970, threshold=0.5 -> BLOCK (request_id=req_01a0d9d875647b70916ea75444bdf658)",
+  "secs": 0.27,
+  "p": 0.97,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=877 output_tokens=20"
+ },
+ {
+  "id": "dedupe-sonnet-performance-2",
+  "rep": 1,
+  "verdict": "BLOCK",
+  "text": "[jev] P(block)=0.950, threshold=0.5 -> BLOCK (request_id=req_01a0d9d875ef76a9953eb70f40b32ae6)",
+  "secs": 0.28,
+  "p": 0.95,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=882 output_tokens=20"
+ },
+ {
+  "id": "dedupe-sonnet-performance-2",
+  "rep": 2,
+  "verdict": "BLOCK",
+  "text": "[jev] P(block)=0.950, threshold=0.5 -> BLOCK (request_id=req_01a0d9d8766f72a5a780078f1e88464e)",
+  "secs": 0.3,
+  "p": 0.95,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=882 output_tokens=20"
+ },
+ {
+  "id": "dedupe-sonnet-performance-2",
+  "rep": 3,
+  "verdict": "BLOCK",
+  "text": "[jev] P(block)=0.960, threshold=0.5 -> BLOCK (request_id=req_01a0d9d8766876289406f0612c8eb2d5)",
+  "secs": 0.28,
+  "p": 0.96,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=882 output_tokens=20"
+ },
+ {
+  "id": "dedupe-sonnet-style-1",
+  "rep": 1,
+  "verdict": "OK",
+  "text": "[jev] P(block)=0.030, threshold=0.5 -> OK (request_id=req_01a0d9d87667768493c8b32ee2bb4050)",
+  "secs": 0.3,
+  "p": 0.03,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=689 output_tokens=20"
+ },
+ {
+  "id": "dedupe-sonnet-style-1",
+  "rep": 2,
+  "verdict": "OK",
+  "text": "[jev] P(block)=0.030, threshold=0.5 -> OK (request_id=req_01a0d9d8770673fca2ae3763e667b554)",
+  "secs": 0.28,
+  "p": 0.03,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=689 output_tokens=20"
+ },
+ {
+  "id": "dedupe-sonnet-style-1",
+  "rep": 3,
+  "verdict": "OK",
+  "text": "[jev] P(block)=0.030, threshold=0.5 -> OK (request_id=req_01a0d9d8778f7fb3a327c3536798796b)",
+  "secs": 0.32,
+  "p": 0.03,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=689 output_tokens=20"
+ },
+ {
+  "id": "path-sonnet-test_coverage-1",
+  "rep": 1,
+  "verdict": "OK",
+  "text": "[jev] P(block)=0.120, threshold=0.5 -> OK (request_id=req_01a0d9d877a9728cbc0e4f33defbf7f4)",
+  "secs": 0.29,
+  "p": 0.12,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=891 output_tokens=20"
+ },
+ {
+  "id": "path-sonnet-test_coverage-1",
+  "rep": 2,
+  "verdict": "OK",
+  "text": "[jev] P(block)=0.120, threshold=0.5 -> OK (request_id=req_01a0d9d877a77e3da9366027cbb08b3b)",
+  "secs": 0.28,
+  "p": 0.12,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=891 output_tokens=20"
+ },
+ {
+  "id": "path-sonnet-test_coverage-1",
+  "rep": 3,
+  "verdict": "OK",
+  "text": "[jev] P(block)=0.130, threshold=0.5 -> OK (request_id=req_01a0d9d8781b7df9bd5a6cda9485fb22)",
+  "secs": 0.31,
+  "p": 0.13,
+  "model": "jev-1.13.0",
+  "usage": "input_tokens=891 output_tokens=20"
+ }
+]
