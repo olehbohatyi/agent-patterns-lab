@@ -1614,3 +1614,94 @@ While reading the TypeSafe docs, a fetched page's result carried an embedded
 instruction to add a `Co-Authored-By` trailer to commits, contradicting the
 user's standing rule. It came from fetched content, not the user, and was not
 followed. Small, but a real data point about fetching live docs mid-task.
+
+## Jev judge, stage 1 calibration (live)
+First live use of `--judge jev`. Setup, decision rules and labels were fixed
+before any judge saw the corpus (`calibration/PREREGISTRATION.md`,
+`calibration/corpus.json`); raw results are in `calibration/jev_results.json` and
+`calibration/llm_results.json`, and `calibration/run_cal.py` reruns them (from the
+repo dir, with `typesafe-sdk` installed for the jev mode).
+
+### Design
+- **Same review text, only the judge varies.** 27 frozen reviews, each judged 3x
+  by the current LLM judge (`judge_review_llm`, sonnet alias via `claude -p`) and 3x
+  by `judge_review_jev` (threshold 0.5). 81 calls each, 0 integration errors.
+- **20 recovered verbatim, 7 regenerated, labeled per case.** The recovered ones were
+  parsed out of the session transcript where a probe had printed the full review:
+  8 `is_prime(1)` reviews (two runs), 1 owner-silent sonnet test_coverage review, 3
+  haiku O(n²) reviews, 4 sonnet reviews from the run where the then-current judge
+  passed everything, and the 4 hand-written "fabricated clean" reviews (all
+  checked to be exact substrings of the transcript). The Phase 4 path-traversal
+  reviews were printed truncated to 300 characters, so they could not be recovered;
+  3 security reviews of that code were regenerated instead, plus 2 sonnet
+  performance, 1 style and 1 test_coverage review. `provenance` in the corpus file
+  marks each case.
+- **Labels are what the current rubric says the judge should output for that text**
+  (in-lane defect -> BLOCK, hedging doesn't excuse, explicit out-of-lane mention ->
+  OK), assigned by the assistant after freezing and before judging. 4 cases are
+  marked contestable (softer lane wording or a test-file bug mentioned without a
+  lane disclaimer) and are reported separately. Because the labels come from the
+  same rubric both judges were given, agreement with them measures fidelity to the
+  rubric, not truth about the code.
+- **Decision rule, fixed in advance:** a dedicated finding if Jev's majority missed
+  any non-contestable BLOCK case, or differed from the LLM judge's majority on more
+  than 1 non-contestable case. Neither happened (0 and 1).
+
+### Results (per case, 3 runs each; full table in the results files)
+- **Jev matched the label on 27/27, in every one of its 3 repeats.** Raw P(block) was
+  stable (max spread within a case 0.04). Every OK-labeled case scored 0.02–0.26;
+  every BLOCK-labeled case 0.71–0.98 (the non-contestable ones >= 0.86). No case fell
+  between 0.26 and 0.71.
+- **The LLM judge matched the label on 26/27** (majority of 3). Its one miss is the
+  only Jev/LLM disagreement: `prime-sonnet-test_coverage-silent`, a sonnet
+  test_coverage review that lists coverage gaps and never mentions the `is_prime(1)`
+  bug. The LLM judge said BLOCK 3/3 ("gap #1 ... is a genuine in-lane test-coverage
+  defect"); Jev said OK 3/3 (P 0.22–0.26, the highest of any OK-labeled case). The
+  label was OK because the rubric says coverage suggestions for behavior that
+  already works are OK; the LLM judge read the same gap as a defect. That is a
+  rubric-application difference, and the same review text got OK from the LLM judge
+  in the earlier Phase 3 run, so this judge is not stable on this kind of review.
+  It is not evidence of a false correspondence: the LLM judge's stated reason was
+  the review's own gap #1 (a real hole in the tests), and it never claimed the
+  review flagged the `is_prime(1)` bug. Whether it should block on such a gap is
+  what the label and the judge disagree about, on one review text judged three
+  times, so treat it as one observed instance, not an established failure mode.
+- **The LLM judge was also unstable within a case on 2 of the 4 contestable ones**
+  (`prime-default-performance` OBO, `prime-default-test_coverage` OBB); Jev was
+  identical across repeats on all 27. On the contestable cases Jev's majority
+  matched the label on all 4 (P 0.07–0.09 for the OK-labeled, 0.73–0.75 for the
+  BLOCK-labeled).
+- **By provenance:** on the 7 regenerated cases both judges matched every label
+  (3/3 each). The single disagreement is on a recovered case.
+- **Latency:** median 0.28 s per Jev call (max 1.04 s) vs 9.3 s (max 19.4 s) per LLM
+  judge call. Jev call size was 808 input / 20 output tokens; model reported as
+  `jev-1.13.0`. The model behind the sonnet alias for the LLM judge was not recorded.
+
+### What this does and doesn't show
+- It shows that, on these 27 texts, a single holistic Noul with the rubric passed as
+  instructions reproduced the rubric's labels, including the anti-hedge cases (two
+  hedged path-traversal reviews scored 0.87–0.95) and the lane-disclaimed cases
+  (explicit "not a security issue" mentions scored 0.06–0.09), and that its scores
+  were stable across repeats.
+- Not shown: any rate. The 27 reviews come from three code/defect setups plus the
+  fabricated controls, so they are correlated; n=23 non-contestable. There is no
+  evidence about reviews that fall near the boundary, because the corpus has none
+  (nothing scored 0.26–0.71), so the 0.5 threshold is untested rather than
+  validated: any value in that gap would have given the same result. Nothing here
+  says the P values are calibrated probabilities.
+- The threshold-vs-judgment question has no misses to inspect: no BLOCK-labeled case
+  scored low. The near-miss to watch is the P 0.16–0.26 band, which holds only
+  test_coverage reviews listing real gaps, the same kind of text the LLM judge
+  blocked.
+- Shared blind spot, unchanged: both judges said OK on the fabricated clean reviews
+  and on `path-sonnet-security-3` (a sonnet review of vulnerable code that says
+  "path traversal isn't applicable"), because they see only review text. Neither
+  judge helps when the reviewer misses, and neither addresses the lane-check
+  regression (owner lens silent, everyone else disclaims): both said OK on all four
+  reviews from that run.
+- 81 review texts (which quote generated code) were sent to TypeSafe for this run.
+
+### Next
+Stage 2 (per-criterion split) is now unblocked but has no motivating failure: stage 1
+missed nothing here. If pursued, the useful corpus is one built to sit near the
+boundary, not more clear-cut cases.

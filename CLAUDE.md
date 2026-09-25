@@ -138,7 +138,7 @@ code generation) is how the Phase 4 probes in `NOTES.md` were run. (Before the s
   review with the same rubric (`_judge_rubric()`), blocks at `JEV_BLOCK_THRESHOLD` (0.5, uncalibrated), and
   fails safe to BLOCK on any error with the category named (`sdk-missing`, `schema-error`, `api-error`,
   `client-error`, `bad-response`). It is deliberately not split per criterion (that would change two things at
-  once), and it has never been run live or calibrated — see NOTES.md "Jev judge". Keep `judge_review()`
+  once), and its only live calibration is a small 27-review comparison (`calibration/`, NOTES.md "Jev judge, stage 1 calibration") with no near-boundary cases, so the threshold is untested. Keep `judge_review()`
   as the dispatcher; `aggregate_verdict()` is unchanged.
 - Known limit of the diamond design: the judge reads only review text, never the code, so a reviewer
   that misses a defect entirely cannot be caught downstream (confirmed directly by feeding a fabricated

@@ -209,6 +209,12 @@ code doesn't have".)
   context; a bare API call sees only the prompt and carries no CLI system prompt. Whether any finding
   depended on those differences (context-related ones such as X2, the isolation finding V2, and the
   decline patterns are the obvious candidates) is unknown: nothing has been measured on the API backend.
+- **The Jev judge is calibrated only lightly.** A live comparison on 27 frozen reviews (20 recovered
+  verbatim, 7 regenerated, 4 of the 27 contestable) found it matched the rubric-derived labels 27/27
+  against 26/27 for the LLM judge. Both matched all 7 regenerated cases; the one disagreement is on a
+  recovered coverage-gap review, judged three times. The corpus had no near-boundary cases, so the
+  0.5 threshold is untested, and it comes from three defect setups; see NOTES.md "Jev judge, stage 1
+  calibration". Both judges share the reviewer-miss blind spot.
 - **Reviewer coverage of false claims** (C1) and of the extra behavior fixes
   introduce is untested, because the fix experiments ran without a second
   review pass.
