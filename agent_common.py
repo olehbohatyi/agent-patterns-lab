@@ -39,13 +39,17 @@ def set_judge(name: str) -> None:
 def get_judge() -> str:
     return _judge
 
-def load_env_key(name: str, path: str = ".env") -> None:
+def load_env_key(name: str, path: str | None = None) -> None:
     """Sets os.environ[name] from a `NAME=value` line in a dotenv-style file, if it is not
     already set. Deliberately reads ONLY `name` — every other line in the file is ignored,
     so it can never change the environment for anything else (e.g. ANTHROPIC_API_KEY and
-    the local backend). A missing file is fine. Never prints or returns the value."""
+    the local backend). Resolved next to this module by default (not the caller's cwd), so
+    it works regardless of where an agent script is invoked from. A missing file is fine.
+    Never prints or returns the value."""
     if os.environ.get(name):
         return
+    if path is None:
+        path = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
     try:
         with open(path) as f:
             lines = f.read().splitlines()

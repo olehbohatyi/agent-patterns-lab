@@ -1,6 +1,7 @@
 """Tests for the --judge {llm,jev} switch and the Jev judge in agent_review.py. No live
 calls: the `typesafe_sdk` module is replaced by a fake that mirrors the real SDK's
 names (checked against typesafe-sdk 0.7.1), and call_claude by a stub."""
+import os
 import sys
 import types
 
@@ -277,6 +278,19 @@ def test_loader_tolerates_a_missing_file_and_empty_value(tmp_path, monkeypatch):
     (tmp_path / ".env").write_text("TYPESAFE_API_KEY=\n")
     agent_common.load_env_key("TYPESAFE_API_KEY", str(tmp_path / ".env"))
     assert "TYPESAFE_API_KEY" not in agent_common.os.environ
+
+
+def test_loader_default_path_is_next_to_agent_common_not_cwd(tmp_path, monkeypatch):
+    """--judge jev must find .env regardless of the caller's working directory, so the
+    default path is resolved next to agent_common.py, not os.getcwd()."""
+    monkeypatch.delenv("TYPESAFE_API_KEY", raising=False)
+    real_dirname = os.path.dirname(os.path.abspath(agent_common.__file__))
+    (tmp_path / ".env").write_text("TYPESAFE_API_KEY=from-cwd-env\n")  # a decoy in an unrelated cwd
+    monkeypatch.chdir(tmp_path)
+    agent_common.load_env_key("TYPESAFE_API_KEY")
+    assert os.environ.get("TYPESAFE_API_KEY") != "from-cwd-env"
+    monkeypatch.delenv("TYPESAFE_API_KEY", raising=False)
+    assert real_dirname  # sanity: the module has a real, findable directory
 
 
 def test_jev_client_construction_triggers_the_loader(fake_sdk, monkeypatch):
