@@ -71,10 +71,10 @@ python agent_diamond.py "<task description>"
 python agent_graph.py "<task description>"
 ```
 Each accepts `--backend {local,api}` (default `local`, the `claude -p` CLI; `api` uses the Anthropic SDK
-and needs `pip install anthropic` plus `ANTHROPIC_API_KEY`). Don't run `--backend api` casually — it makes
+and needs the `api` extra, `uv pip install -e ".[api]"`, plus `ANTHROPIC_API_KEY`). Don't run `--backend api` casually — it makes
 billable requests. The backends are different systems (see the note under Architecture).
 `agent_diamond.py`/`agent_graph.py` also accept `--judge {llm,jev}` (default `llm`; `jev` needs
-`uv pip install typesafe-sdk` and `TYPESAFE_API_KEY`, and sends review text to TypeSafe).
+the `jev` extra, `uv pip install -e ".[jev]"`, and `TYPESAFE_API_KEY`, and sends review text to TypeSafe).
 
 Re-run just the diamond review against whatever is already on disk, skipping code generation (useful
 for probing reviewer/judge behavior on hand-planted code):

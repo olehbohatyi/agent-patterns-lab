@@ -1,0 +1,17 @@
+[project]
+name = "agent-patterns-lab"
+version = "0.1.0"
+description = "Comparison of agent-loop patterns built around `claude -p`."
+requires-python = ">=3.10"
+dependencies = [
+    "pytest",
+]
+
+[project.optional-dependencies]
+# --backend api (agent_common.py)
+api = ["anthropic"]
+# --judge jev (agent_review.py) and calibration/run_cal.py
+jev = ["typesafe-sdk"]
+
+[tool.uv]
+package = false

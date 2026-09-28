@@ -72,7 +72,19 @@ hand-authored source, and are gitignored.
 - [pytest](https://pytest.org)
 - The `claude` CLI available on `PATH` (only needed to run the agent scripts themselves, not to run
   the tests)
-- Optional, only for `--backend api`: `pip install anthropic` and an `ANTHROPIC_API_KEY` in the environment
+- Optional, only for `--backend api`: the `api` extra (`anthropic`) and an `ANTHROPIC_API_KEY` in the
+  environment
+- Optional, only for `--judge jev` (and `calibration/run_cal.py jev`): the `jev` extra (`typesafe-sdk`)
+  and a `TYPESAFE_API_KEY` (see "Judges" below)
+
+`pyproject.toml` declares both as optional extras, so `pytest` alone is a plain install:
+
+```bash
+uv pip install -e .            # base: pytest only
+uv pip install -e ".[api]"     # + anthropic, for --backend api
+uv pip install -e ".[jev]"     # + typesafe-sdk, for --judge jev
+uv pip install -e ".[api,jev]" # both
+```
 
 ## Usage
 
@@ -127,7 +139,9 @@ The diamond and graph agents grade each review with a judge, selected by `--judg
 `llm`, is the isolated `claude` verdict call the research was done with. `jev` asks a
 [TypeSafe](https://docs.typesafe.ai) Jev model one yes/no question per review, using the same rubric text, and
 blocks at or above a probability threshold (`JEV_BLOCK_THRESHOLD`, an uncalibrated 0.5). It needs
-`uv pip install typesafe-sdk` and `TYPESAFE_API_KEY` in the environment (or in a gitignored `.env`; only that one variable is read); any failure to get an answer blocks,
+the `jev` extra (`uv pip install -e ".[jev]"`) and `TYPESAFE_API_KEY` in the environment (or in a gitignored `.env` next
+to `agent_common.py` — resolved relative to that file, not the current directory; only that one variable
+is read); any failure to get an answer blocks,
 with the failure category named in the report:
 
 ```bash
