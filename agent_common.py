@@ -128,15 +128,30 @@ def _call_api(prompt: str, model: str) -> str:
               file=sys.stderr)
     return "".join(block.text for block in response.content if block.type == "text").strip()
 
+class CallFailedError(RuntimeError):
+    """The model call itself failed (non-zero exit, or nothing came back). Raised instead of
+    returning an empty/garbage string, because downstream that string would be read as a
+    model answer: a reviewer's "review" or a judge's verdict. Measured: the LLM judge gave
+    OK on a review that was just a CLI error message in 5 of 6 runs (see NOTES.md)."""
+
 def _call_local(prompt: str, model: str) -> str:
-    """Calls Claude Code in non-interactive mode and returns the response."""
+    """Calls Claude Code in non-interactive mode and returns the response. Raises
+    CallFailedError on a non-zero exit or empty output (and subprocess.TimeoutExpired /
+    FileNotFoundError propagate), matching the API backend, whose SDK errors propagate."""
     result = subprocess.run(
         ["claude", "--model", model, "-p", prompt],
         capture_output=True,
         text=True,
         timeout=120
     )
-    return result.stdout.strip()
+    out = result.stdout.strip()
+    if result.returncode != 0:
+        detail = (result.stderr.strip() or out)[-300:]
+        raise CallFailedError(f"`claude -p` exited with status {result.returncode}: {detail}")
+    if not out:
+        raise CallFailedError("`claude -p` returned empty output"
+                              + (f" (stderr: {result.stderr.strip()[-300:]})" if result.stderr.strip() else ""))
+    return out
 
 def call_claude(prompt: str, model: str = "sonnet") -> str:
     """Sends one prompt to Claude and returns the response text, through the active
@@ -258,15 +273,35 @@ def clean_code(text: str) -> str:
         )
     return code
 
+RUN_TESTS_TIMEOUT_SECONDS = 120
+
+def imports_solution(test_text: str) -> bool:
+    """True if the test file imports the `solution` module. Without that, tests can pass
+    while exercising nothing generated (e.g. `assert True`)."""
+    for node in ast.walk(ast.parse(test_text)):
+        if isinstance(node, ast.ImportFrom) and node.module and node.module.split(".")[0] == "solution":
+            return True
+        if isinstance(node, ast.Import) and any(a.name.split(".")[0] == "solution" for a in node.names):
+            return True
+    return False
+
 def run_tests() -> tuple[bool, str]:
-    """Runs pytest and returns (success, output)."""
-    result = subprocess.run(
-        ["pytest", "test_solution.py", "-v"],
-        capture_output=True,
-        text=True
-    )
-    passed = result.returncode == 0
-    return passed, result.stdout + result.stderr
+    """Runs pytest (under the same interpreter as the agent) and returns (success, output).
+    Success needs exit 0 AND at least one test reported as passed, so an all-skipped run
+    is not green; a run that exceeds RUN_TESTS_TIMEOUT_SECONDS (e.g. generated code stuck
+    in a loop) counts as a failure with the timeout in the output."""
+    try:
+        result = subprocess.run(
+            [sys.executable, "-m", "pytest", "test_solution.py", "-v"],
+            capture_output=True,
+            text=True,
+            timeout=RUN_TESTS_TIMEOUT_SECONDS,
+        )
+    except subprocess.TimeoutExpired:
+        return False, f"pytest timed out after {RUN_TESTS_TIMEOUT_SECONDS}s (possible infinite loop in generated code)"
+    output = result.stdout + result.stderr
+    passed = result.returncode == 0 and re.search(r"\b\d+ passed\b", output) is not None
+    return passed, output
 
 def write_solution_and_tests(task_description: str, announce: bool = True) -> tuple[str, str]:
     """Step A, shared by every agent: generate solution.py, then generate a test file
@@ -297,6 +332,9 @@ def write_solution_and_tests(task_description: str, announce: bool = True) -> tu
         test_text = clean_code(tests)
     except NotPythonError as e:
         sys.exit(f"❌ claude refused to write test_solution.py: {e}")
+    if not imports_solution(test_text):
+        sys.exit("❌ test_solution.py never imports `solution`, so a green run would prove nothing:\n\n"
+                 + test_text[:500])
     with open("test_solution.py", "w") as f:
         f.write(test_text)
     return code_text, test_text
@@ -332,3 +370,14 @@ def fix_until_green(task_description: str, code_text: str) -> str:
             sys.exit(f"❌ claude refused to fix solution.py: {e}")
         with open("solution.py", "w") as f:
             f.write(code_text)
+
+def run_cli(main, task: str) -> None:
+    """Runs an agent's main() so exit codes keep one meaning each: 0 success, 1 the agent's own
+    verdict (tests never green, review BLOCKed), 2 infrastructure failure (CLI/SDK error,
+    timeout, missing `claude`). Without this an uncaught error also exits 1 and is
+    indistinguishable from "review blocked" in CI. SystemExit passes through untouched."""
+    try:
+        main(task)
+    except Exception as e:
+        print(f"❌ infrastructure failure (not a verdict on the code): {type(e).__name__}: {e}", file=sys.stderr)
+        sys.exit(2)

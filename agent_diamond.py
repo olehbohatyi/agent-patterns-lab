@@ -1,6 +1,6 @@
 import sys
 
-from agent_common import fix_until_green, parse_cli, write_solution_and_tests
+from agent_common import fix_until_green, parse_cli, run_cli, write_solution_and_tests
 from agent_review import aggregate_verdict, run_diamond_review
 
 def main(task_description: str):
@@ -24,4 +24,4 @@ def main(task_description: str):
 
 if __name__ == "__main__":
     task = parse_cli("Loop agent plus a four-reviewer diamond review of the passing code.")
-    main(task)
+    run_cli(main, task)

@@ -1,6 +1,6 @@
 import sys
 
-from agent_common import fix_until_green, parse_cli, write_solution_and_tests
+from agent_common import fix_until_green, parse_cli, run_cli, write_solution_and_tests
 
 
 def main(task_description: str):
@@ -13,4 +13,4 @@ def main(task_description: str):
 
 if __name__ == "__main__":
     task = parse_cli("Self-correcting agent: write a function and tests, fix until the tests pass.")
-    main(task)
+    run_cli(main, task)
