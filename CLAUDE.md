@@ -57,6 +57,12 @@ Run the tests for the `--judge` switch and the Jev judge (faked `typesafe_sdk`, 
 pytest test_judge.py -v
 ```
 
+Run the tests for the shared pieces (`clean_code`, `find_undefined_names`, `parse_verdict`, the
+failure handling in `call_claude`/`run_tests`, exit codes; stubs only, no live calls):
+```bash
+pytest test_common.py -v
+```
+
 Run a single test:
 ```bash
 pytest test_solution.py -v -k <test_name>
@@ -160,5 +166,10 @@ code generation) is how the Phase 4 probes in `NOTES.md` were run. (Before the s
   pattern entirely, so routing never gets a chance to trigger.
 - Exit codes carry the outcome: `0` if tests pass within the attempt budget, `1` if the budget is
   exhausted (loop) or the single attempt failed (linear). `agent_diamond.py`/`agent_graph.py`
-  additionally exit `1` when review blocks, even with green tests — useful for scripting/CI around
-  these loops.
+  additionally exit `1` when review blocks, even with green tests. `2` means an infrastructure
+  failure (a `claude -p` non-zero exit or empty output, a timeout, a missing CLI, an SDK error),
+  raised through `run_cli()` so CI can tell "the code was blocked" from "the harness broke".
+  `_call_local` raises `CallFailedError` on a failed call rather than returning stdout, because an
+  error string used as a reviewer's "review" was judged OK in 5 of 6 runs (NOTES.md). `run_tests()`
+  runs under `sys.executable`, has a timeout, and is green only if at least one test passed; the
+  write step refuses a test file that never imports `solution`.

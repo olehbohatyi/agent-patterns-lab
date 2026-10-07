@@ -1705,3 +1705,53 @@ repo dir, with `typesafe-sdk` installed for the jev mode).
 Stage 2 (per-criterion split) is now unblocked but has no motivating failure: stage 1
 missed nothing here. If pursued, the useful corpus is one built to sit near the
 boundary, not more clear-cut cases.
+
+## Harness hardening after a 2026-10-07 review
+Three read-only reviewers (repo, refactor critic, completeness) found silent-failure holes in the
+harness. This entry records the experiments run and what was changed. The science in FINDINGS.md is
+untouched.
+
+### Experiment 1: what does the LLM judge do with a failed reviewer call?
+`_call_local` returned stdout without checking the exit code, so a failed `claude -p` could become a
+reviewer's "review". Fed to the real LLM judge (`judge_review_llm`, security lens, 3 runs each, 9 calls,
+no API spend), a review that was only an error string was judged OK: "Credit balance is too low" 2/3 OK,
+a 429 message 3/3 OK, each saying the text "is not a genuine security review ... describes no defect".
+The empty review gave BLOCK 3/3, but not as a verdict: the responses were off-topic and carried no
+`VERDICT:` marker, so `parse_verdict` blocked by its fail-safe. n=3 per input, one judge setup.
+
+### Experiment 2: which stream does a real CLI failure use?
+One deliberately failing call each, stdout and stderr captured separately. `--model no-such-model-xyz`:
+exit 1, the message ("There's an issue with the selected model ...") on **stdout**, a different message
+on stderr. `--no-such-flag`: exit 1, empty stdout, message on stderr. So at least one real failure class
+(a model/API error) put its text on stdout with a non-zero exit, which the old `_call_local` returned
+as the answer: for that class the bug was live, not merely defensive. Not tested: auth and credit
+failures specifically (the Experiment 1 strings were typed in by hand, not captured from the CLI).
+
+### Changes
+- `_call_local` raises `CallFailedError` on a non-zero exit or empty output (timeouts and a missing CLI
+  already propagated). A failed reviewer or judge call now aborts the run instead of becoming an answer.
+- `run_tests` runs `sys.executable -m pytest` with a 120 s timeout, and counts as green only if exit 0
+  *and* at least one test passed (an all-skipped run is not green). The write step refuses a test file
+  that never imports `solution`.
+- **A pytest timeout is a failed attempt, not an infrastructure error:** generated code stuck in a loop
+  is the model's output failing, so `run_tests` returns it as a failure, the timeout message goes into
+  the fix prompt, and an unresolved hang exhausts the budget and exits 1 (both pinned by tests).
+- New exit code 2 (`run_cli`) for infrastructure failures (CLI/SDK errors, a missing `claude`,
+  timeouts of the model call); 1 stays "the agent's own verdict".
+- `test_common.py`: unit tests for `clean_code`, `find_undefined_names`, `parse_verdict`, the failure
+  handling and exit codes. Removing the return-code check and the passed-count requirement makes 4 of
+  them fail.
+- **The behavior-equivalence harness was deliberately not re-run.** It stubs the old bare `pytest`
+  command and checks that behavior is unchanged; these changes alter behavior on purpose (new failure
+  handling, a different test command), so identical output would be the wrong expectation. The missing
+  re-run is a decision, not an oversight.
+
+### Known issues, deliberately not fixed yet
+`.env` parser keeps an inline `# comment` in the value; `parse_verdict` blocks `**VERDICT: OK**` (safe,
+costs false blocks); `find_undefined_names` flags `match` capture patterns (pinned by an `xfail` test);
+`clean_code` takes the first fenced block; `load_env_key` puts the Jev key in `os.environ`, inherited
+by subprocesses; reviewer/judge prompts lack the "do not use tools" wording and no enforcing flag was
+checked; `--judge` is accepted by the loop and linear agents, which have no judge; `run_cal.py` only
+writes at the end and ignores the CLI return code; `llm_results.json` has `model_usage` null (predates
+logging). Design points raised by the critic (globals instead of injection, a `Verdict` dataclass,
+shared helpers calling `sys.exit` while the graph agent continues) do not affect correctness today.
