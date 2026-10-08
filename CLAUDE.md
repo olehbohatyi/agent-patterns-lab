@@ -150,10 +150,11 @@ code generation) is how the Phase 4 probes in `NOTES.md` were run. (Before the s
   that misses a defect entirely cannot be caught downstream (confirmed directly by feeding a fabricated
   "no issues found" review against genuinely vulnerable code — clean OK). Giving the judge the code
   would close that gap but turn it into a fifth reviewer rather than an independent check. Separately:
-  `claude -p` is not sandboxed by default — it can read files in the working directory (e.g. via git
-  context, or actively via Read) unless told not to. Verified the judge doesn't do this in practice (3
-  runs, no leaked file content), but a prompt relying on isolation should say "do not use tools" /
-  "do not read any files" explicitly rather than assume it.
+  `claude -p` is not sandboxed by default. Reviewer and judge calls now run with tool access disabled
+  (`--tools ""`, `ISOLATED_TOOLS` in `agent_review.py`; checked to stop a file read, small n; the API
+  backend has no tools), but auto-loaded context (`CLAUDE.md`, git status) is NOT addressed, so "the
+  judge sees only the review text" is only partly enforced. Prompts were deliberately not reworded, and
+  all research findings predate the restriction (NOTES.md "Tools disabled for reviewer and judge calls").
 - `agent_graph.py`'s `route_fix()` picks a fix prompt by which category blocked (security → add
   validation/trust boundary; performance → fix the algorithmic complexity; anything else → generic),
   then the graph loop re-reviews after each fix rather than reviewing once, up to `MAX_GRAPH_ATTEMPTS`

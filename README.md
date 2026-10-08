@@ -8,6 +8,13 @@ The repo also compares that loop against a "linear" agent that gets only one att
 whether the self-correction loop actually improves reliability (see [NOTES.md](NOTES.md); that
 first comparison turned out not to establish it — see the correction in [FINDINGS.md](FINDINGS.md)).
 
+> **Status: research closed.** The findings were measured on `claude -p` with the `sonnet` and `haiku`
+> aliases, which resolved to `claude-sonnet-5` and `claude-haiku-4-5-20251001` when checked on
+> 2026-09; the resolved model was not recorded during the experiments, and the results have not been
+> re-run on later model versions. Reviewer and judge calls have run with tool access disabled since 2026-10-07,
+> after the research (auto-loaded context such as git status and `CLAUDE.md` is not addressed). `calibration/llm_results.json` has `model_usage` null because it predates that
+> logging (`llm_results_notools.json` has it). Licensed under MIT ([LICENSE](LICENSE)).
+
 **Start with [FINDINGS.md](FINDINGS.md)**: the consolidated, corrected results of the research phase,
 with confidence levels and known gaps. [NOTES.md](NOTES.md) is the chronological lab notebook with the
 evidence and every correction.

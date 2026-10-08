@@ -40,6 +40,11 @@ This confirms the core hypothesis: an agent loop with evidence-based
 verification (real test output, not the model's self-assessment) 
 delivers a measurable reliability improvement even on simple tasks.
 
+> **Correction (see FINDINGS.md, "Claims that were revised"):** this conclusion is not supported.
+> Raw logs show the loop passed on its first attempt in all 5 runs, so the self-correction never
+> ran; the linear agent's one failure was a missing test import, a one-run difference from
+> test-generation variance. The paragraph above is kept as the historical record.
+
 ## Phase 2: Context-selection bug misdiagnosed as a model limitation
 
 The diamond agent failed the palindrome task with an identical `NameError`
@@ -1678,6 +1683,10 @@ repo dir, with `typesafe-sdk` installed for the jev mode).
   `jev-1.13.0`. The model behind the sonnet alias for the LLM judge was not recorded.
 
 ### What this does and doesn't show
+- **Later note:** a re-run of the LLM judge on these same reviews with tools disabled moved its one miss
+  to a different case and changed 7 of 81 verdicts (see "Tools disabled for reviewer and judge
+  calls"), so the 27/27 vs 26/27 comparison below is one sample of an unstable LLM judge, not a stable
+  gap. Jev's own results are unaffected (tools don't apply to it).
 - It shows that, on these 27 texts, a single holistic Noul with the rubric passed as
   instructions reproduced the rubric's labels, including the anti-hedge cases (two
   hedged path-traversal reviews scored 0.87–0.95) and the lane-disclaimed cases
@@ -1755,3 +1764,51 @@ checked; `--judge` is accepted by the loop and linear agents, which have no judg
 writes at the end and ignores the CLI return code; `llm_results.json` has `model_usage` null (predates
 logging). Design points raised by the critic (globals instead of injection, a `Verdict` dataclass,
 shared helpers calling `sys.exit` while the graph agent continues) do not affect correctness today.
+
+## Tools disabled for reviewer and judge calls (`--tools ""`); auto-loaded context not addressed
+The reviewer and judge prompts never said "do not use tools" (this file recommended it in the isolation
+entry), and isolation was only ever a convention. Instead of adding prompt wording, which would change
+the calibrated prompts, `claude -p` was checked for a real option: `claude --help` lists
+`--tools <tools...>` ("Use \"\" to disable all tools") and a broader `--restricted` mode.
+
+### Does the flag actually remove the capability?
+A marker file in the working directory and a prompt asking the model to read it. Default tools: the file
+was read in 1 of 2 runs (the other run refused for unrelated reasons). `--tools ""`: 0 of 4 checked runs
+leaked the marker, and all 4 replied that they have no file-reading tool (two earlier flagged runs were
+only seen truncated, so they are not counted). Small n, but this is a removed capability, not a request.
+
+### What changed
+`call_claude(..., tools="")` (local backend only; the API has no tools to disable) is used for every
+reviewer and judge call (`ISOLATED_TOOLS` in `agent_review.py`). Code-generation and fix calls keep the
+CLI defaults. Prompts are byte-identical to before.
+
+### Cost to comparability: the LLM judge re-run with tools disabled
+All earlier results, including the 27-review calibration, were measured with tools available. The LLM
+judge was re-run on the same 27 frozen reviews, 3 runs each, with tools disabled
+(`calibration/llm_results_notools.json`, sonnet alias resolved to `claude-sonnet-5` in `modelUsage`, 0
+errors). Majority-vote agreement with the labels stayed 26/27, but not on the same case:
+- `prime-sonnet-test_coverage-silent` (the earlier LLM-vs-Jev disagreement): BBB -> OOO, now matching the
+  label and Jev.
+- `prime-default-performance` (contestable, label OK): OBO -> OBB, now BLOCK.
+- `prime-default-test_coverage` (contestable): OBB -> BBB.
+- `dedupe-haiku-performance-b` and `-c` (BLOCK-labeled O(n²) reviews): BBB -> BBO and BOB; the majority
+  stayed BLOCK, but these were unanimous before.
+7 of 81 individual verdicts differ. **This cannot be attributed to the tools setting**: the tools-available
+run was not repeated, and that judge was already unstable on 2 cases between its own repeats, so run-to-run
+noise alone could produce flips of this size. What it does show is that the LLM-judge numbers in the
+earlier entry are not stable enough to treat the one LLM/Jev disagreement as a property of the judge.
+No change was made to the Jev results. FINDINGS.md was not changed beyond a one-line pointer.
+
+### What this does not cover
+`--tools ""` removes tool access. It does not remove the context `claude -p` loads on its own in a
+repository directory: `CLAUDE.md` and auto-injected git context (the isolation entry above records the model
+reporting the latest commit message that way). So a reviewer or judge call can still see repo
+context it was not given in the prompt, and the "judge sees only the review text" property is only
+partly enforced: tool access is closed, auto-loaded context is open. `claude --help` documents `--bare`
+(skips hooks, plugin sync, auto-memory, keychain reads and `CLAUDE.md` auto-discovery) but also states
+that Anthropic auth is then strictly `ANTHROPIC_API_KEY` or an `apiKeyHelper` (OAuth and keychain are
+never read), so it would not work for a subscription-authenticated CLI, and whether it also drops the
+git-status injection is not documented there. Not tried. Running the calls from a scratch directory
+outside the repo is another option, also not tried, and would need a check that it really drops the
+context before it is relied on. The 0 of 4 vs 1 of 2 marker check is small; it supports "the capability is
+removed", not a rate.

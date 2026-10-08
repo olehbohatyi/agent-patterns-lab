@@ -56,12 +56,18 @@ verification".)
 can read files in the working directory unless told not to (checked
 directly). The judge didn't do so in 3 checks, so the isolation held in
 practice. The earlier "each call is a blank slate" claim was wrong. *Inspected +
-measured.* (NOTES: "Isolation caveat".)
+measured.* (NOTES: "Isolation caveat".) Since 2026-10-07 reviewer and judge calls run with tool access
+disabled (`claude --tools ""`), which stopped a file read in 4 of 4 checked runs; auto-loaded context
+(git status, `CLAUDE.md`) is not addressed. Every finding here was measured before that change. (NOTES: "Tools disabled for reviewer and judge calls".)
 
-**V3. Reviewers miss defects intermittently.** The performance reviewer
-missed a seeded O(n²) defect in 1 of 3 runs; the security reviewer missed a
-path-traversal defect in the original probe and in 2 of 7 later security-route
-graph runs. These are incidents, not a rate. Downstream, nothing recovers a defect that is
+**V3. Reviewers miss defects intermittently.** In the Phase 4 performance-route
+runs (sonnet reviewers), the performance reviewer missed a seeded O(n²) defect in
+1 of 3 runs; the security reviewer missed a path-traversal defect in the original
+probe and in later security-route graph runs (NOTES.md states "2/7" in a later
+summary, but does not tally the seven runs one by one). A separate Phase 3
+measurement (haiku reviewers, after the lane fix) logged 1 unreproduced dedupe
+miss in 7, which may be a reviewer or a judge miss; it is not counted here.
+These are incidents, not a rate. Downstream, nothing recovers a defect that is
 never reported. *Measured, small n.*
 
 **V4. The judge's rubric had three separate gaps, each producing a defect
@@ -76,7 +82,9 @@ that ships clean.**
   stopped honest out-of-lane mentions from over-blocking, but removed the
   accidental redundancy that caught a defect when its owning lens stayed
   silent: `prime_bug` on sonnet went to 3 full misses in 7 runs, against no
-  misses in the few pre-fix runs. Unresolved trade-off.
+  misses in the pre-fix sonnet baseline, whose run count NOTES.md does not
+  state (so "43% vs 0%" has no reliable denominator on the pre-fix side).
+  Unresolved trade-off.
 - *Memory complexity.* The performance criterion covered only time
   complexity, so a seeded read-the-whole-file defect for a multi-GB task
   passed although the review described it accurately (1 seeded run).
@@ -92,8 +100,10 @@ default to BLOCK. *Inspected.*
 **V6. Cheaper reviewers tier cleanly on scoped defects, with a twist.**
 Sonnet and haiku reviewers matched exactly on 2 of 3 probes. On the third
 (an obvious bug), haiku restated the defect in every lens (5 of 6 runs), which
-hurt per-category attribution but turned out to make it *more* robust than
-sonnet once the lane check was added. The probe's defect was blatant, so it
+hurt per-category attribution and coincided with haiku passing 3 of 3 after the
+lane check where sonnet passed 4 of 7. The explanation (redundant restatement
+across lenses) is inferred from reading the reviews, not tested directly, and
+the 3-vs-7 sample is too small to call haiku the more robust tier. The probe's defect was blatant, so it
 tests lens discipline more than detection. *Measured, small n.*
 (NOTES: "Model tiering".)
 
@@ -212,7 +222,8 @@ code doesn't have".)
 - **The Jev judge is calibrated only lightly.** A live comparison on 27 frozen reviews (20 recovered
   verbatim, 7 regenerated, 4 of the 27 contestable) found it matched the rubric-derived labels 27/27
   against 26/27 for the LLM judge. Both matched all 7 regenerated cases; the one disagreement is on a
-  recovered coverage-gap review, judged three times. The corpus had no near-boundary cases, so the
+  recovered coverage-gap review, judged three times. A later LLM-judge re-run with tools disabled
+  agreed with Jev on that review but flipped other cases, so the disagreement is not stable evidence. The corpus had no near-boundary cases, so the
   0.5 threshold is untested, and it comes from three defect setups; see NOTES.md "Jev judge, stage 1
   calibration". Both judges share the reviewer-miss blind spot.
 - **Reviewer coverage of false claims** (C1) and of the extra behavior fixes
