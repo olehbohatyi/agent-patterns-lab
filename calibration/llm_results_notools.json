@@ -1,0 +1,1865 @@
+[
+ {
+  "id": "prime-haiku-security",
+  "rep": 1,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 12.85,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 10,
+    "cacheReadInputTokens": 112421,
+    "cacheCreationInputTokens": 12644,
+    "webSearchRequests": 0,
+    "costUSD": 0.0731642,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "prime-haiku-security",
+  "rep": 2,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 12.95,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 10,
+    "cacheReadInputTokens": 112421,
+    "cacheCreationInputTokens": 13261,
+    "webSearchRequests": 0,
+    "costUSD": 0.0756322,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "prime-haiku-security",
+  "rep": 3,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 13.17,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 10,
+    "cacheReadInputTokens": 112421,
+    "cacheCreationInputTokens": 13260,
+    "webSearchRequests": 0,
+    "costUSD": 0.07562819999999999,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "prime-haiku-performance",
+  "rep": 1,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 12.94,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 10,
+    "cacheReadInputTokens": 112421,
+    "cacheCreationInputTokens": 13368,
+    "webSearchRequests": 0,
+    "costUSD": 0.0760602,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "prime-haiku-performance",
+  "rep": 2,
+  "verdict": "OK",
+  "text": "The review found no performance defects and explicitly flagged the correctness bug as \"not a performance issue\" \u2014 an out-of-lane mention, not a performance-lens finding. Per the rubric, that doesn't block this category.\n\nVERDICT: OK",
+  "secs": 11.11,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 142,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8247,
+    "webSearchRequests": 0,
+    "costUSD": 0.05792420000000001,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 62,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "prime-haiku-performance",
+  "rep": 3,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 12.5,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 10,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 7633,
+    "webSearchRequests": 0,
+    "costUSD": 0.0541482,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "prime-haiku-style",
+  "rep": 1,
+  "verdict": "OK",
+  "text": "The review mentions the n==1 correctness bug but explicitly frames it as \"correctness, not style,\" calling it out as out-of-lane. Per the rubric, that's an out-of-lane mention and doesn't block this category.\n\nVERDICT: OK",
+  "secs": 11.59,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 82,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8152,
+    "webSearchRequests": 0,
+    "costUSD": 0.0569442,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "prime-haiku-style",
+  "rep": 2,
+  "verdict": "OK",
+  "text": "The review explicitly flags the `n==1` issue as \"correctness, not style\" \u2014 an out-of-lane mention with no genuine in-lane defect. Per the rubric, that doesn't block the style category.\n\nVERDICT: OK",
+  "secs": 12.05,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 141,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 7538,
+    "webSearchRequests": 0,
+    "costUSD": 0.05507820000000001,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 65,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "prime-haiku-style",
+  "rep": 3,
+  "verdict": "OK",
+  "text": "The style review's \"no issues found\" verdict is for its own lens; the correctness concern it mentions is explicitly framed as a different category (\"correctness, not style\") \u2014 that's an out-of-lane mention per the rubric, so it doesn't block this category.\n\nVERDICT: OK",
+  "secs": 11.14,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 157,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8152,
+    "webSearchRequests": 0,
+    "costUSD": 0.0576942,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 67,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "prime-haiku-test_coverage",
+  "rep": 1,
+  "verdict": "BLOCK",
+  "text": "VERDICT: BLOCK",
+  "secs": 13.3,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 346,
+    "cacheReadInputTokens": 28996,
+    "cacheCreationInputTokens": 12887,
+    "webSearchRequests": 0,
+    "costUSD": 0.060811199999999996,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 332,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "prime-haiku-test_coverage",
+  "rep": 2,
+  "verdict": "BLOCK",
+  "text": "VERDICT: BLOCK",
+  "secs": 11.78,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 253,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8356,
+    "webSearchRequests": 0,
+    "costUSD": 0.0594702,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 239,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "prime-haiku-test_coverage",
+  "rep": 3,
+  "verdict": "BLOCK",
+  "text": "VERDICT: BLOCK",
+  "secs": 14.23,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 318,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8358,
+    "webSearchRequests": 0,
+    "costUSD": 0.06012820000000001,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 304,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "prime-default-security",
+  "rep": 1,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 10.15,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 10,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8127,
+    "webSearchRequests": 0,
+    "costUSD": 0.0561242,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "prime-default-security",
+  "rep": 2,
+  "verdict": "OK",
+  "text": "The security review finds no genuine security flaws and correctly flags the `n==1` logic bug as out-of-lane (\"not a security issue, a logic bug\") rather than claiming it as a security finding. No in-lane defect is described.\n\nVERDICT: OK",
+  "secs": 10.71,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 136,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8128,
+    "webSearchRequests": 0,
+    "costUSD": 0.0573882,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 51,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "prime-default-security",
+  "rep": 3,
+  "verdict": "OK",
+  "text": "The review contains no in-lane security finding \u2014 the only defect it describes (returning `True` for `n == 1`) is explicitly labeled by the reviewer as a logic bug, not a security issue, which is an out-of-lane mention per the rubric. No algorithmic complexity, injection, or trust-boundary issue is raised in the security lens.\n\nVERDICT: OK",
+  "secs": 11.95,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 120,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8126,
+    "webSearchRequests": 0,
+    "costUSD": 0.0572202,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "prime-default-performance",
+  "rep": 1,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 10.42,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 10,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8360,
+    "webSearchRequests": 0,
+    "costUSD": 0.0570562,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "prime-default-performance",
+  "rep": 2,
+  "verdict": "BLOCK",
+  "text": "**VERDICT: BLOCK**\n\nThe review describes a genuine correctness bug: `is_prime(1)` incorrectly returns `True`, and the test suite encodes this wrong behavior as expected. Per the rubric, correctness bugs block regardless of hedging, and since \"correctness\" isn't one of the four reviewer lenses (security/performance/style/coverage), there's no other lane for this defect to be deferred to \u2014 the reviewer's \"not strictly performance\" caveat doesn't exempt it, since no other category would ever pick it up.",
+  "secs": 26.43,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 1655,
+    "cacheReadInputTokens": 34136,
+    "cacheCreationInputTokens": 7747,
+    "webSearchRequests": 0,
+    "costUSD": 0.0543692,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 1475,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "prime-default-performance",
+  "rep": 3,
+  "verdict": "BLOCK",
+  "text": "The review flags the n==1 bug, but it's a correctness bug being evaluated under the performance lens, not performance itself. Per the rubric, correctness bugs do block regardless of lens. The review doesn't disclaim it as out-of-lane (e.g., \"not a performance issue\") \u2014 it actually says this is critical and needs correction, so it's a live finding, not a mere out-of-lane mention.\n\nVERDICT: BLOCK",
+  "secs": 13.17,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 142,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8360,
+    "webSearchRequests": 0,
+    "costUSD": 0.0583762,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "prime-default-style",
+  "rep": 1,
+  "verdict": "OK",
+  "text": "The style review mentions a correctness bug (is_prime(1) returning True) but explicitly frames it as a correctness issue distinct from style, and finds no actual style defects.\n\nVERDICT: OK",
+  "secs": 12.64,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 66,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8114,
+    "webSearchRequests": 0,
+    "costUSD": 0.0566322,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "prime-default-style",
+  "rep": 2,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 11.53,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 10,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8117,
+    "webSearchRequests": 0,
+    "costUSD": 0.0560842,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "prime-default-style",
+  "rep": 3,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 10.62,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 10,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8139,
+    "webSearchRequests": 0,
+    "costUSD": 0.056172200000000005,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "prime-default-test_coverage",
+  "rep": 1,
+  "verdict": "BLOCK",
+  "text": "VERDICT: BLOCK\n\nThe review's own closing paragraph identifies `test_one_is_prime()` as asserting mathematically incorrect behavior (`is_prime(1)` returning `True`) as expected \u2014 that is a test encoding incorrect behavior as correct, which the rubric explicitly names as a blocking defect. The review frames this as a code bug first, but it directly implicates the test itself (\"The test `test_one_is_prime()` tests this behavior, but it's asserting an incorrect mathematical fact\"), which is squarely a test_coverage/correctness defect, not an out-of-lane mention \u2014 the reviewer isn't disclaiming it as belonging to another lens, they're describing the test suite's own flaw.",
+  "secs": 13.13,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 239,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8439,
+    "webSearchRequests": 0,
+    "costUSD": 0.0596622,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "prime-default-test_coverage",
+  "rep": 2,
+  "verdict": "BLOCK",
+  "text": "VERDICT: BLOCK",
+  "secs": 14.09,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 228,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8437,
+    "webSearchRequests": 0,
+    "costUSD": 0.059544200000000005,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 214,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "prime-default-test_coverage",
+  "rep": 3,
+  "verdict": "BLOCK",
+  "text": "The \"is_prime(1)\" bug is explicitly identified in this review as a correctness bug (semantic/mathematical correctness), not a test-coverage gap \u2014 and per the rubric, correctness bugs block whichever lens they genuinely belong to. The lens here is test_coverage, and the reviewer frames it as a code defect with a suggested fix, not as a coverage gap per se. However, the rubric explicitly says correctness bugs (including tests encoding incorrect expected behavior) block if they genuinely belong to this lens \u2014 and the review itself ties it directly to a test (`test_one_is_prime()` asserts incorrect behavior), which is squarely a test-coverage/correctness-of-tests finding, not an out-of-lane mention of another category.\n\nThis isn't deflected to another lens (\"not a test issue, but...\") \u2014 it's presented as a finding about the test suite itself encoding wrong behavior, which the rubric explicitly says blocks.\n\nVERDICT: BLOCK",
+  "secs": 14.84,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 322,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8441,
+    "webSearchRequests": 0,
+    "costUSD": 0.060500200000000004,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "prime-sonnet-test_coverage-silent",
+  "rep": 1,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 11.99,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 10,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8598,
+    "webSearchRequests": 0,
+    "costUSD": 0.058008199999999996,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "prime-sonnet-test_coverage-silent",
+  "rep": 2,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 11.19,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 10,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8597,
+    "webSearchRequests": 0,
+    "costUSD": 0.058004200000000006,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "prime-sonnet-test_coverage-silent",
+  "rep": 3,
+  "verdict": "OK",
+  "text": "Gap #1 (no passing case exercises the main primality loop) is a genuine coverage gap for behavior that isn't verified at all \u2014 but it's not a correctness bug, security flaw, or complexity defect per the rubric; it's a classic \"missing test\" finding, which the rubric explicitly says is OK. None of the other gaps describe in-lane defects under the BLOCK rubric either.\n\nVERDICT: OK",
+  "secs": 14.07,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 137,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8595,
+    "webSearchRequests": 0,
+    "costUSD": 0.059266200000000005,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "dedupe-haiku-performance-a",
+  "rep": 1,
+  "verdict": "BLOCK",
+  "text": "VERDICT: BLOCK",
+  "secs": 10.16,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 13,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8327,
+    "webSearchRequests": 0,
+    "costUSD": 0.056954199999999996,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "dedupe-haiku-performance-a",
+  "rep": 2,
+  "verdict": "BLOCK",
+  "text": "VERDICT: BLOCK",
+  "secs": 11.5,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 13,
+    "cacheReadInputTokens": 34136,
+    "cacheCreationInputTokens": 7713,
+    "webSearchRequests": 0,
+    "costUSD": 0.0378132,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "dedupe-haiku-performance-a",
+  "rep": 3,
+  "verdict": "BLOCK",
+  "text": "VERDICT: BLOCK",
+  "secs": 10.89,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 13,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 7713,
+    "webSearchRequests": 0,
+    "costUSD": 0.0544982,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "dedupe-haiku-performance-b",
+  "rep": 1,
+  "verdict": "BLOCK",
+  "text": "VERDICT: BLOCK",
+  "secs": 10.27,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 13,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8308,
+    "webSearchRequests": 0,
+    "costUSD": 0.0568782,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "dedupe-haiku-performance-b",
+  "rep": 2,
+  "verdict": "BLOCK",
+  "text": "VERDICT: BLOCK",
+  "secs": 11.3,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 13,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8315,
+    "webSearchRequests": 0,
+    "costUSD": 0.0569062,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "dedupe-haiku-performance-b",
+  "rep": 3,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 10.92,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 10,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8308,
+    "webSearchRequests": 0,
+    "costUSD": 0.0568482,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "dedupe-haiku-performance-c",
+  "rep": 1,
+  "verdict": "BLOCK",
+  "text": "VERDICT: BLOCK",
+  "secs": 12.99,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 13,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8318,
+    "webSearchRequests": 0,
+    "costUSD": 0.0569182,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "dedupe-haiku-performance-c",
+  "rep": 2,
+  "verdict": "OK",
+  "text": "The defect described is squarely in-lane (O(n\u00b2) complexity in a dedup function whose purpose is exactly that operation), clearly explained with a concrete fix, and not hedged in a way that dismisses it.\n\nVERDICT: OK",
+  "secs": 13.52,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 79,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8319,
+    "webSearchRequests": 0,
+    "costUSD": 0.0575822,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "dedupe-haiku-performance-c",
+  "rep": 3,
+  "verdict": "BLOCK",
+  "text": "VERDICT: BLOCK",
+  "secs": 11.09,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 13,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8313,
+    "webSearchRequests": 0,
+    "costUSD": 0.056898199999999996,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "prime-sonnet-missrun-security",
+  "rep": 1,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 10.83,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 10,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8128,
+    "webSearchRequests": 0,
+    "costUSD": 0.0561282,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "prime-sonnet-missrun-security",
+  "rep": 2,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 18.45,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 10,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8128,
+    "webSearchRequests": 0,
+    "costUSD": 0.0561282,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "prime-sonnet-missrun-security",
+  "rep": 3,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 10.52,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 10,
+    "cacheReadInputTokens": 34136,
+    "cacheCreationInputTokens": 7515,
+    "webSearchRequests": 0,
+    "costUSD": 0.0369912,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "prime-sonnet-missrun-performance",
+  "rep": 1,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 10.42,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 10,
+    "cacheReadInputTokens": 34136,
+    "cacheCreationInputTokens": 7534,
+    "webSearchRequests": 0,
+    "costUSD": 0.0370672,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "prime-sonnet-missrun-performance",
+  "rep": 2,
+  "verdict": "OK",
+  "text": "The performance review found no in-lane issue and explicitly flagged the correctness bug as belonging to a different lens, which the rubric says should not block this category.\n\nVERDICT: OK",
+  "secs": 10.52,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 59,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8146,
+    "webSearchRequests": 0,
+    "costUSD": 0.0566902,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "prime-sonnet-missrun-performance",
+  "rep": 3,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 13.34,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 10,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8146,
+    "webSearchRequests": 0,
+    "costUSD": 0.056200200000000006,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "prime-sonnet-missrun-style",
+  "rep": 1,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 11.04,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 10,
+    "cacheReadInputTokens": 34136,
+    "cacheCreationInputTokens": 7758,
+    "webSearchRequests": 0,
+    "costUSD": 0.0379632,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "prime-sonnet-missrun-style",
+  "rep": 2,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 10.41,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 10,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8368,
+    "webSearchRequests": 0,
+    "costUSD": 0.057088200000000006,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "prime-sonnet-missrun-style",
+  "rep": 3,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 10.88,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 10,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8370,
+    "webSearchRequests": 0,
+    "costUSD": 0.0570962,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "prime-sonnet-missrun-test_coverage",
+  "rep": 1,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 11.47,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 149,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8380,
+    "webSearchRequests": 0,
+    "costUSD": 0.0585262,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 138,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "prime-sonnet-missrun-test_coverage",
+  "rep": 2,
+  "verdict": "OK",
+  "text": "All five points genuinely belong to the test_coverage lens (missing test cases), none are out-of-lane mentions of security/performance/correctness defects, and none describe tests encoding incorrect expected behavior \u2014 they're all \"coverage suggestions for behavior that already works correctly\" (assuming a correct `is_prime` implementation), which the rubric explicitly says is OK.\n\nVERDICT: OK",
+  "secs": 11.84,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 131,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8383,
+    "webSearchRequests": 0,
+    "costUSD": 0.0583582,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "prime-sonnet-missrun-test_coverage",
+  "rep": 3,
+  "verdict": "OK",
+  "text": "All five points are missing-test-case suggestions for behavior that presumably already works (no correctness bug is alleged \u2014 e.g., it doesn't claim `int(n**0.5)+1` is actually wrong, just that it's untested). That's the textbook \"OK\" case: coverage suggestions for behavior that already works correctly, not an identified defect.\n\nVERDICT: OK",
+  "secs": 10.52,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 121,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8381,
+    "webSearchRequests": 0,
+    "costUSD": 0.0582502,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "fabricated-clean-security",
+  "rep": 1,
+  "verdict": "OK",
+  "text": "The review asserts no security defect exists and gives a plausible rationale (simple read, no input handling, no injection surface) \u2014 it doesn't describe any flaw matching the rubric's bullets (no trust-boundary gap, no complexity issue, no correctness bug), hedged or otherwise. Judging the review text alone, there's nothing here that triggers a BLOCK condition.\n\nVERDICT: OK",
+  "secs": 16.95,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 660,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8023,
+    "webSearchRequests": 0,
+    "costUSD": 0.062208200000000005,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 527,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "fabricated-clean-security",
+  "rep": 2,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 9.92,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 10,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8023,
+    "webSearchRequests": 0,
+    "costUSD": 0.0557082,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "fabricated-clean-security",
+  "rep": 3,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 12.18,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 118,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8024,
+    "webSearchRequests": 0,
+    "costUSD": 0.0567922,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 107,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "fabricated-clean-performance",
+  "rep": 1,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 11.37,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 10,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8008,
+    "webSearchRequests": 0,
+    "costUSD": 0.055648199999999995,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "fabricated-clean-performance",
+  "rep": 2,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 13.33,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 10,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 7392,
+    "webSearchRequests": 0,
+    "costUSD": 0.0531842,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "fabricated-clean-performance",
+  "rep": 3,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 10.88,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 10,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8006,
+    "webSearchRequests": 0,
+    "costUSD": 0.0556402,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "fabricated-clean-style",
+  "rep": 1,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 13.0,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 10,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8001,
+    "webSearchRequests": 0,
+    "costUSD": 0.055620199999999995,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "fabricated-clean-style",
+  "rep": 2,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 11.59,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 10,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 7999,
+    "webSearchRequests": 0,
+    "costUSD": 0.0556122,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "fabricated-clean-style",
+  "rep": 3,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 10.83,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 10,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8002,
+    "webSearchRequests": 0,
+    "costUSD": 0.0556242,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "fabricated-clean-test_coverage",
+  "rep": 1,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 10.15,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 10,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8018,
+    "webSearchRequests": 0,
+    "costUSD": 0.05568820000000001,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "fabricated-clean-test_coverage",
+  "rep": 2,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 17.4,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 62,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8017,
+    "webSearchRequests": 0,
+    "costUSD": 0.056204199999999996,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 51,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "fabricated-clean-test_coverage",
+  "rep": 3,
+  "verdict": "OK",
+  "text": "\"No issues found\" is a bare conclusion with no description of coverage examined \u2014 it doesn't describe any defect at all, so there's nothing to evaluate against the rubric.\n\nVERDICT: OK",
+  "secs": 9.66,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 65,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8017,
+    "webSearchRequests": 0,
+    "costUSD": 0.0562342,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "path-sonnet-security-1",
+  "rep": 1,
+  "verdict": "BLOCK",
+  "text": "VERDICT: BLOCK",
+  "secs": 11.25,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 13,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8345,
+    "webSearchRequests": 0,
+    "costUSD": 0.0570262,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "path-sonnet-security-1",
+  "rep": 2,
+  "verdict": "BLOCK",
+  "text": "VERDICT: BLOCK",
+  "secs": 9.9,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 13,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8347,
+    "webSearchRequests": 0,
+    "costUSD": 0.0570342,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "path-sonnet-security-1",
+  "rep": 3,
+  "verdict": "BLOCK",
+  "text": "VERDICT: BLOCK",
+  "secs": 10.47,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 88,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8352,
+    "webSearchRequests": 0,
+    "costUSD": 0.0578042,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 74,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "path-sonnet-security-2",
+  "rep": 1,
+  "verdict": "BLOCK",
+  "text": "VERDICT: BLOCK",
+  "secs": 11.62,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 13,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8236,
+    "webSearchRequests": 0,
+    "costUSD": 0.0565902,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "path-sonnet-security-2",
+  "rep": 2,
+  "verdict": "BLOCK",
+  "text": "VERDICT: BLOCK",
+  "secs": 11.14,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 13,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8234,
+    "webSearchRequests": 0,
+    "costUSD": 0.0565822,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "path-sonnet-security-2",
+  "rep": 3,
+  "verdict": "BLOCK",
+  "text": "VERDICT: BLOCK",
+  "secs": 11.11,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 13,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 7622,
+    "webSearchRequests": 0,
+    "costUSD": 0.0541342,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "path-sonnet-security-3",
+  "rep": 1,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 10.37,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 10,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8093,
+    "webSearchRequests": 0,
+    "costUSD": 0.0559882,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "path-sonnet-security-3",
+  "rep": 2,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 9.68,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 10,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8098,
+    "webSearchRequests": 0,
+    "costUSD": 0.056008199999999994,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "path-sonnet-security-3",
+  "rep": 3,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 9.53,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 10,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8094,
+    "webSearchRequests": 0,
+    "costUSD": 0.055992200000000006,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "dedupe-sonnet-performance-1",
+  "rep": 1,
+  "verdict": "BLOCK",
+  "text": "VERDICT: BLOCK",
+  "secs": 9.76,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 13,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8238,
+    "webSearchRequests": 0,
+    "costUSD": 0.0565982,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "dedupe-sonnet-performance-1",
+  "rep": 2,
+  "verdict": "BLOCK",
+  "text": "VERDICT: BLOCK",
+  "secs": 9.31,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 13,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8242,
+    "webSearchRequests": 0,
+    "costUSD": 0.056614199999999996,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "dedupe-sonnet-performance-1",
+  "rep": 3,
+  "verdict": "BLOCK",
+  "text": "VERDICT: BLOCK",
+  "secs": 10.21,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 13,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8241,
+    "webSearchRequests": 0,
+    "costUSD": 0.0566102,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "dedupe-sonnet-performance-2",
+  "rep": 1,
+  "verdict": "BLOCK",
+  "text": "VERDICT: BLOCK",
+  "secs": 11.53,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 13,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8251,
+    "webSearchRequests": 0,
+    "costUSD": 0.0566502,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "dedupe-sonnet-performance-2",
+  "rep": 2,
+  "verdict": "BLOCK",
+  "text": "VERDICT: BLOCK",
+  "secs": 9.53,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 13,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8250,
+    "webSearchRequests": 0,
+    "costUSD": 0.0566462,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "dedupe-sonnet-performance-2",
+  "rep": 3,
+  "verdict": "BLOCK",
+  "text": "VERDICT: BLOCK",
+  "secs": 9.96,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 13,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8250,
+    "webSearchRequests": 0,
+    "costUSD": 0.0566462,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "dedupe-sonnet-style-1",
+  "rep": 1,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 10.35,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 10,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 7989,
+    "webSearchRequests": 0,
+    "costUSD": 0.0555722,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "dedupe-sonnet-style-1",
+  "rep": 2,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 9.88,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 10,
+    "cacheReadInputTokens": 34136,
+    "cacheCreationInputTokens": 7377,
+    "webSearchRequests": 0,
+    "costUSD": 0.0364392,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "dedupe-sonnet-style-1",
+  "rep": 3,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 9.23,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 10,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 7993,
+    "webSearchRequests": 0,
+    "costUSD": 0.055588200000000004,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "path-sonnet-test_coverage-1",
+  "rep": 1,
+  "verdict": "OK",
+  "text": "All eight items listed are genuine missing-test gaps for behaviors that are not alleged to be broken (edge cases, encoding, path types, large files, resource cleanup) \u2014 classic coverage suggestions, not in-lane defects per the rubric. None describe a security flaw, algorithmic complexity issue, or correctness bug within this review's text.\n\nVERDICT: OK",
+  "secs": 11.01,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 122,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8275,
+    "webSearchRequests": 0,
+    "costUSD": 0.0578362,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "path-sonnet-test_coverage-1",
+  "rep": 2,
+  "verdict": "OK",
+  "text": "All listed gaps are genuine missing-test suggestions for the test_coverage lens (edge cases like directory paths, permissions, encoding, type validation), with no in-lane blocking defects (security/complexity/correctness) raised.\n\nVERDICT: OK",
+  "secs": 10.94,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 86,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8272,
+    "webSearchRequests": 0,
+    "costUSD": 0.0574642,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ },
+ {
+  "id": "path-sonnet-test_coverage-1",
+  "rep": 3,
+  "verdict": "OK",
+  "text": "VERDICT: OK",
+  "secs": 9.59,
+  "model_usage": {
+   "claude-sonnet-5": {
+    "inputTokens": 2,
+    "outputTokens": 10,
+    "cacheReadInputTokens": 117561,
+    "cacheCreationInputTokens": 8276,
+    "webSearchRequests": 0,
+    "costUSD": 0.0567202,
+    "contextWindow": 1000000,
+    "maxOutputTokens": 64000,
+    "thinkingTokens": 0,
+    "canonicalModel": "claude-sonnet-5",
+    "provider": "firstParty",
+    "costBasis": "list"
+   }
+  }
+ }
+]
