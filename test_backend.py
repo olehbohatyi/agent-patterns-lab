@@ -73,12 +73,30 @@ def test_local_backend_uses_the_cli(monkeypatch):
 
     def fake_run(cmd, **kwargs):
         seen["cmd"], seen["kwargs"] = cmd, kwargs
-        return types.SimpleNamespace(stdout="  from cli \n", returncode=0)
+        return types.SimpleNamespace(stdout="  from cli \n", stderr="", returncode=0)
 
     monkeypatch.setattr(subprocess, "run", fake_run)
     assert call_claude("hi", model="haiku") == "from cli"
     assert seen["cmd"] == ["claude", "--model", "haiku", "-p", "hi"]
     assert seen["kwargs"]["timeout"] == 120
+
+
+def test_local_backend_can_disable_all_tools(monkeypatch):
+    seen = {}
+
+    def fake_run(cmd, **kwargs):
+        seen["cmd"] = cmd
+        return types.SimpleNamespace(stdout="ok", stderr="", returncode=0)
+
+    monkeypatch.setattr(subprocess, "run", fake_run)
+    call_claude("hi", model="sonnet", tools="")
+    assert seen["cmd"] == ["claude", "--model", "sonnet", "--tools", "", "-p", "hi"]
+
+
+def test_api_backend_ignores_the_tools_option(fake_sdk):
+    set_backend("api")
+    assert call_claude("hi", tools="") == "hello"
+    assert "tools" not in fake_sdk["messages"].calls[0]
 
 
 def test_api_backend_maps_aliases_and_extracts_text(fake_sdk):

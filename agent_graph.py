@@ -137,5 +137,5 @@ def main(task_description: str):
         code_text = candidate_code
 
 if __name__ == "__main__":
-    task = parse_cli("Diamond agent plus multi-target routed fixes with re-review.")
+    task = parse_cli("Diamond agent plus multi-target routed fixes with re-review.", judge=True)
     run_cli(main, task)

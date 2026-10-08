@@ -116,7 +116,7 @@ def test_local_call_lets_timeouts_and_a_missing_cli_propagate(monkeypatch, error
 
 
 def test_a_failed_reviewer_call_aborts_the_review_instead_of_becoming_an_empty_review(monkeypatch):
-    def failing(prompt, model="sonnet"):
+    def failing(prompt, model="sonnet", tools=None):
         raise CallFailedError("boom")
     monkeypatch.setattr(agent_review, "call_claude", failing)
     with pytest.raises(CallFailedError):
@@ -124,7 +124,7 @@ def test_a_failed_reviewer_call_aborts_the_review_instead_of_becoming_an_empty_r
 
 
 def test_a_failed_judge_call_propagates_instead_of_reading_as_a_verdict(monkeypatch):
-    def failing(prompt, model="sonnet"):
+    def failing(prompt, model="sonnet", tools=None):
         raise CallFailedError("boom")
     monkeypatch.setattr(agent_review, "call_claude", failing)
     with pytest.raises(CallFailedError):
@@ -229,3 +229,16 @@ def test_a_pytest_timeout_that_never_clears_exits_1_not_2(monkeypatch, tmp_path)
     with pytest.raises(SystemExit) as exc:
         run_cli(lambda t: fix_until_green(t, "def f():\n    pass\n"), "task")
     assert exc.value.code == 1
+
+
+def test_reviewers_and_judges_run_with_tools_disabled_but_codegen_keeps_defaults(monkeypatch):
+    seen = []
+
+    def stub(prompt, model="sonnet", tools=None):
+        seen.append(tools)
+        return "No issues found." if "Review" in prompt[:20] else "VERDICT: OK"
+
+    monkeypatch.setattr(agent_review, "call_claude", stub)
+    agent_review.run_diamond_review("code", "tests")
+    agent_review.judge_review_llm("security", "No issues found.")
+    assert seen and all(t == "" for t in seen)

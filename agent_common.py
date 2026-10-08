@@ -39,22 +39,19 @@ def set_judge(name: str) -> None:
 def get_judge() -> str:
     return _judge
 
-def load_env_key(name: str, path: str | None = None) -> None:
-    """Sets os.environ[name] from a `NAME=value` line in a dotenv-style file, if it is not
-    already set. Deliberately reads ONLY `name` — every other line in the file is ignored,
-    so it can never change the environment for anything else (e.g. ANTHROPIC_API_KEY and
-    the local backend). Resolved next to this module by default (not the caller's cwd), so
-    it works regardless of where an agent script is invoked from. A missing file is fine.
-    Never prints or returns the value."""
-    if os.environ.get(name):
-        return
+def read_env_key(name: str, path: str | None = None) -> str | None:
+    """Returns the value of `NAME=value` from a dotenv-style file, or None. It does NOT touch
+    os.environ, so a key read this way is handed straight to the client that needs it and is
+    not inherited by `claude -p` subprocesses or by pytest running generated code. Reads ONLY
+    `name` (every other line is ignored), is resolved next to this module by default (not the
+    caller's cwd), tolerates a missing file, and never prints the value."""
     if path is None:
         path = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
     try:
         with open(path) as f:
             lines = f.read().splitlines()
     except OSError:
-        return
+        return None
     for line in lines:
         line = line.strip()
         if line.startswith("export "):
@@ -64,9 +61,8 @@ def load_env_key(name: str, path: str | None = None) -> None:
             value = value.strip()
             if len(value) >= 2 and value[0] == value[-1] and value[0] in "\"'":
                 value = value[1:-1]
-            if value:
-                os.environ[name] = value
-            return
+            return value or None
+    return None
 
 # CLI aliases used throughout the agents -> API model IDs. IDs are from the Models
 # overview page (platform.claude.com/docs/en/models/overview); the API needs real
@@ -134,12 +130,15 @@ class CallFailedError(RuntimeError):
     model answer: a reviewer's "review" or a judge's verdict. Measured: the LLM judge gave
     OK on a review that was just a CLI error message in 5 of 6 runs (see NOTES.md)."""
 
-def _call_local(prompt: str, model: str) -> str:
-    """Calls Claude Code in non-interactive mode and returns the response. Raises
-    CallFailedError on a non-zero exit or empty output (and subprocess.TimeoutExpired /
-    FileNotFoundError propagate), matching the API backend, whose SDK errors propagate."""
+def _call_local(prompt: str, model: str, tools: str | None = None) -> str:
+    """Calls Claude Code in non-interactive mode and returns the response. `tools` is passed
+    as `--tools`: "" disables every tool (enforced isolation, verified to stop a file read
+    that default tools allow); None leaves the CLI's defaults. Raises CallFailedError on a
+    non-zero exit or empty output (and subprocess.TimeoutExpired / FileNotFoundError
+    propagate), matching the API backend, whose SDK errors propagate."""
+    tool_args = [] if tools is None else ["--tools", tools]
     result = subprocess.run(
-        ["claude", "--model", model, "-p", prompt],
+        ["claude", "--model", model, *tool_args, "-p", prompt],
         capture_output=True,
         text=True,
         timeout=120
@@ -153,31 +152,33 @@ def _call_local(prompt: str, model: str) -> str:
                               + (f" (stderr: {result.stderr.strip()[-300:]})" if result.stderr.strip() else ""))
     return out
 
-def call_claude(prompt: str, model: str = "sonnet") -> str:
+def call_claude(prompt: str, model: str = "sonnet", tools: str | None = None) -> str:
     """Sends one prompt to Claude and returns the response text, through the active
-    backend (see set_backend): the local `claude -p` CLI by default, or the API."""
+    backend (see set_backend): the local `claude -p` CLI by default, or the API. `tools=""`
+    runs the local call with all tools disabled; the API backend has no tools to disable."""
     if _backend == "api":
         return _call_api(prompt, model)
-    return _call_local(prompt, model)
+    return _call_local(prompt, model, tools)
 
-def parse_cli(description: str | None = None) -> str:
-    """Shared command line for every agent script: a task description plus optional
-    --backend {local,api} (default local) and --judge {llm,jev} (default llm; only the
-    diamond and graph agents have a judge). Applies both and returns the task."""
+def parse_cli(description: str | None = None, judge: bool = False) -> str:
+    """Shared command line for every agent script: a task description plus an optional
+    --backend {local,api} (default local). Agents that grade reviews with a judge (diamond,
+    graph) pass judge=True to also accept --judge {llm,jev} (default llm); the others reject
+    it instead of silently ignoring it. Applies the choices and returns the task."""
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument("task", help="description of the function to write")
     parser.add_argument("--backend", choices=BACKENDS, default="local",
                         help="local: the `claude -p` CLI (default); api: the Anthropic API "
-                             "(needs `pip install anthropic` and ANTHROPIC_API_KEY)")
-    parser.add_argument("--judge", choices=JUDGES, default="llm",
-                        help="llm: the isolated `claude` verdict call (default); jev: a TypeSafe "
-                             "Jev yes/no question (needs `uv pip install typesafe-sdk` and "
-                             "TYPESAFE_API_KEY; only affects agent_diamond.py / agent_graph.py)")
+                             "(needs the `api` extra and ANTHROPIC_API_KEY)")
+    if judge:
+        parser.add_argument("--judge", choices=JUDGES, default="llm",
+                            help="llm: the isolated `claude` verdict call (default); jev: a TypeSafe "
+                                 "Jev yes/no question (needs the `jev` extra and TYPESAFE_API_KEY)")
     args = parser.parse_args()
     set_backend(args.backend)
-    set_judge(args.judge)
+    if judge:
+        set_judge(args.judge)
     return args.task
-
 
 class NotPythonError(RuntimeError):
     """Raised when claude's response isn't valid Python (e.g. a refusal or explanation)."""

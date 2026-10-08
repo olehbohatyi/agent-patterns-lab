@@ -20,13 +20,16 @@ if mode == "jev":
             r = real.system_one(*a, **k); tl.last = r; return r
     agent_review._jev_client = Rec()
 elif mode == "llm":
-    def call_claude_json(prompt, model="sonnet"):
+    def call_claude_json(prompt, model="sonnet", tools=None):
         # Same command agent_common.call_claude() runs, plus --output-format json so modelUsage is
         # available; `result` is the same text plain stdout would have been.
+        tool_args = [] if tools is None else ["--tools", tools]
         proc = subprocess.run(
-            ["claude", "--model", model, "-p", prompt, "--output-format", "json"],
+            ["claude", "--model", model, *tool_args, "-p", prompt, "--output-format", "json"],
             capture_output=True, text=True, timeout=120,
         )
+        if proc.returncode != 0:
+            raise RuntimeError(f"claude exited {proc.returncode}: {(proc.stderr or proc.stdout)[-300:]}")
         payload = json.loads(proc.stdout)
         tl.last = payload.get("modelUsage")
         return payload["result"].strip()

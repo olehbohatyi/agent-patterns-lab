@@ -23,5 +23,5 @@ def main(task_description: str):
     sys.exit(0 if final_pass else 1)
 
 if __name__ == "__main__":
-    task = parse_cli("Loop agent plus a four-reviewer diamond review of the passing code.")
+    task = parse_cli("Loop agent plus a four-reviewer diamond review of the passing code.", judge=True)
     run_cli(main, task)

@@ -45,6 +45,9 @@ class FakeResponse:
 def reset_state(monkeypatch):
     monkeypatch.setattr(agent_common, "_judge", "llm")
     monkeypatch.setattr(agent_review, "_jev_client", None)
+    # hermetic: never pick up a real key from the environment or the repo's .env
+    monkeypatch.delenv("TYPESAFE_API_KEY", raising=False)
+    monkeypatch.setattr(agent_review, "read_env_key", lambda name: None)
     yield
     monkeypatch.setattr(agent_common, "_judge", "llm")
 
@@ -100,14 +103,14 @@ def test_set_judge_rejects_unknown_names():
 
 def test_llm_judge_is_the_default_path(monkeypatch):
     seen = []
-    monkeypatch.setattr(agent_review, "call_claude", lambda p, model="sonnet": seen.append(p) or "ok\nVERDICT: OK")
+    monkeypatch.setattr(agent_review, "call_claude", lambda p, model="sonnet", tools=None: seen.append(p) or "ok\nVERDICT: OK")
     assert judge_review("security", "No issues found.") == ("security", "OK", "ok\nVERDICT: OK")
     assert "strict, isolated verifier" in seen[0]
 
 
 def test_parse_cli_defaults_to_llm_judge(monkeypatch):
     monkeypatch.setattr(sys, "argv", ["agent_x.py", "task"])
-    parse_cli()
+    parse_cli(judge=True)
     assert get_judge() == "llm"
 
 
@@ -117,15 +120,30 @@ def test_parse_cli_defaults_to_llm_judge(monkeypatch):
 ])
 def test_parse_cli_selects_jev_in_either_position(monkeypatch, argv):
     monkeypatch.setattr(sys, "argv", argv)
-    assert parse_cli() == "task"
+    assert parse_cli(judge=True) == "task"
     assert get_judge() == "jev"
 
 
 def test_parse_cli_rejects_unknown_judge(monkeypatch):
     monkeypatch.setattr(sys, "argv", ["agent_x.py", "--judge", "bogus", "task"])
     with pytest.raises(SystemExit) as exc:
-        parse_cli()
+        parse_cli(judge=True)
     assert exc.value.code == 2
+
+
+def test_agents_without_a_judge_reject_the_judge_flag(monkeypatch):
+    monkeypatch.setattr(sys, "argv", ["agent_loop.py", "--judge", "jev", "task"])
+    with pytest.raises(SystemExit) as exc:
+        parse_cli("no judge here")
+    assert exc.value.code == 2
+
+
+def test_judge_agents_are_wired_to_accept_the_flag():
+    import pathlib
+    for name in ("agent_diamond.py", "agent_graph.py"):
+        assert "judge=True" in pathlib.Path(name).read_text()
+    for name in ("agent_loop.py", "agent_linear.py"):
+        assert "judge=True" not in pathlib.Path(name).read_text()
 
 
 # --- the Jev judge -----------------------------------------------------------------
@@ -251,51 +269,42 @@ def test_aggregate_verdict_works_with_the_jev_judge(monkeypatch, fake_sdk):
     assert report.startswith("security: BLOCK")
 
 
-# --- .env loader -------------------------------------------------------------------
+# --- .env key reader ---------------------------------------------------------------
 
-def test_loader_reads_only_the_named_key(tmp_path, monkeypatch):
+def test_reader_reads_only_the_named_key_and_never_touches_the_environment(tmp_path, monkeypatch):
     env = tmp_path / ".env"
     env.write_text("ANTHROPIC_API_KEY=should-not-load\n# c\nexport TYPESAFE_API_KEY='ts-secret'\nOTHER=1\n")
     for k in ("TYPESAFE_API_KEY", "ANTHROPIC_API_KEY", "OTHER"):
         monkeypatch.delenv(k, raising=False)
-    agent_common.load_env_key("TYPESAFE_API_KEY", str(env))
-    assert agent_common.os.environ["TYPESAFE_API_KEY"] == "ts-secret"
-    assert "ANTHROPIC_API_KEY" not in agent_common.os.environ and "OTHER" not in agent_common.os.environ
-    monkeypatch.delenv("TYPESAFE_API_KEY")
+    assert agent_common.read_env_key("TYPESAFE_API_KEY", str(env)) == "ts-secret"
+    assert not any(k in os.environ for k in ("TYPESAFE_API_KEY", "ANTHROPIC_API_KEY", "OTHER"))
 
 
-def test_loader_never_overrides_the_environment(tmp_path, monkeypatch):
-    env = tmp_path / ".env"
-    env.write_text("TYPESAFE_API_KEY=from-file\n")
-    monkeypatch.setenv("TYPESAFE_API_KEY", "from-env")
-    agent_common.load_env_key("TYPESAFE_API_KEY", str(env))
-    assert agent_common.os.environ["TYPESAFE_API_KEY"] == "from-env"
-
-
-def test_loader_tolerates_a_missing_file_and_empty_value(tmp_path, monkeypatch):
-    monkeypatch.delenv("TYPESAFE_API_KEY", raising=False)
-    agent_common.load_env_key("TYPESAFE_API_KEY", str(tmp_path / "nope"))
+def test_reader_tolerates_a_missing_file_and_an_empty_value(tmp_path):
+    assert agent_common.read_env_key("TYPESAFE_API_KEY", str(tmp_path / "nope")) is None
     (tmp_path / ".env").write_text("TYPESAFE_API_KEY=\n")
-    agent_common.load_env_key("TYPESAFE_API_KEY", str(tmp_path / ".env"))
-    assert "TYPESAFE_API_KEY" not in agent_common.os.environ
+    assert agent_common.read_env_key("TYPESAFE_API_KEY", str(tmp_path / ".env")) is None
 
 
-def test_loader_default_path_is_next_to_agent_common_not_cwd(tmp_path, monkeypatch):
-    """--judge jev must find .env regardless of the caller's working directory, so the
-    default path is resolved next to agent_common.py, not os.getcwd()."""
-    monkeypatch.delenv("TYPESAFE_API_KEY", raising=False)
-    real_dirname = os.path.dirname(os.path.abspath(agent_common.__file__))
-    (tmp_path / ".env").write_text("TYPESAFE_API_KEY=from-cwd-env\n")  # a decoy in an unrelated cwd
+def test_reader_default_path_is_next_to_agent_common_not_cwd(tmp_path, monkeypatch):
+    """--judge jev must find .env regardless of the caller's working directory."""
+    (tmp_path / ".env").write_text("TYPESAFE_API_KEY=from-cwd-decoy\n")
     monkeypatch.chdir(tmp_path)
-    agent_common.load_env_key("TYPESAFE_API_KEY")
-    assert os.environ.get("TYPESAFE_API_KEY") != "from-cwd-env"
+    assert agent_common.read_env_key("TYPESAFE_API_KEY") != "from-cwd-decoy"
+
+
+def test_jev_client_gets_a_file_key_directly_and_os_environ_stays_clean(fake_sdk, monkeypatch):
     monkeypatch.delenv("TYPESAFE_API_KEY", raising=False)
-    assert real_dirname  # sanity: the module has a real, findable directory
-
-
-def test_jev_client_construction_triggers_the_loader(fake_sdk, monkeypatch):
-    seen = []
-    monkeypatch.setattr(agent_review, "load_env_key", lambda name: seen.append(name))
+    monkeypatch.setattr(agent_review, "read_env_key", lambda name: "from-file")
     set_judge("jev")
     judge_review("security", "x")
-    assert seen == ["TYPESAFE_API_KEY"]
+    assert fake_sdk["clients"] == [{"api_key": "from-file"}]
+    assert "TYPESAFE_API_KEY" not in os.environ
+
+
+def test_jev_client_defers_to_the_environment_when_it_is_set(fake_sdk, monkeypatch):
+    monkeypatch.setenv("TYPESAFE_API_KEY", "from-env")
+    monkeypatch.setattr(agent_review, "read_env_key", lambda name: pytest.fail("must not read .env"))
+    set_judge("jev")
+    judge_review("security", "x")
+    assert fake_sdk["clients"] == [{}]   # the SDK reads the env var itself; nothing passed from code

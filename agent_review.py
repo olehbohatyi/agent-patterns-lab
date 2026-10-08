@@ -2,15 +2,21 @@
 parallel reviewers, one isolated judge call per review, and the Python-side
 aggregation that fails if any category blocks. See NOTES.md / FINDINGS.md for why the
 judge prompt, the VERDICT marker and the per-category aggregation are shaped this way."""
+import os
 import re
 import threading
 from concurrent.futures import ThreadPoolExecutor
 
-from agent_common import call_claude, get_judge, load_env_key
+from agent_common import call_claude, get_judge, read_env_key
 
 # Model is per-reviewer so tiering can be tested one role at a time. The judge in
 # judge_review() is deliberately left on the default (sonnet) — changing reviewers
 # and judge together would make a regression impossible to attribute.
+# Reviewer and judge calls run with every tool disabled (`claude --tools ""`), so the isolation the
+# diamond relies on is enforced rather than requested in the prompt. Code generation and fix calls
+# keep the CLI defaults. Findings in FINDINGS.md were measured WITHOUT this restriction (see NOTES.md).
+ISOLATED_TOOLS = ""
+
 REVIEWERS = {
     "security": {
         "model": "sonnet",
@@ -36,7 +42,7 @@ REVIEWERS = {
 
 def run_reviewer(name: str, config: dict, code: str, tests: str) -> tuple[str, str]:
     prompt = f"{config['instruction']}\n\nCode (solution.py):\n{code}\n\nTests (test_solution.py):\n{tests}"
-    result = call_claude(prompt, model=config["model"])
+    result = call_claude(prompt, model=config["model"], tools=ISOLATED_TOOLS)
     return name, result
 
 def run_diamond_review(code: str, tests: str) -> dict:
@@ -95,7 +101,7 @@ def judge_review_llm(name: str, review: str) -> tuple[str, str, str]:
         "or\n"
         "VERDICT: OK"
     )
-    response = call_claude(prompt)
+    response = call_claude(prompt, tools=ISOLATED_TOOLS)
     return name, parse_verdict(response), response
 
 # --- Jev judge ------------------------------------------------------------------
@@ -113,14 +119,17 @@ _jev_client_lock = threading.Lock()
 def _get_jev_client():
     """One shared TypeSafe client (the aggregator judges four reviews in threads). The
     key comes from TYPESAFE_API_KEY in the environment, or failing that a gitignored .env
-    (only that one variable is read) — never from code. A failed
+    (only that one variable is read, and it is not copied into os.environ) — never from code. A failed
     construction is not cached."""
     global _jev_client
     with _jev_client_lock:
         if _jev_client is None:
             import typesafe_sdk
-            load_env_key("TYPESAFE_API_KEY")  # gitignored .env fallback; env var wins
-            _jev_client = typesafe_sdk.TypeSafeClient()
+            # The key is read from the environment by the SDK itself; only if it is absent is the
+            # gitignored .env consulted, and then the value goes straight to the client (never into
+            # os.environ, where subprocesses would inherit it).
+            file_key = None if os.environ.get("TYPESAFE_API_KEY") else read_env_key("TYPESAFE_API_KEY")
+            _jev_client = typesafe_sdk.TypeSafeClient(**({"api_key": file_key} if file_key else {}))
         return _jev_client
 
 def _jev_failure(name: str, category: str, detail: str) -> tuple[str, str, str]:
